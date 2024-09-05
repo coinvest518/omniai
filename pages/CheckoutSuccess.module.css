@@ -1,0 +1,22 @@
+/* pages/CheckoutSuccess.module.css */
+
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f5f5f5;
+    font-family: Arial, sans-serif;
+    font-size: 1.5rem;
+    color: #333;
+    text-align: center;
+  }
+  
+  .loading {
+    color: #888;
+  }
+  
+  .redirecting {
+    color: #0070f3;
+  }
+  

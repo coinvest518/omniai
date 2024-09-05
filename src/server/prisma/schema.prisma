@@ -1,0 +1,120 @@
+// Prisma is the ORM for server-side (API) access to the database
+//
+// This file defines the schema for the database.
+//  - make sure to run 'prisma generate' after making changes to this file
+//  - make sure to run 'prisma db push' to sync the remote database with the schema
+//
+// Database is optional: when the environment variables are not set, the database is not used at all,
+// and the storage of data in Big-AGI is limited to client-side (browser) storage.
+//
+// The database is used for:
+//  - the 'sharing' function, to let users share the chats with each other
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("MONGODB_URI")
+}
+
+//
+// Storage of Linked Data
+//
+model User {
+  id                     String       @id @default(auto()) @map("_id") @db.ObjectId
+  email                  String       @unique
+  firstName              String?
+  lastName               String?
+  clerkUserId            String       @unique
+  stripeSubscriptionId   String?
+  stripePriceId          String?
+  stripeSessionId        String?
+  stripeCurrentPeriodEnd DateTime?
+  credits                Int          @default(3)
+  createdAt              DateTime     @default(now())
+  updatedAt              DateTime     @updatedAt
+  tokens                 Int          @default(0)
+  tokenUsage             Int          @default(0)
+  planId                 String?      @db.ObjectId
+  plan                   Plan?        @relation(fields: [planId], references: [id])
+  userPrompts            UserPrompt[]
+  creditPurchases        CreditPurchase[]
+  purchasedPromptIds     String[] 
+
+
+}
+
+model Plan {
+  id          String   @id @default(uuid()) @map("_id")
+  users       User[]
+  priceId     String   @unique
+  planName    String?
+  credits     Int // number of credits provided with this plan
+  freeCredits Int // free credits for the user
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  tokens      Int
+  price       Float
+}
+model CreditPurchase {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id])
+  amount    Int
+  price     Float
+  createdAt DateTime @default(now())
+}
+
+model UserPrompt {
+  id          String       @id @default(auto()) @map("_id") @db.ObjectId
+  description String?
+  promptData  String?
+  imgSrc      String?
+  creditPrice Int?
+  category    String?
+  userId      String? 
+  clerkUserId String?     
+  user        User?        @relation(fields: [userId], references: [id])
+  promptTitle String?      
+  createdAt   DateTime?    @default(now())
+}
+
+
+
+model LinkStorage {
+  id         String                @id @default(auto()) @map("_id") @db.ObjectId
+  ownerId    String
+  visibility LinkStorageVisibility
+  dataType   LinkStorageDataType
+  dataTitle  String?
+  dataSize   Int
+  data       Json
+  upVotes    Int                   @default(0)
+  downVotes  Int                   @default(0)
+  flagsCount Int                   @default(0)
+  readCount  Int                   @default(0)
+  writeCount Int                   @default(1)
+
+  // time-based expiration
+  expiresAt DateTime?
+
+  // manual deletion
+  deletionKey String
+  isDeleted   Boolean   @default(false)
+  deletedAt   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum LinkStorageVisibility {
+  PUBLIC
+  UNLISTED
+  PRIVATE
+}
+
+enum LinkStorageDataType {
+  CHAT_V1
+}

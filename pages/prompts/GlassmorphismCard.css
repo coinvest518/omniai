@@ -1,0 +1,136 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap');
+
+.cards-container {
+    display: flex;
+    justify-content: center;
+    align-items: center; /* Center alignment */
+    gap: 40px; /* Space between cards */
+}
+
+.card {
+    position: relative;
+    width: 250px; /* Increased width */
+    height: 400px; /* Increased height */
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    border-radius: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Orbitron', sans-serif; /* Apply Poppins font */
+}
+
+.card .imgBx {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.card .imgBx img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Cover the entire area */
+}
+
+.card .content {
+    position: absolute;
+    bottom: -160px; /* Adjusted to fit more content */
+    width: 100%;
+    height: 200px; /* Increased height for content area */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    flex-direction: column;
+    backdrop-filter: blur(15px); /* Glassmorphism effect */
+    box-shadow: 0 -10px 10px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: bottom 0.5s;
+    transition-delay: 0.8s;
+}
+
+.card:hover .content {
+    bottom: 0px; /* Slide up on hover */
+    transition-delay: 0s; /* Remove delay on hover */
+}
+
+.card .content .contentBx h3 {
+    color: #fff; /* Title color */
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: 600; /* Increased font weight for better visibility */
+    font-size: 14px; /* Adjusted font size for better readability */
+    line-height: 1.2em; /* Adjusted line height */
+    text-align: center;
+    margin: 5px 0 15px;
+    transition: 0.5s;
+    opacity: 0; /* Initially hidden */
+    transform: translateY(-20px); /* Slide up effect */
+    transition-delay: 0.6s; /* Delay for title appearance */
+}
+
+.card:hover .content .contentBx h3 {
+    opacity: 1; /* Show title on hover */
+    transform: translateY(0px); /* Reset position */
+}
+
+.card .content .contentBx p {
+    color: #fff; /* Description color */
+    text-align: center; /* Center align description */
+    margin: 5px 0; /* Margin for spacing */
+}
+
+.card .content .promptData {
+    margin-top: 10px; /* Space above prompt data */
+    color: #fff; /* Text color for prompt data */
+    text-align: center; /* Center align text */
+    max-height: 100px; /* Limit height for prompt data */
+    overflow-y: auto; /* Allow scrolling if text is too long */
+}
+
+.card .content .copyButton {
+    background-color: #3b82f6; /* Button background color */
+    color: white; /* Text color */
+    padding: 5px 10px; /* Inner spacing */
+    border: none; /* Remove default border */
+    border-radius: 5px; /* Rounded corners */
+    cursor: pointer; /* Pointer cursor */
+    transition: background-color 0.3s; /* Smooth transition for hover effect */
+}
+
+.card .content .copyButton:hover {
+    background-color: #2563eb; /* Darker shade on hover */
+}
+
+.card .content .sci {
+    position: relative; 
+    bottom: 10px; 
+    display: flex;
+    justify-content: center;
+    margin-right: 55px;
+}
+
+.card .content .sci li {
+    list-style: none; /* Remove default list styling */
+    margin: 0 5px; /* Space between icons */
+    transform: translateY(40px); /* Slide up effect */
+    transition: 0.5s;
+    opacity: 0; /* Initially hidden */
+    transition-delay: calc(0.2s * var(--i));
+    align-items: center;
+    margin-left: 15px; /* Delay for each icon */
+}
+
+.card:hover .content .sci li {
+    transform: translateY(0px); /* Reset position on hover */
+    opacity: 1; /* Show icons on hover */
+}
+
+.card .content .sci li a {
+    color: #fff; /* Icon color */
+}
