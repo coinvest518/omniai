@@ -1,11 +1,4 @@
-import path from 'path';
-import { fileURLToPath } from 'url';
 
-// Get the directory name
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-// Non-default build types
 const buildType =
   process.env.BIG_AGI_BUILD === 'standalone' ? 'standalone'
     : process.env.BIG_AGI_BUILD === 'static' ? 'export'
