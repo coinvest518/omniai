@@ -18,8 +18,9 @@ on:
       - 'v*'  # Trigger on version tags (e.g., v1.7.0)
 
 env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  REGISTRY: Omni.io
+  IMAGE_NAME: /coinvest518/Omni
+  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.CLERK_PUBLISHABLE_KEY }}
 
 jobs:
   build-and-push-image:
