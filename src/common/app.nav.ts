@@ -35,6 +35,7 @@ import { hasNoChatLinkItems } from '~/modules/trade/link/store-link';
 
 import { UserButton, useUser } from "@clerk/nextjs";
 import UserIcon from '../common/components/UserIcon';
+import userPrompts from '../../pages/userPage/[[...index]]';
 
 
 // enable to show all items, for layout development
@@ -103,7 +104,7 @@ export const navItems: {
       type: 'app',
       component: UserButton,
       hideOnMobile: false,
-      route: '/userPrompts',
+      route: '/userPage',
     },
 
 

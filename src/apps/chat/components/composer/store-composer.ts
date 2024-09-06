@@ -22,7 +22,16 @@ const useComposerStore = create<ComposerStore>()(
     {
       name: 'app-composer',
       version: 1,
-    }),
+      storage: {
+        getItem: (name) => {
+          const value = localStorage.getItem(name);
+          return value ? JSON.parse(value) : null;
+        },
+        setItem: (name, value) => localStorage.setItem(name, JSON.stringify(value)),
+        removeItem: (name) => localStorage.removeItem(name),
+      },
+    }
+  )
 );
 
 export const setComposerStartupText = (text: string | null) =>

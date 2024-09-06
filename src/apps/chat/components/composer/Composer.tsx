@@ -71,7 +71,7 @@ import { ReplyToBubble } from '../message/ReplyToBubble';
 import { TokenBadgeMemo } from './TokenBadge';
 import { TokenProgressbarMemo } from './TokenProgressbar';
 import { useComposerStartupText } from './store-composer';
-
+import { create } from 'zustand';
 import { useUserStore } from '../../../../../src/common/state/userStore';
 
 const prisma = new PrismaClient(); // Initialize Prisma Client
@@ -194,6 +194,7 @@ export function Composer(props: {
 
   
   // Credit costs for each feature
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const creditCosts = {
     'generate-text': 4,
     'generate-text-beam': 10,
@@ -296,7 +297,7 @@ export function Composer(props: {
       console.error('Error updating user credits:', error);
       return false;
     } 
-  },  [clearAttachments, conversationId, handleReplyToCleared, llmAttachments, onAction, replyToGenerateText, setComposeText, props.updateCredits, user, tokensComposer]);
+  },  [clearAttachments, conversationId, handleReplyToCleared, llmAttachments, onAction, replyToGenerateText, setComposeText, user, tokensComposer, creditCosts, updateCredits, updateTokens]);
 
   const handleSendClicked = React.useCallback(() => {
     handleSendAction(chatModeId, composeText);
@@ -348,12 +349,12 @@ export function Composer(props: {
     console.error('Network error:', error);
     alert('Failed to update credits. Please check your network connection.');
 }
-  }, [props.conversationId, systemPurposeId, user, creditCosts.callFeature, props.updateCredits]);
+  }, [composeText, props.conversationId, user, creditCosts.callFeature, updateCredits, systemPurposeId]);
 
 
   const handleDrawOptionsClicked = React.useCallback(async () => {
      openPreferencesTab(PreferencesTab.Draw);
-  }, [openPreferencesTab, user, updateCredits, creditCosts.drawOption]);
+  }, [openPreferencesTab]);
 
   const handleTextImagineClicked = React.useCallback(async() => {
     if (!composeText || !props.conversationId)return;
@@ -392,7 +393,7 @@ export function Composer(props: {
     alert('Failed to update credits. Please check your network connection.');
 }
 
-  }, [composeText, props, setComposeText, user, updateCredits, creditCosts.textImagine ]);
+  }, [composeText, props, setComposeText, user, updateCredits, creditCosts.textImagine]);
 
 
   // Mode menu

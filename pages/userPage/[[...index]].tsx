@@ -11,6 +11,7 @@ import { creditDetails } from '../../lib/creditDetails';
 import Image from 'next/image';
 import Link from 'next/link';
 import { PrismaClient } from '@prisma/client';
+import { User } from 'lucide-react';
 
 
 
@@ -48,7 +49,7 @@ interface UserData {
 
 
 
-const SettingsPage: React.FC = () => {
+const AppUsers: React.FC = () => {
     const { user } = useUser();
     const { isSignedIn, userId } = useAuth();
     const setUser = useUserStore(state => state.setUser);
@@ -524,5 +525,5 @@ const SettingsPage: React.FC = () => {
 
 
 
-export default SettingsPage;
+export default AppUsers;
 

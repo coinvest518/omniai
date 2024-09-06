@@ -1,8 +1,10 @@
-
 const buildType =
   process.env.BIG_AGI_BUILD === 'standalone' ? 'standalone'
     : process.env.BIG_AGI_BUILD === 'static' ? 'export'
       : undefined;
+
+console.log(`Build Type: ${buildType}`);
+console.log(`Analyze Bundle: ${process.env.ANALYZE_BUNDLE}`);
 
 buildType && console.log(`   🧠 omni-AI: building for ${buildType}...\n`);
 
@@ -10,12 +12,12 @@ buildType && console.log(`   🧠 omni-AI: building for ${buildType}...\n`);
 let nextConfig = {
   reactStrictMode: true,
 
-  // [exports] https://nextjs.org/docs/advanced-features/static-html-export
+  // Static HTML export settings
   ...buildType && {
     output: buildType,
     distDir: 'dist',
 
-    // disable image optimization for exports
+    // Disable image optimization for exports
     images: { 
       remotePatterns: [
         {
@@ -31,24 +33,22 @@ let nextConfig = {
           pathname: '/**',
         },
       ], 
-
-
     },
 
     // Optional: Change links `/me` -> `/me/` and emit `/me.html` -> `/me/index.html`
     // trailingSlash: true,
   },
 
-  // [puppeteer] https://github.com/puppeteer/puppeteer/issues/11052
+  // Experimental features
   experimental: {
     serverComponentsExternalPackages: ['puppeteer-core'],
   },
 
   webpack: (config) => {
-    // @mui/joy: anything material gets redirected to Joy
+    // Redirect @mui/material to @mui/joy
     config.resolve.alias['@mui/material'] = '@mui/joy';
 
-    // @dqbd/tiktoken: enable asynchronous WebAssembly
+    // Enable asynchronous WebAssembly
     config.experiments = {
       asyncWebAssembly: true,
       layers: true,
@@ -69,24 +69,16 @@ let nextConfig = {
     return config;
   },
 
-  // Note: disabled to check whether the project becomes slower with this
-  // modularizeImports: {
-  //   '@mui/icons-material': {
-  //     transform: '@mui/icons-material/{{member}}',
-  //   },
-  // },
-
-  // Uncomment the following leave console messages in production
+  // Uncomment the following to leave console messages in production
   // compiler: {
   //   removeConsole: false,
   // },
 };
 
-// Validate environment variables, if set at build time. Will be actually read and used at runtime.
-// This is the reason both this file and the servr/env.mjs files have this extension.
+// Validate environment variables, if set at build time
 await import('./src/server/env.mjs');
 
-// conditionally enable the nextjs bundle analyzer
+// Conditionally enable the Next.js bundle analyzer
 if (process.env.ANALYZE_BUNDLE) {
   const { default: withBundleAnalyzer } = await import('@next/bundle-analyzer');
   nextConfig = withBundleAnalyzer({ openAnalyzer: true })(nextConfig);

@@ -84,10 +84,17 @@ function AppDebug() {
   const { lastSeenNewsVersion } = useAppNewsStateStore.getState();
   const { usageCount } = useAppStateStore.getState();
 
+  // Debugging statements
+  console.log('backendCaps:', backendCaps);
+  console.log('chatsCount:', chatsCount);
+  console.log('uxLabsExperiments:', uxLabsExperiments);
+  console.log('folders:', folders);
+  console.log('enableFolders:', enableFolders);
+  console.log('lastSeenNewsVersion:', lastSeenNewsVersion);
+  console.log('usageCount:', usageCount);
 
   // derived state
   const cClient = {
-    // isBrowser,
     isChromeDesktop,
     isFirefox,
     isIPhone: isIPhoneUser,

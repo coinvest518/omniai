@@ -24,16 +24,17 @@ import { hasGoogleAnalytics, OptionalGoogleAnalytics } from '~/common/components
 import { isVercelFromFrontend } from '~/common/util/pwaUtils';
 import Script from 'next/script';
 
+const clerkPublishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+
 const MyApp = ({ Component, emotionCache, pageProps }: MyAppProps) => {
   const router = useRouter();
-
   return (
     <>
       <Head>
         <title>{Brand.Title.Common}</title>
       </Head>
 
-      <ClerkProvider {...pageProps}>
+      <ClerkProvider publishableKey={clerkPublishableKey} {...pageProps}>
         <ProviderTheming emotionCache={emotionCache}>
           <ProviderSingleTab>
             <ProviderTRPCQuerySettings>
@@ -55,7 +56,6 @@ const MyApp = ({ Component, emotionCache, pageProps }: MyAppProps) => {
       {hasGoogleAnalytics && <OptionalGoogleAnalytics />}
       {/* Load jQuery */}
       <Script src="https://code.jquery.com/jquery-3.6.0.min.js" />
-
     </>
   );
 };
