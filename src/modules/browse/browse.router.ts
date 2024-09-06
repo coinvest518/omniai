@@ -3,7 +3,6 @@ import { TRPCError } from '@trpc/server';
 
 import { BrowserContext, connect, ScreenshotOptions } from '@cloudflare/puppeteer';
 import { default as TurndownService } from 'turndown';
-import { load as cheerioLoad } from 'cheerio';
 
 import { createTRPCRouter, publicProcedure } from '~/server/api/trpc.server';
 import { env } from '~/server/env.mjs';
@@ -128,13 +127,11 @@ async function workerPuppeteer(
     const contentType = response?.headers()?.['content-type'];
     const isWebPage = contentType?.startsWith('text/html') || contentType?.startsWith('text/plain') || false;
     if (!isWebPage) {
-      // noinspection ExceptionCaughtLocallyJS
       throw new Error(`Invalid content-type: ${contentType}`);
     } else {
       result.stopReason = 'end';
     }
   } catch (error: any) {
-    // This was "error instanceof TimeoutError;" but threw some type error - trying the below instead
     const isTimeout = error?.message?.includes('Navigation timeout') || false;
     result.stopReason = isTimeout ? 'timeout' : 'error';
     if (!isTimeout) {
@@ -148,16 +145,15 @@ async function workerPuppeteer(
       for (const transform of transforms) {
         switch (transform) {
           case 'html':
-            result.content.html = cleanHtml(await page.content());
+            result.content.html = await page.content();
             break;
           case 'text':
             result.content.text = await page.evaluate(() => document.body.innerText || document.textContent || '');
             break;
           case 'markdown':
             const html = await page.content();
-            const cleanedHtml = cleanHtml(html);
             const turndownService = new TurndownService({ headingStyle: 'atx' });
-            result.content.markdown = turndownService.turndown(cleanedHtml);
+            result.content.markdown = turndownService.turndown(html);
             break;
         }
       }
@@ -218,36 +214,4 @@ async function workerPuppeteer(
   }
 
   return result;
-}
-
-
-function cleanHtml(html: string) {
-  const $ = cheerioLoad(html);
-
-  // Remove standard unwanted elements
-  $('script, style, nav, aside, noscript, iframe, svg, canvas, .ads, .comments, link[rel="stylesheet"]').remove();
-
-  // Remove elements that might be specific to proxy services or injected by them
-  $('[id^="brightdata-"], [class^="brightdata-"]').remove();
-
-  // Remove comments
-  $('*').contents().filter(function() {
-    return this.type === 'comment';
-  }).remove();
-
-  // Remove empty elements
-  $('p, div, span').each(function() {
-    if ($(this).text().trim() === '' && $(this).children().length === 0) {
-      $(this).remove();
-    }
-  });
-
-  // Merge consecutive paragraphs
-  $('p + p').each(function() {
-    $(this).prev().append(' ' + $(this).text());
-    $(this).remove();
-  });
-
-  // Return the cleaned HTML
-  return $.html();
 }

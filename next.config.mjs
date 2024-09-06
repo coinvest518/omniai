@@ -1,6 +1,5 @@
 import path from 'path';
 import { fileURLToPath } from 'url';
-import crypto from 'crypto-browserify'; // Keep this line
 
 // Get the directory name
 const __filename = fileURLToPath(import.meta.url);
@@ -16,7 +15,6 @@ buildType && console.log(`   🧠 omni-AI: building for ${buildType}...\n`);
 
 /** @type {import('next').NextConfig} */
 let nextConfig = {
-  swcMinify: true, // Added SWC minification
   reactStrictMode: true,
 
   // [exports] https://nextjs.org/docs/advanced-features/static-html-export
@@ -63,11 +61,17 @@ let nextConfig = {
       layers: true,
     };
 
-    // Add polyfill for crypto
-    config.resolve.fallback = {
-      crypto: 'crypto-browserify', // Set as a string
-      // other fallbacks if needed
-    };
+    // Add a loader for undici
+    config.module.rules.push({
+      test: /\.m?js$/,
+      exclude: /node_modules/,
+      use: {
+        loader: 'babel-loader',
+        options: {
+          presets: ['@babel/preset-env'],
+        },
+      },
+    });
 
     return config;
   },
