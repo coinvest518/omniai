@@ -1,6 +1,8 @@
 import React from 'react';
 import { AccountCircle } from '@mui/icons-material';
 import { useUser } from '@clerk/nextjs';
+import Image from 'next/image';
+
 
 const UserIcon: React.FC = () => {
   const { user } = useUser();
@@ -8,7 +10,7 @@ const UserIcon: React.FC = () => {
 
   if (profileImageUrl) {
     return (
-      <img
+      <Image
         src={profileImageUrl}
         alt="User Icon"
         width={24}

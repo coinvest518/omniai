@@ -4,7 +4,6 @@
 /app/**/*.backup
 
 # dependencies
-/node_modules
 /.pnp
 .pnp.js
 

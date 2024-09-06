@@ -1,3 +1,11 @@
+import path from 'path';
+import { fileURLToPath } from 'url';
+import crypto from 'crypto-browserify'; // Keep this line
+
+// Get the directory name
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 // Non-default build types
 const buildType =
   process.env.BIG_AGI_BUILD === 'standalone' ? 'standalone'
@@ -8,6 +16,7 @@ buildType && console.log(`   🧠 omni-AI: building for ${buildType}...\n`);
 
 /** @type {import('next').NextConfig} */
 let nextConfig = {
+  swcMinify: true, // Added SWC minification
   reactStrictMode: true,
 
   // [exports] https://nextjs.org/docs/advanced-features/static-html-export
@@ -54,9 +63,11 @@ let nextConfig = {
       layers: true,
     };
 
-    // prevent too many small chunks (40kb min) on 'client' packs (not 'server' or 'edge-server')
-    if (typeof config.optimization.splitChunks === 'object' && config.optimization.splitChunks.minSize)
-      config.optimization.splitChunks.minSize = 40 * 1024;
+    // Add polyfill for crypto
+    config.resolve.fallback = {
+      crypto: 'crypto-browserify', // Set as a string
+      // other fallbacks if needed
+    };
 
     return config;
   },

@@ -34,7 +34,8 @@
       "~/common/*": ["src/common/*"],
       "~/modules/*": ["src/modules/*"],
       "~/server/*": ["src/server/*"]
-    }
+    },
+    "typeRoots": ["./node_modules/@types", "./src/@types"]
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts",
     // this is here only because otherwise, during standalone build the process would update this file

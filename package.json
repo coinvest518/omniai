@@ -12,7 +12,7 @@
     "postinstall": "prisma generate && patch-package",
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
-    "vercel:env:pull": "npx vercel env pull .env.development.local",
+    "vercel:env:pull": "npx vercel env pull .env.development.local"
   },
   "prisma": {
     "schema": "src/server/prisma/schema.prisma"
@@ -54,6 +54,9 @@
     "browser-fs-access": "^0.35.0",
     "cheerio": "^1.0.0-rc.12",
     "class-variance-authority": "^0.7.0",
+    "crypto": "^1.0.1",
+    "crypto-browserify": "^3.12.0",
+    "crypto-js": "^4.2.0",
     "dexie": "^4.0.4",
     "dotenv": "^16.4.5",
     "eventsource-parser": "^1.1.2",
@@ -98,8 +101,13 @@
     "zustand": "^4.5.2"
   },
   "devDependencies": {
+    "@babel/core": "^7.25.2",
     "@babel/plugin-proposal-class-properties": "^7.18.6",
     "@babel/plugin-proposal-private-methods": "^7.18.6",
+    "@babel/plugin-syntax-jsx": "^7.24.7",
+    "@babel/preset-env": "^7.25.4",
+    "@babel/preset-react": "^7.24.7",
+    "@babel/preset-typescript": "^7.24.7",
     "@cloudflare/puppeteer": "0.0.5",
     "@types/node": "^20.12.11",
     "@types/nprogress": "^0.2.3",
@@ -113,6 +121,7 @@
     "@types/react-timeago": "^4.1.7",
     "@types/turndown": "^5.0.4",
     "@types/uuid": "^9.0.8",
+    "babel-loader": "^9.1.3",
     "eslint": "^8.57.0",
     "eslint-config-next": "^14.2.3",
     "prettier": "^3.2.5",
