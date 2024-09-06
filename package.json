@@ -9,10 +9,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "prisma generate",
+    "postinstall": "prisma generate && patch-package",
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
-    "vercel:env:pull": "npx vercel env pull .env.development.local"
+    "vercel:env:pull": "npx vercel env pull .env.development.local",
   },
   "prisma": {
     "schema": "src/server/prisma/schema.prisma"
@@ -57,6 +57,7 @@
     "dexie": "^4.0.4",
     "dotenv": "^16.4.5",
     "eventsource-parser": "^1.1.2",
+    "firebase": "^10.13.1",
     "fix": "^0.0.6",
     "font-awesome": "^4.7.0",
     "idb-keyval": "^6.2.1",
@@ -66,8 +67,10 @@
     "nprogress": "^0.2.0",
     "openai": "^4.57.0",
     "openssl": "^2.0.0",
+    "patch-package": "^8.0.0",
     "pdfjs-dist": "4.2.67",
     "plantuml-encoder": "^1.4.0",
+    "postinstall-postinstall": "^2.1.0",
     "prismjs": "^1.29.0",
     "react": "^18.3.1",
     "react-beautiful-dnd": "^13.1.1",
