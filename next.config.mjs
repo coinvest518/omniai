@@ -1,3 +1,7 @@
+
+const isProd = process.env.NODE_ENV === 'production';
+
+
 const buildType =
   process.env.BIG_AGI_BUILD === 'standalone' ? 'standalone'
     : process.env.BIG_AGI_BUILD === 'static' ? 'export'
@@ -11,6 +15,9 @@ buildType && console.log(`   🧠 omni-AI: building for ${buildType}...\n`);
 /** @type {import('next').NextConfig} */
 let nextConfig = {
   reactStrictMode: true,
+
+  basePath: isProd ? '/Omni' : '',
+  assetPrefix: isProd ? '/Omni/' : '',
 
   // Static HTML export settings
   ...buildType && {
