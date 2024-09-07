@@ -17,7 +17,6 @@
     "schema": "src/server/prisma/schema.prisma"
   },
   "dependencies": {
-    "@clerk/clerk-js": "^5.18.0",
     "@clerk/clerk-react": "^5.5.0",
     "@clerk/clerk-sdk-node": "^5.0.33",
     "@clerk/nextjs": "^5.4.1",
