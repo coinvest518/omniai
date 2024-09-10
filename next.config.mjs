@@ -1,5 +1,4 @@
 
-const isProd = process.env.NODE_ENV === 'production';
 
 
 const buildType =
@@ -15,9 +14,6 @@ buildType && console.log(`   🧠 omni-AI: building for ${buildType}...\n`);
 /** @type {import('next').NextConfig} */
 let nextConfig = {
   reactStrictMode: true,
-
-  basePath: isProd ? '/Omni' : '',
-  assetPrefix: isProd ? '/Omni/' : '',
 
   // Static HTML export settings
   ...buildType && {
