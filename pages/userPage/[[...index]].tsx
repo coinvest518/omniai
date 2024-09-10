@@ -319,17 +319,17 @@ const AppUsers: React.FC = () => {
                                 {userData?.planName ? 'Upgrade Plan' : 'Subscribe to a Plan'}
                             </Link>
 
-                            <Link href="https://pure-lemming-33.accounts.dev/sign-in" className="button" >
+                            <Link href="https://accounts.omniai.icu/sign-in" className="button" >
                                 <i className="ph-lightning-bold"></i>
                                 <span>Sign In</span>
                             </Link>
 
-                            <Link href="https://pure-lemming-33.accounts.dev/sign-up" className="button">
+                            <Link href="https://accounts.omniai.icu/sign-up" className="button">
                                 <i className="ph-bell-bold"></i>
                                 <span>Sign Up</span>
                             </Link>
 
-                            <Link href="https://pure-lemming-33.accounts.dev/user" className="avatar">
+                            <Link href="https://accounts.omniai.icu/user" className="avatar">
                                 <UserButton />
                             </Link>
                         </div>
