@@ -330,6 +330,7 @@ const AppUsers: React.FC = () => {
                             </Link>
 
                             <Link href="https://accounts.omniai.icu/user" className="avatar">
+                            </Link>
                                 <UserButton />
                             </Link>
                         </div>
