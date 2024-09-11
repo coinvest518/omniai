@@ -14,7 +14,7 @@ export type CreditDetail = {
   
   export const creditDetails: CreditDetail[] = [
     {
-      priceId: 'price_1PblvhE4H116aDHA1Rw9bN88',
+      priceId: 'price_1PtYXNE4H116aDHArZNVwlXG',
       credits: 100,
       
     },
