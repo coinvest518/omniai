@@ -24,7 +24,7 @@ interface OptimaDrawersActions {
 const UseOptimaDrawers = React.createContext<(OptimaDrawersState & OptimaDrawersActions) | undefined>(undefined);
 
 // TRICK: this is how we persist the drawer state across page navigations
-let lastDrawerOpen = !getIsMobile() && !(isBrowser && window.location.pathname === '/news');
+let lastDrawerOpen = !getIsMobile() && !isBrowser; // Removed news path check
 
 export function OptimaDrawerProvider(props: { children: React.ReactNode }) {
 
@@ -61,11 +61,5 @@ export const useOptimaDrawers = () => {
   const context = React.useContext(UseOptimaDrawers);
   if (!context)
     throw new Error('useOptimaDrawer must be used within an OptimaDrawerProvider');
-  // NOTE: shall we merge Drawers and Layout? They cascade anyway, and there are benefits to having them together
-  // const { appDrawerContent } = useOptimaLayout();
-  // return {
-  //   ...context,
-  //   isDrawerOpen: context.isDrawerOpen && !!appDrawerContent,
-  // };
   return context;
 };
