@@ -83,7 +83,7 @@ function CommonPageMenuItems(props: { onClose: () => void }) {
 }
 
 
-// type ContainedAppType = 'chat' | 'data' | 'news';
+// type ContainedAppType = 'chat' | 'data' ;
 
 
 /**

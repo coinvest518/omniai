@@ -17,7 +17,6 @@ import { Brand } from '~/common/app.config';
 import { ROUTE_APP_CHAT, ROUTE_INDEX } from '~/common/app.routes';
 
 // apps access
-import { incrementalNewsVersion, useAppNewsStateStore } from '../../src/apps/news/news.version';
 
 // capabilities access
 import { useCapabilityBrowserSpeechRecognition, useCapabilityElevenLabs, useCapabilityTextToImage } from '~/common/components/useCapabilities';
@@ -81,7 +80,6 @@ function AppDebug() {
   const chatsCount = useChatStore.getState().conversations?.length;
   const uxLabsExperiments = Object.entries(useUXLabsStore.getState()).filter(([_k, v]) => v === true).map(([k, _]) => k).join(', ');
   const { folders, enableFolders } = useFolderStore.getState();
-  const { lastSeenNewsVersion } = useAppNewsStateStore.getState();
   const { usageCount } = useAppStateStore.getState();
 
   // Debugging statements
@@ -90,7 +88,6 @@ function AppDebug() {
   console.log('uxLabsExperiments:', uxLabsExperiments);
   console.log('folders:', folders);
   console.log('enableFolders:', enableFolders);
-  console.log('lastSeenNewsVersion:', lastSeenNewsVersion);
   console.log('usageCount:', usageCount);
 
   // derived state
@@ -114,8 +111,6 @@ function AppDebug() {
       chatsCount,
       foldersCount: folders?.length,
       foldersEnabled: enableFolders,
-      newsCurrent: incrementalNewsVersion,
-      newsSeen: lastSeenNewsVersion,
       labsActive: uxLabsExperiments,
       reloads: usageCount,
     },

@@ -22,7 +22,6 @@ assignees: enricoros
   - [ ] Create a [New Draft GitHub Release](https://github.com/enricoros/big-agi/releases/new), and generate the automated changelog (for new contributors)
   - [ ] Update the release version in package.json, and `npm i`
   - [ ] Update the in-app News version number
-  - [ ] Update in-app News [src/apps/news/news.data.tsx](/src/apps/news/news.data.tsx)
   - [ ] Update in-app Cover graphics
   - [ ] Update the README.md with the new release
   - [ ] Copy the highlights to the [docs/changelog.md](/docs/changelog.md)
@@ -55,12 +54,11 @@ To familiarize yourself with the application, the following are the Website and 
 
 ```markdown
 I am announcing a new version, 1.2.3.
-For reference, the following was the collateral for 1.1.0 (Discord announcement, GitHub Release, in-app-news file news.data.tsx).
+For reference, the following was the collateral for 1.1.0 (Discord announcement, GitHub Release,.data.tsx).
 ```
 
 - paste the former: `discord announcement`,
 - `GitHub release`,
-- `news.data.tsx`,
 - `changelog.md`
 
 ```markdown
