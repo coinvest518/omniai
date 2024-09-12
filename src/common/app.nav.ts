@@ -27,6 +27,14 @@ import { DiscordIcon } from '~/common/components/icons/3rdparty/DiscordIcon';
 // Modal icons
 import BuildCircleIcon from '@mui/icons-material/BuildCircle';
 import SettingsIcon from '@mui/icons-material/Settings';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faProductHunt } from '@fortawesome/free-brands-svg-icons';
+
+// Add this import at the top of the file
+import React from 'react';
+
+// Add this import if missing
+import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 
 
 import { Brand } from '~/common/app.config';
@@ -37,12 +45,14 @@ import { UserButton, useUser } from "@clerk/nextjs";
 import UserIcon from '../common/components/UserIcon';
 import userPrompts from '../../pages/userPage/[[...index]]';
 
-
 // enable to show all items, for layout development
 const SHOW_ALL_APPS = false;
 
 const SPECIAL_DIVIDER = '__DIVIDER__';
+// Add this custom component near the top of the file, after the imports
 
+
+const ProductHuntIcon: React.FC = () => React.createElement(FontAwesomeIcon, { icon: faProductHunt as IconDefinition, size: "lg" });
 
 // Nav items
 
@@ -106,7 +116,8 @@ export const navItems: {
       hideOnMobile: false,
       route: '/userPage',
     },
-
+    
+    
 
     {
       name: 'Chat',
@@ -243,7 +254,8 @@ export const navItems: {
     //   name: 'X',
     //   icon: TwitterIcon,
     //   href: 'https://twitter.com',
-    // },
+
+  
     {
       type: 'extLink',
       name: 'Discord',
@@ -255,6 +267,13 @@ export const navItems: {
       name: 'GitHub',
       icon: GitHubIcon,
       href: Brand.URIs.OpenRepo,
+    },
+
+    {
+      type: 'extLink',
+      name: 'Product Hunt',
+      icon: ProductHuntIcon,
+      href: 'https://www.producthunt.com/posts/omni-ai-multi-ai-chat-interface?embed=true&utm_source=badge-featured&utm_medium=badge&utm_souce=badge-omni&#0045;ai&#0045;multi&#0045;ai&#0045;chat&#0045;interface',
     },
   ],
 

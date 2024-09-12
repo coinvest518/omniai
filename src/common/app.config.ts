@@ -25,6 +25,8 @@ export const Brand = {
     OpenProject: 'https://github.com/coinvest518',
     SupportInvite: 'https://discord.gg/NTNszcwE',
     // Twitter: 'https://www.twitter.com/omni_ai',
-    PrivacyPolicy: '',
+    ProductHunt: 'https://www.producthunt.com/posts/omni-ai-multi-ai-chat-interface?embed=true&utm_source=badge-featured&utm_medium=badge&utm_souce=badge-omni&#0045;ai&#0045;multi&#0045;ai&#0045;chat&#0045;interface',
+
   },
 } as const;
+

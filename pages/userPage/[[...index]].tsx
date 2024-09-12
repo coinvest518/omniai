@@ -12,6 +12,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { PrismaClient } from '@prisma/client';
 import { User } from 'lucide-react';
+import SignInModal from './SignInModal';
 
 
 
@@ -64,6 +65,7 @@ const AppUsers: React.FC = () => {
     const [activeTab, setActiveTab] = useState('all');
     const [error, setError] = useState<string | null>(null);
     const [userPrompts, setUserPrompts] = useState<Prompt[]>([]);
+    const [showSignInModal, setShowSignInModal] = useState(false);
     
 
 
@@ -277,7 +279,19 @@ const AppUsers: React.FC = () => {
             return prompt.category === activeTab;
         });
 
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (!isSignedIn) {
+                setShowSignInModal(true);
+            }
+        }, 5000); // 5000 milliseconds = 5 seconds
 
+        return () => clearTimeout(timer);
+    }, [isSignedIn]);
+
+    const closeSignInModal = () => {
+        setShowSignInModal(false);
+    };
 
     return (
         <div>
@@ -518,6 +532,8 @@ const AppUsers: React.FC = () => {
                     </div>
                 </div>
             </main>
+
+            <SignInModal isOpen={showSignInModal} onClose={closeSignInModal} />
         </div>
 
     );
@@ -526,4 +542,5 @@ const AppUsers: React.FC = () => {
 
 
 export default AppUsers;
+
 
