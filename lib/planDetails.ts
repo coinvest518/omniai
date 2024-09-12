@@ -11,7 +11,7 @@ export interface Plan {
   
   export const planDetails: Plan[] = [
     {
-      priceId: 'price_1PMAlHE4H116aDHAAEluoUjo', // real price_1PtYXeE4H116aDHAFyye0Pov
+      priceId: 'price_1PtYXeE4H116aDHAFyye0Pov', // real price_1PtYXeE4H116aDHAFyye0Pov
       planName: 'Omni Starter',
       tokens: 10000,
       credits: 250,
