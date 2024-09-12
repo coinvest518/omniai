@@ -66,8 +66,7 @@ const AppUsers: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [userPrompts, setUserPrompts] = useState<Prompt[]>([]);
     const [showSignInModal, setShowSignInModal] = useState(false);
-    
-
+    const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);
 
 
 
@@ -292,6 +291,10 @@ const AppUsers: React.FC = () => {
     const closeSignInModal = () => {
         setShowSignInModal(false);
     };
+    const toggleMenuModal = () => {
+        setShowSignInModal(true);
+    };
+
 
     return (
         <div>
@@ -348,7 +351,10 @@ const AppUsers: React.FC = () => {
                             </Link>
                         </div>
                     </div>
-                    <Link href="#" className="button">
+                    <Link href="#" className="button" onClick={(e) => {
+                        e.preventDefault();
+                        toggleMenuModal();
+                    }}>
                         <i className="ph-list-bold"></i>
                         <span>Menu</span>
                     </Link>
@@ -496,7 +502,7 @@ const AppUsers: React.FC = () => {
                                         prompts={userPrompts}
 
                                         isPurchased={userData?.purchasedPromptIds?.includes(prompt.id) || false}
-                                        />
+                                    />
                                 ))
                             ) : (
                                 filteredPrompts.length > 0 ? (
@@ -509,7 +515,7 @@ const AppUsers: React.FC = () => {
                                             description={prompt.description}
                                             onClick={() => handleCardClick(prompt)}
                                             isPurchased={userData?.purchasedPromptIds?.includes(prompt.id) || false}
-                                            />
+                                        />
                                     ))
                                 ) : (
                                     <p>No prompts available for this user.</p>
@@ -526,7 +532,7 @@ const AppUsers: React.FC = () => {
                                     onPurchase={handlePurchase}
                                     showCopyButton={showCopyButton}
                                     isPurchased={userData?.purchasedPromptIds?.includes(selectedPrompt.id) || false}
-                                    />
+                                />
                             )}
                         </div>
                     </div>
