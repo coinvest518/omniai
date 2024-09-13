@@ -20,6 +20,7 @@ export async function POST(req: Request) {
   const svix_signature = headerPayload.get('svix-signature');
 
   if (!svix_id || !svix_timestamp || !svix_signature) {
+    console.error('Missing Svix headers');
     return new Response('Missing Svix headers', { status: 400 });
   }
 
@@ -76,8 +77,10 @@ export async function POST(req: Request) {
     }
   }
 
-  // Ensure the Prisma Client is disconnected after operation
-  await prisma.$disconnect();
-
   return new Response('Webhook handled successfully', { status: 200 });
+}
+
+export async function GET() {
+  // Handle GET requests (if Clerk/Svix hits the webhook endpoint with GET)
+  return new Response('GET method not allowed for this endpoint', { status: 405 });
 }
