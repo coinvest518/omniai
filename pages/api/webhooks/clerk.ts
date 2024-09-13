@@ -1,43 +1,42 @@
 import { Webhook } from 'svix';
 import { headers } from 'next/headers';
 import { WebhookEvent } from '@clerk/nextjs/server';
-import { PrismaClient } from '@prisma/client'; // Import Prisma Client
+import { PrismaClient } from '@prisma/client';
 
-// Initialize Prisma Client
 const prisma = new PrismaClient();
 
 export async function POST(req: Request) {
-  // Ensure the webhook is configured to send a POST request
-  // Check the Clerk Dashboard for the correct HTTP method
-
   const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET;
-  // Ensure WEBHOOK_SECRET is set correctly in your environment
+
   if (!WEBHOOK_SECRET) {
-    throw new Error('Please add WEBHOOK_SECRET from Clerk Dashboard to .env or .env.local');
+    console.error('WEBHOOK_SECRET is not set.');
+    return new Response('Server misconfiguration: WEBHOOK_SECRET not set', { status: 500 });
   }
 
-  // Get the headers
+  // Extract Svix headers
   const headerPayload = headers();
   const svix_id = headerPayload.get('svix-id');
   const svix_timestamp = headerPayload.get('svix-timestamp');
   const svix_signature = headerPayload.get('svix-signature');
 
-  // If there are no headers, error out
   if (!svix_id || !svix_timestamp || !svix_signature) {
-    return new Response('Error occurred -- no svix headers', {
-      status: 400,
-    });
+    return new Response('Missing Svix headers', { status: 400 });
   }
 
-  // Get the body
-  const payload = await req.json();
-  const body = JSON.stringify(payload);
+  // Get the payload
+  let payload;
+  try {
+    payload = await req.json();
+  } catch (error) {
+    console.error('Failed to parse JSON body:', error);
+    return new Response('Invalid JSON payload', { status: 400 });
+  }
 
-  // Create a new Svix instance with your secret.
+  const body = JSON.stringify(payload);
   const wh = new Webhook(WEBHOOK_SECRET);
   let evt: WebhookEvent;
 
-  // Verify the payload with the headers
+  // Verify the webhook payload
   try {
     evt = wh.verify(body, {
       'svix-id': svix_id,
@@ -45,47 +44,40 @@ export async function POST(req: Request) {
       'svix-signature': svix_signature,
     }) as WebhookEvent;
   } catch (err) {
-    console.error('Error verifying webhook:', err);
-    return new Response('Error occurred', {
-      status: 400,
-    });
+    console.error('Webhook verification failed:', err);
+    return new Response('Webhook verification failed', { status: 400 });
   }
 
   const eventType = evt.type;
 
-  // Process the webhook event based on its type
+  // Handle `user.created` event
   if (eventType === 'user.created') {
     const { id, email_addresses, first_name, last_name } = evt.data;
 
-    // Ensure required data fields are present
-    if (!id || !email_addresses) {
-      return new Response(JSON.stringify({ error: 'Error occurred -- missing data' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
+    if (!id || !email_addresses || email_addresses.length === 0) {
+      return new Response('Missing user data in webhook', { status: 400 });
     }
 
     try {
-      // Create a user record in the database using Prisma
-      const prismaUser = {
-        clerkUserId: id,
-        email: email_addresses[0].email_address,
-        firstName: first_name || undefined, // Use undefined if optional
-        lastName: last_name || undefined,
-      };
-
+      // Use Prisma to create a new user in the database
       const createdUser = await prisma.user.create({
-        data: prismaUser,
+        data: {
+          clerkUserId: id,
+          email: email_addresses[0].email_address,
+          firstName: first_name || undefined,
+          lastName: last_name || undefined,
+        },
       });
 
-      console.log('User created in database:', createdUser);
+      console.log('User created successfully:', createdUser);
     } catch (error) {
-      console.error('Error creating user in database:', error);
-      return new Response('Error occurred during user creation', {
-        status: 500,
-      });
+      console.error('Database error when creating user:', error);
+      return new Response('Internal server error', { status: 500 });
     }
   }
 
-  return new Response('', { status: 200 });
+  // Ensure the Prisma Client is disconnected after operation
+  await prisma.$disconnect();
+
+  return new Response('Webhook handled successfully', { status: 200 });
 }
