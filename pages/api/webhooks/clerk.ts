@@ -1,34 +1,41 @@
 import { Webhook } from 'svix';
-import { NextApiRequest, NextApiResponse } from 'next';
+import { headers } from 'next/headers';
 import { WebhookEvent } from '@clerk/nextjs/server';
-import createUser from '../../api/create-user';
-import { User } from '@prisma/client';
+import { PrismaClient } from '@prisma/client'; // Import Prisma Client
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET;
+// Initialize Prisma Client
+const prisma = new PrismaClient();
 
+export async function POST(req: Request) {
+  // You can find this in the Clerk Dashboard -> Webhooks -> choose the endpoint
+  const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET;
   if (!WEBHOOK_SECRET) {
-    throw new Error(
-      'Please add CLERK_WEBHOOK_SECRET from Clerk Dashboard to .env or .env.local'
-    );
+    return new Response(JSON.stringify({ error: 'WEBHOOK_SECRET is not set' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 
-  // Get the headers directly from the request
-  const svix_id = req.headers['svix-id'] as string;
-  const svix_timestamp = req.headers['svix-timestamp'] as string;
-  const svix_signature = req.headers['svix-signature'] as string;
+  // Get the headers
+  const headerPayload = headers();
+  const svix_id = headerPayload.get('svix-id');
+  const svix_timestamp = headerPayload.get('svix-timestamp');
+  const svix_signature = headerPayload.get('svix-signature');
 
   // If there are no headers, error out
   if (!svix_id || !svix_timestamp || !svix_signature) {
-    return res.status(400).json({ error: 'Error occurred -- missing svix headers' });
+    return new Response(JSON.stringify({ error: 'Missing svix headers' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 
   // Get the body
-  const body = JSON.stringify(req.body);
+  const payload = await req.json();
+  const body = JSON.stringify(payload);
 
-  // Create a new Svix instance with your secret
+  // Create a new Svix instance with your secret.
   const wh = new Webhook(WEBHOOK_SECRET);
-
   let evt: WebhookEvent;
 
   // Verify the payload with the headers
@@ -36,47 +43,57 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     evt = wh.verify(body, {
       'svix-id': svix_id,
       'svix-timestamp': svix_timestamp,
-      'svix-signature': svix_signature
+      'svix-signature': svix_signature,
     }) as WebhookEvent;
   } catch (err) {
     console.error('Error verifying webhook:', err);
-    return res.status(400).json({ error: 'Error occurred during webhook verification' });
+    return new Response(JSON.stringify({ error: 'Error verifying webhook' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 
   const eventType = evt.type;
 
   // Process the webhook event based on its type
   if (eventType === 'user.created') {
-    const { id, email_addresses, first_name, last_name } = evt.data;
+    const { id, email_addresses, first_name, last_name } = evt.data as any;
 
     // Ensure required data fields are present
-    if (!id || !email_addresses) {
-      return res.status(400).json({ error: 'Error occurred -- missing data' });
+    if (!id || !email_addresses?.length) {
+      return new Response(JSON.stringify({ error: 'Missing required user data' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
-    // Prepare user data to be created
-    const user: Partial<User> = {
-      clerkUserId: id,
-      email: email_addresses[0].email_address,
-      firstName: first_name || undefined,
-      lastName: last_name || undefined,
-    };
-
-    // Attempt to create the user
     try {
-      const { user: createdUser, error } = await createUser(user as User);
-      if (error) {
-        console.error('Error creating user:', error);
-        return res.status(500).json({ error: 'Error occurred during user creation' });
-      }
-      console.log('User created:', createdUser);
-      return res.status(200).json({ message: 'User created successfully', user: createdUser });
+      // Create a user record in the database using Prisma
+      const createdUser = await prisma.user.create({
+        data: {
+          clerkUserId: id,
+          email: email_addresses[0].email_address,
+          firstName: first_name || undefined,
+          lastName: last_name || undefined,
+        },
+      });
+
+      console.log('User created in database:', createdUser);
+      return new Response(JSON.stringify({ message: 'User created successfully' }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
     } catch (error) {
-      console.error('Error creating user:', error);
-      return res.status(500).json({ error: 'Server error during user creation' });
+      console.error('Error creating user in database:', error);
+      return new Response(JSON.stringify({ error: 'Error creating user in database' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
   }
 
-  // Return success response if event type is not 'user.created'
-  return res.status(200).json({ message: 'Webhook processed successfully' });
+  return new Response(JSON.stringify({ message: 'Webhook processed' }), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' },
+  });
 }
