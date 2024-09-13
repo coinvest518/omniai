@@ -1,8 +1,8 @@
 import { Webhook } from 'svix';
-import { headers } from 'next/headers';
 import { WebhookEvent } from '@clerk/nextjs/server';
 import { PrismaClient } from '@prisma/client';
 
+// Initialize Prisma Client
 const prisma = new PrismaClient();
 
 export async function POST(req: Request) {
@@ -14,10 +14,10 @@ export async function POST(req: Request) {
   }
 
   // Extract Svix headers
-  const headerPayload = headers();
-  const svix_id = headerPayload.get('svix-id');
-  const svix_timestamp = headerPayload.get('svix-timestamp');
-  const svix_signature = headerPayload.get('svix-signature');
+  const headers = req.headers;
+  const svix_id = headers.get('svix-id');
+  const svix_timestamp = headers.get('svix-timestamp');
+  const svix_signature = headers.get('svix-signature');
 
   if (!svix_id || !svix_timestamp || !svix_signature) {
     console.error('Missing Svix headers');
