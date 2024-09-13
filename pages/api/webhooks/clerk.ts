@@ -7,12 +7,14 @@ const prisma = new PrismaClient();
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
-    const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET;
-
-    if (!WEBHOOK_SECRET) {
-      console.error('WEBHOOK_SECRET is not set.');
-      return res.status(500).json({ error: 'Server misconfiguration: WEBHOOK_SECRET not set' });
-    }
+     const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET;
+  if (!WEBHOOK_SECRET) {
+    console.error('WEBHOOK_SECRET is not set in the environment variables');
+    return new Response(JSON.stringify({ error: 'Server misconfiguration: WEBHOOK_SECRET not set' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
 
     // Extract Svix headers
     const svix_id = req.headers['svix-id'] as string;
