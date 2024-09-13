@@ -18,7 +18,7 @@ export const Brand = {
     TwitterSite: '@omniai.ai',
   },
   URIs: {
-    Home: 'https://coinvestinc.xyz',
+    Home: 'https://omniai.icu',
     // App: '',
     CardImage: '',
     OpenRepo: 'https://github.com/coinvest518',
