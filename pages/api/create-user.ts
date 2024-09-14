@@ -30,7 +30,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         create: {
           email,
           clerkUserId: userId,
-          credits: 3,
+          credits: 10,
         },
       });
       console.log('User upserted successfully:', user);

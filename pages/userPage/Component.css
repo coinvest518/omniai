@@ -82,18 +82,7 @@ img {
 	text-decoration: none;
 	display: flex;
 	align-items: center;
-
-	&>a {
-		display: none;
-	}
-
-	@media (max-width: 1200px) {
-		justify-content: space-between;
-
-		&>a {
-			display: inline-flex;
-		}
-	}
+	justify-content: space-between;
 }
 
 .content-header-cards-container {
@@ -245,6 +234,131 @@ img {
 		}
 	}
 }
+.nav-link, .credit-button, .menu-button span {
+	text-decoration: none;
+	color: var(--c-text-action);
+	padding: 8px 16px;
+	border: none;
+	background: var(--c-background-tertiary);
+	cursor: pointer;
+	display: inline-flex;
+	align-items: center;
+	border-radius: 8px; /* Match the border radius */
+	transition: 0.15s ease;
+}
+
+.nav-link:hover, .credit-button:hover, .menu-button span:hover {
+	background-color: var(--c-background-quaternary);
+	color: var(--c-accent-primary);
+}
+
+.menu-button {
+	display: none; /* Hide by default */
+	position: relative;
+
+	@media (max-width: 1200px) {
+		display: flex; /* Show on smaller screens */
+		align-items: center;
+		cursor: pointer;
+	}
+}
+
+.menu-button .dropdown-menu {
+	display: none; /* Hide dropdown by default */
+	position: absolute;
+	top: 100%;
+	left: 0;
+	background-color: var(--c-background-primary);
+	box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+	z-index: 1;
+	list-style: none; /* Remove default list styling */
+	padding: 0 0 10px 0; /* Add padding to the bottom */
+	margin: 0;
+	width: 200px;
+	border-radius: 8px; /* Match the border radius */
+}
+
+.menu-button:hover .dropdown-menu,
+.menu-button:focus-within .dropdown-menu {
+	display: block; /* Show dropdown on hover or focus */
+}
+
+.menu-button .dropdown-menu li {
+	padding: 8px 16px;
+	list-style: none; /* Ensure no list styling for list items */
+}
+
+.menu-button .dropdown-menu li a, .menu-button .dropdown-menu li button {
+	text-decoration: none;
+	color: var(--c-text-action); /* Ensure text color is set */
+	display: block;
+	width: 100%;
+	text-align: left;
+	background: var(--c-background-tertiary);
+	border: none;
+	cursor: pointer;
+	padding: 8px 16px;
+	border-radius: 8px; /* Match the border radius */
+	transition: 0.15s ease;
+}
+
+.menu-button .dropdown-menu li a:hover, .menu-button .dropdown-menu li button:hover {
+	background-color: var(--c-background-quaternary);
+	color: var(--c-accent-primary);
+}
+
+.menu-button .dropdown-menu .credits-label {
+	position: relative;
+	text-align: center; /* Center the credits label */
+}
+
+.menu-button .dropdown-menu .credits-label .dropdown-content {
+	display: none; /* Hide dropdown by default */
+	position: absolute;
+	top: 100%;
+	left: 0; /* Center the dropdown */
+	transform: translateX(-50%); /* Center the dropdown */
+	background-color: var(--c-background-primary);
+	box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+	z-index: 2; /* Ensure it's above other elements */
+	list-style: none; /* Remove default list styling */
+	padding: 0;
+	margin: 0;
+	width: 200px;
+	border-radius: 8px; /* Match the border radius */
+}
+
+.menu-button .dropdown-menu .credits-label:hover .dropdown-content,
+.menu-button .dropdown-menu .credits-label:focus-within .dropdown-content {
+	display: block; /* Show dropdown on hover or focus */
+}
+
+.menu-button .dropdown-menu .credits-label .dropdown-content li {
+	padding: 8px 16px;
+	list-style: none; /* Ensure no list styling for list items */
+	text-align: center;
+	padding-left: 80px; /* Center the list items */
+}
+
+.menu-button .dropdown-menu .credits-label .dropdown-content li a, .menu-button .dropdown-menu .credits-label .dropdown-content li button {
+	text-decoration: none;
+	color: var(--c-text-action); /* Ensure text color is set */
+	display: block;
+	width: 100%;
+	text-align: center; /* Center the text */
+	background: var(--c-background-tertiary);
+	border: none;
+	cursor: pointer;
+	padding: 8px 16px;
+	border-radius: 8px; /* Match the border radius */
+	transition: 0.15s ease;
+	padding-left: 50px;
+}
+
+.menu-button .dropdown-menu .credits-label .dropdown-content li a:hover, .menu-button .dropdown-menu .credits-label .dropdown-content li button:hover {
+	background-color: var(--c-background-quaternary);
+	color: var(--c-accent-primary);
+}
 
 .header-navigation-as a {
 	text-decoration: none;
@@ -268,11 +382,56 @@ img {
 	background-color: var(--c-background-tertiary);
 	border-radius: 8px;
 	transition: 0.15s ease;
+	cursor: pointer; /* Ensure it's clickable */
 
 	&:hover {
 		color: var(--c-accent-primary);
 		background-color: var(--c-background-quaternary);
 	}
+}
+
+.credits-label .dropdown-content {
+	display: none; /* Hide dropdown by default */
+	position: absolute;
+	top: 100%;
+	left: 0;
+	background-color: var(--c-background-primary);
+	box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+	z-index: 1;
+	list-style: none; /* Remove default list styling */
+	padding: 0;
+	margin: 0;
+	width: 200px;
+	border-radius: 8px; /* Match the border radius */
+}
+
+.credits-label:hover .dropdown-content,
+.credits-label:focus-within .dropdown-content {
+	display: block; /* Show dropdown on hover or focus */
+}
+
+.credits-label .dropdown-content li {
+	padding: 8px 16px;
+	list-style: none; /* Ensure no list styling for list items */
+}
+
+.credits-label .dropdown-content li a, .credits-label .dropdown-content li button {
+	text-decoration: none;
+	color: var(--c-text-action); /* Ensure text color is set */
+	display: block;
+	width: 100%;
+	text-align: left;
+	background: var(--c-background-tertiary);
+	border: none;
+	cursor: pointer;
+	padding: 8px 16px;
+	border-radius: 8px; /* Match the border radius */
+	transition: 0.15s ease;
+}
+
+.credits-label .dropdown-content li a:hover, .credits-label .dropdown-content li button:hover {
+	background-color: var(--c-background-quaternary);
+	color: var(--c-accent-primary);
 }
 
 .dropdown {
@@ -281,8 +440,6 @@ img {
 	border-radius: 5px;
 	color: relative;
 }
-
-
 
 .dropdown-content {
 	display: none;
@@ -295,7 +452,6 @@ img {
 	padding-bottom: 10px;
 	margin-left: 125px;
 	padding-top: 1px;
-
 }
 
 .dropdown-content button {
@@ -401,8 +557,8 @@ img {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	width: 40px;
-	height: 40px;
+	width: 44px;
+	height: 44px;
 	border-radius: 8px;
 	color: var(--c-text-action);
 	transition: 0.15s ease;
@@ -411,8 +567,7 @@ img {
 		font-size: 1.25em;
 	}
 
-	&:focus,
-	&:hover {
+	&:focus {
 		background-color: var(--c-background-tertiary);
 		color: var(--c-accent-primary);
 	}
@@ -425,6 +580,8 @@ img {
 	width: 44px;
 	height: 44px;
 	border-radius: 50%;
+	overflow: hidden; /* Ensure the image fits within the border */
+
 }
 
 .main {

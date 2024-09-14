@@ -10,17 +10,12 @@ import { loadStripe } from '@stripe/stripe-js';
 import { creditDetails } from '../../lib/creditDetails';
 import Image from 'next/image';
 import Link from 'next/link';
-import { PrismaClient } from '@prisma/client';
 import { User } from 'lucide-react';
 import SignInModal from './SignInModal';
+import UserIcon from '../../src/common/components/UserIcon';
 
 
 
-
-
-
-
-const prisma = new PrismaClient();
 
 
 
@@ -295,6 +290,29 @@ const AppUsers: React.FC = () => {
         setShowSignInModal(true);
     };
 
+    const handleFreeCredits = async () => {
+        try {
+            const response = await fetch('/api/create-user', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to create user and assign credits');
+            }
+
+            const updatedUserData = await response.json();
+            setUserData(updatedUserData);
+            setUser(updatedUserData);
+            alert('You have received 10 free credits!');
+        } catch (error) {
+            console.error('Error assigning free credits:', error);
+            alert(`Failed to assign free credits: ${error instanceof Error ? error.message : 'An unknown error occurred'}`);
+        }
+    };
+
 
     return (
         <div>
@@ -310,56 +328,55 @@ const AppUsers: React.FC = () => {
                     <div className="header-navigation">
                         <nav className="header-navigation-as">
                             <Link href="./" style={{ textDecoration: 'none' }}> Home </Link>
+                            <Link href="https://accounts.omniai.icu/sign-in" style={{ textDecoration: 'none' }}> Sign In </Link>
+
                             <Link href="/" style={{ textDecoration: 'none' }}> Omni.AI </Link>
                             <Link href="/price/PricingPage" style={{ textDecoration: 'none' }}> Plans </Link>
                             <div className="dropdown">
                                 <div className="credits-label">Credits</div>
                                 <div className="dropdown-content">
                                     {creditDetails.map((credit) => (
-
                                         <button
                                             key={credit.priceId}
                                             onClick={() => handleCreditPurchase(credit.priceId)}
                                         >
                                             {credit.credits} Credits
                                         </button>
-
                                     ))}
                                 </div>
                             </div>
                         </nav>
-
-                        <div className="header-navigation-actions">
-                            <Link href="/price/PricingPage"
-                                className="button">
-                                <i className="ph-lightning-bold"></i>
-                                {userData?.planName ? 'Upgrade Plan' : 'Subscribe to a Plan'}
-                            </Link>
-
-                            <Link href="https://accounts.omniai.icu/sign-in" className="button" >
-                                <i className="ph-lightning-bold"></i>
-                                <span>Sign In</span>
-                            </Link>
-
-                            <Link href="https://accounts.omniai.icu/sign-up" className="button">
-                                <i className="ph-bell-bold"></i>
-                                <span>Sign Up</span>
-                            </Link>
-
-                            <Link href="https://accounts.omniai.icu/user" className="avatar">
-                                <UserButton />
-                            </Link>
-                        </div>
+                         </div>
+                         <div className="user-icon icon-button avatar">
+                        <UserIcon />
+                        {isSignedIn && user && (
+                            <span>Welcome, {user.firstName || user.username}</span>
+                        )}
                     </div>
-                    <Link href="#" className="button" onClick={(e) => {
-                        e.preventDefault();
-                        toggleMenuModal();
-                    }}>
-                        <i className="ph-list-bold"></i>
-                        <span>Menu</span>
-                    </Link>
+                         
+                        <div className="menu-button">
+                    <i className="ph-list-bold"></i>
+                    <span>Menu</span>
+                    <ul className="dropdown-menu">
+                        <li><Link href="./">Home</Link></li>
+                        <li><Link href="/">Omni.AI</Link></li>
+                        <li><Link href="/price/PricingPage">Plans</Link></li>
+                        <li className="dropdown">
+                            <span>Credits</span>
+                            <ul className="dropdown-content">
+                                {creditDetails.map((credit) => (
+                                    <li key={credit.priceId}>
+                                        <button onClick={() => handleCreditPurchase(credit.priceId)}>
+                                            {credit.credits} Credits
+                                        </button>
+                                    </li>
+                                ))}
+                            </ul>
+                        </li>
+                    </ul>
                 </div>
-            </header>
+            </div>
+        </header>
             <main className="main">
                 <div className="responsive-wrapper">
                     <div className="main-header">
@@ -369,7 +386,7 @@ const AppUsers: React.FC = () => {
 
                     <div className="horizontal-tabs">
                         <div className="horizontal-tab-item">
-                            <Link href="https://gleam.io/1Pm9S/omni-credits-giveaway" style={{ textDecoration: 'none' }}>Free Credits</Link>
+                            <Link href="#" onClick={handleFreeCredits} style={{ textDecoration: 'none' }}>10 Free Credits</Link>
                         </div>
                         <div className="horizontal-tab-item">
                             <Link href="/" style={{ textDecoration: 'none' }}>Omni Chat</Link>
