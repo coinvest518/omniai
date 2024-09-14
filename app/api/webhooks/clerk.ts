@@ -1,11 +1,12 @@
 import { Webhook } from 'svix'
 import { headers } from 'next/headers'
 import { WebhookEvent } from '@clerk/nextjs/server'
+import { NextApiRequest, NextApiResponse } from 'next'
 
-export async function POST(req: Request) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   // Ensure the request method is POST
   if (req.method !== 'POST') {
-    return new Response('Method Not Allowed', { status: 405 });
+    return res.status(405).send('Method Not Allowed');
   }
 
   // You can find this in the Clerk Dashboard -> Webhooks -> choose the endpoint
@@ -13,7 +14,7 @@ export async function POST(req: Request) {
 
   if (!WEBHOOK_SECRET) {
     console.error('WEBHOOK_SECRET is not set');
-    return new Response('Internal Server Error', { status: 500 });
+    return res.status(500).send('Internal Server Error');
   }
 
   // Get the headers
@@ -25,16 +26,16 @@ export async function POST(req: Request) {
   // If there are no headers, error out
   if (!svix_id || !svix_timestamp || !svix_signature) {
     console.error('Missing svix headers');
-    return new Response('Bad Request: Missing svix headers', { status: 400 });
+    return res.status(400).send('Bad Request: Missing svix headers');
   }
 
   // Get the body
   let payload;
   try {
-    payload = await req.json();
+    payload = req.body;
   } catch (err) {
-    console.error('Error parsing JSON body:', err);
-    return new Response('Bad Request: Invalid JSON', { status: 400 });
+    console.error('Error parsing body:', err);
+    return res.status(400).send('Bad Request: Invalid body');
   }
   const body = JSON.stringify(payload)
 
@@ -52,7 +53,7 @@ export async function POST(req: Request) {
     }) as WebhookEvent
   } catch (err) {
     console.error('Error verifying webhook:', err);
-    return new Response('Bad Request: Invalid signature', { status: 400 });
+    return res.status(400).send('Bad Request: Invalid signature');
   }
 
   // Do something with the payload
@@ -62,5 +63,5 @@ export async function POST(req: Request) {
   console.log(`Webhook with an ID of ${id} and type of ${eventType}`)
   console.log('Webhook body:', body)
 
-  return new Response('Webhook received', { status: 200 })
+  return res.status(200).send('Webhook received')
 }
