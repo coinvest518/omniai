@@ -542,12 +542,6 @@ img {
 	span {
 		font-weight: 500;
 	}
-
-	&:hover,
-	&:focus {
-		border-color: var(--c-accent-primary);
-		color: var(--c-accent-primary);
-	}
 }
 
 .icon-button {

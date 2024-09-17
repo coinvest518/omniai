@@ -347,11 +347,9 @@ const AppUsers: React.FC = () => {
                             </div>
                         </nav>
                          </div>
-                         <div className="user-icon icon-button avatar">
+                         <div className="icon-button avatar">
                         <UserIcon />
-                        {isSignedIn && user && (
-                            <span>Welcome, {user.firstName || user.username}</span>
-                        )}
+                      
                     </div>
                          
                         <div className="menu-button">
@@ -509,7 +507,7 @@ const AppUsers: React.FC = () => {
                         <div className="card-grid">
 
                             {activeTab === 'user-prompts' && userPrompts.length > 0 ? (
-                                userPrompts.map((prompt, index) => (
+                                userPrompts.map((prompt: Prompt, index: any) => (
                                     <GlassmorphismCard
                                         key={index}
                                         imgSrc={prompt.imgSrc}
