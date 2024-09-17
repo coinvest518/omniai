@@ -346,35 +346,35 @@ const AppUsers: React.FC = () => {
                                 </div>
                             </div>
                         </nav>
-                         </div>
-                         <div className="icon-button avatar">
-                        <UserIcon />
-                      
                     </div>
-                         
-                        <div className="menu-button">
-                    <i className="ph-list-bold"></i>
-                    <span>Menu</span>
-                    <ul className="dropdown-menu">
-                        <li><Link href="./">Home</Link></li>
-                        <li><Link href="/">Omni.AI</Link></li>
-                        <li><Link href="/price/PricingPage">Plans</Link></li>
-                        <li className="dropdown">
-                            <span>Credits</span>
-                            <ul className="dropdown-content">
-                                {creditDetails.map((credit) => (
-                                    <li key={credit.priceId}>
-                                        <button onClick={() => handleCreditPurchase(credit.priceId)}>
-                                            {credit.credits} Credits
-                                        </button>
-                                    </li>
-                                ))}
-                            </ul>
-                        </li>
-                    </ul>
+                    <div className="icon-button" style={{ position: 'relative', zIndex: 10001 }}>
+                        <UserButton />
+                        <SignOutButton />
+                    </div>
+
+                    <div className="menu-button">
+                        <i className="ph-list-bold"></i>
+                        <span>Menu</span>
+                        <ul className="dropdown-menu">
+                            <li><Link href="./">Home</Link></li>
+                            <li><Link href="/">Omni.AI</Link></li>
+                            <li><Link href="/price/PricingPage">Plans</Link></li>
+                            <li className="dropdown">
+                                <span>Credits</span>
+                                <ul className="dropdown-content">
+                                    {creditDetails.map((credit) => (
+                                        <li key={credit.priceId}>
+                                            <button onClick={() => handleCreditPurchase(credit.priceId)}>
+                                                {credit.credits} Credits
+                                            </button>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
-            </div>
-        </header>
+            </header>
             <main className="main">
                 <div className="responsive-wrapper">
                     <div className="main-header">
