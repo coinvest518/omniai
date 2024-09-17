@@ -349,7 +349,6 @@ const AppUsers: React.FC = () => {
                     </div>
                     <div className="icon-button" style={{ position: 'relative', zIndex: 10001 }}>
                         <UserButton />
-                        <SignOutButton />
                     </div>
 
                     <div className="menu-button">
