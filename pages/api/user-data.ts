@@ -5,6 +5,8 @@ import { planDetails } from '../../lib/planDetails';
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { userId } = req.query;
 
+  console.log('Received userId:', userId);
+
   if (!userId) {
     return res.status(400).json({ message: 'User ID is required' });
   }

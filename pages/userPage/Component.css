@@ -21,7 +21,7 @@ a[href="https://coinvestinc.medium.com/"] {
 body {
 	line-height: 1.5;
 	min-height: 100vh;
-	font-family: "Be Vietnam Pro", sans-serif;
+	font-family: "Orbitron", sans-serif;
 	background-color: var(--c-background-secondary);
 	color: var(--c-text-primary);
 }
@@ -33,8 +33,7 @@ body {
 	right: 0;
 	bottom: 0;
 	background-color: rgba(0, 0, 0, 0.5);
-	z-index: 9999;
-	/* High z-index to ensure it's above other elements */
+	z-index: 9999; /* High z-index to ensure it's above other elements */
 }
 
 .modal-content {
@@ -45,12 +44,9 @@ body {
 	background-color: white;
 	padding: 20px;
 	border-radius: 8px;
-	z-index: 10000;
-	/* Even higher z-index to be above the overlay */
-	max-height: 80vh;
-	/* Limit height to 80% of viewport height */
-	overflow-y: auto;
-	/* Allow scrolling within the modal if content is too long */
+	z-index: 10000; /* Even higher z-index to be above the overlay */
+	max-height: 80vh; /* Limit height to 80% of viewport height */
+	overflow-y: auto; /* Allow scrolling within the modal if content is too long */
 }
 
 img {
@@ -114,8 +110,8 @@ img {
 }
 
 .card-icon {
-	width: 3rem;
-	height: 3rem;
+	width: 4rem;
+	height: 4rem;
 	display: inline-block;
 	text-align: center;
 	border-radius: 9999px;
@@ -124,7 +120,7 @@ img {
 
 .card-icon i {
 	color: white;
-	font-size: 5.25rem;
+	font-size: 6rem;
 }
 
 .content-header-cards .flex-none {
@@ -556,6 +552,7 @@ img {
 	border-radius: 8px;
 	color: var(--c-text-action);
 	transition: 0.15s ease;
+	z-index: 10001; /* Ensure this is higher than the modal overlay */
 
 	i {
 		font-size: 1.25em;
@@ -567,16 +564,7 @@ img {
 	}
 }
 
-.avatar {
-	display: flex;
-	align-items: center;
-	justify-content: inherit;
-	width: 44px;
-	height: 44px;
-	border-radius: 50%;
-	overflow: hidden; /* Ensure the image fits within the border */
 
-}
 
 .main {
 	padding-top: 2rem;

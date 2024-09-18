@@ -20,23 +20,7 @@ let nextConfig = {
     output: buildType,
     distDir: 'dist',
 
-    // Disable image optimization for exports
-    images: { 
-      remotePatterns: [
-        {
-          protocol: 'https',
-          hostname: 'img.clerk.com',
-          port: '',
-          pathname: '/**',
-        },
-        {
-          protocol: 'https',
-          hostname: 'lh3.googleusercontent.com',
-          port: '',
-          pathname: '/**',
-        },
-      ], 
-    },
+   
 
     // Optional: Change links `/me` -> `/me/` and emit `/me.html` -> `/me/index.html`
     // trailingSlash: true,

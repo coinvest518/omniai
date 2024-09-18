@@ -27,7 +27,7 @@ interface UserStore {
 // Create the user store
 export const useUserStore = create<UserStore>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       user: null,
       userPrompts: [],
       setUser: (user) => set({ user }),

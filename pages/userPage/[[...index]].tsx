@@ -12,7 +12,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { User } from 'lucide-react';
 import SignInModal from './SignInModal';
-import UserIcon from '../../src/common/components/UserIcon';
 
 
 
@@ -192,7 +191,9 @@ const AppUsers: React.FC = () => {
         if (isSignedIn && userId) {
             setIsLoading(true);
             try {
+                console.log('Fetching user data for userId:', userId);
                 const userDataResponse = await fetch(`/api/user-data?userId=${userId}`);
+                console.log('Response from API:', userDataResponse);
                 if (!userDataResponse.ok) {
                     throw new Error('Failed to fetch user data');
                 }
@@ -357,6 +358,7 @@ const AppUsers: React.FC = () => {
                         <ul className="dropdown-menu">
                             <li><Link href="./">Home</Link></li>
                             <li><Link href="/">Omni.AI</Link></li>
+                            <li><Link href="https://accounts.omniai.icu/sign-in">Sign Up</Link></li>
                             <li><Link href="/price/PricingPage">Plans</Link></li>
                             <li className="dropdown">
                                 <span>Credits</span>

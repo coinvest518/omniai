@@ -31,6 +31,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           email,
           clerkUserId: userId,
           credits: 10,
+          tokens: 100,
         },
       });
       console.log('User upserted successfully:', user);
