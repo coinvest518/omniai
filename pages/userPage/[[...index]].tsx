@@ -42,7 +42,7 @@ interface UserData {
 
 
 
-const AppUsers: React.FC = () => {
+const AppUsers: React.FC = (props) => {
     const { user } = useUser();
     const { isSignedIn, userId } = useAuth();
     const setUser = useUserStore(state => state.setUser);
@@ -61,31 +61,28 @@ const AppUsers: React.FC = () => {
     const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);
 
   
-    // Fetch user data on sign-in
     const handleSignIn = useCallback(async () => {
         if (isSignedIn && userId) {
             setIsLoading(true);
             try {
-                const userDataResponse = await fetch(`/api/user-data?userId=${userId}`);
-                if (!userDataResponse.ok) {
-                    throw new Error('Failed to fetch user data');
+                const response = await fetch('/api/create-user', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to create user');
                 }
-                const userData = await userDataResponse.json();
+
+                const userData = await response.json();
                 setUserData(userData);
                 setUser(userData);
 
                 // Store current values as previous values
                 setPrevCredits(userData.credits);
                 setPrevTokens(userData.tokens);
-
-                // Simulate changes for demonstration (remove in production)
-                setTimeout(() => {
-                    setUserData(prevData => ({
-                        ...prevData!,
-                        credits: prevData!.credits + 10,
-                        tokens: prevData!.tokens - 5
-                    }));
-                }, 5000);
             } catch (error) {
                 console.error('Error handling sign in:', error);
             } finally {
@@ -99,6 +96,7 @@ const AppUsers: React.FC = () => {
             handleSignIn();
         }
     }, [isSignedIn, userId, handleSignIn, refreshUserData]);
+
 
 
 
@@ -143,6 +141,23 @@ const fetchAndUpdateUserData = async (userId: string, promptId: string) => {
         alert(`Purchase failed: ${error instanceof Error ? error.message : 'An unknown error occurred'}`);
     }
 };
+
+
+const fetchUserPrompts = async (userId: string) => {
+    try {
+        const response = await fetch(`/api/user-prompts?userId=${userId}`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch user prompts');
+        }
+        const data = await response.json();
+        console.log('Fetched User Prompts:', data); // Log fetched data
+        return data;
+    } catch (error) {
+        console.error('Error fetching user prompts:', error);
+        return [];
+    }
+};
+
 
 
 useEffect(() => {
@@ -218,42 +233,6 @@ const handleCreditPurchase = async (priceId: string) => {
         console.error('Failed to create checkout session:', error);
     }
 };
-
-    
-
-const fetchUserPrompts = async (userId: string) => {
-    try {
-        const response = await fetch(`/api/user-prompts?userId=${userId}`);
-        if (!response.ok) {
-            throw new Error('Failed to fetch user prompts');
-        }
-        const data = await response.json();
-        console.log('Fetched User Prompts:', data); // Log fetched data
-        return data;
-    } catch (error) {
-        console.error('Error fetching user prompts:', error);
-        return [];
-    }
-};
-
-
-
-    useEffect(() => {
-        if (userData) {
-            fetchUserPrompts(userData.id).then(data => {
-                console.log('Setting User Prompts:', data); // Log state update
-                setUserPrompts(data);
-            });
-        }
-    }, [userData]);
-
-    // Handle checkout success
-    useEffect(() => {
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('checkout') === 'success') {
-            setRefreshUserData(prev => !prev);
-        }
-    }, []);
 
 
 
