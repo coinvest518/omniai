@@ -60,62 +60,50 @@ const AppUsers: React.FC = () => {
     const [showSignInModal, setShowSignInModal] = useState(false);
     const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);
 
+  
     // Fetch user data on sign-in
-   // Handle sign-in and user authentication
-const handleSignIn = useCallback(async () => {
-    if (!isSignedIn || !userId) {
-        return; // Early return if not signed in or no userId
-    }
-
-    try {
-        // Fetch user data to check existence
-        const userDataResponse = await fetch(`/api/user-data?userId=${userId}`);
-
-        if (!userDataResponse.ok) {
-            // User not found, so create a new user
-            if (userDataResponse.status === 404) {
-                const createUserResponse = await fetch('/api/create-user', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ userId }), // Send necessary data to create the user
-                });
-
-                if (!createUserResponse.ok) {
-                    throw new Error('Failed to create user');
+    const handleSignIn = useCallback(async () => {
+        if (isSignedIn && userId) {
+            setIsLoading(true);
+            try {
+                const userDataResponse = await fetch(`/api/user-data?userId=${userId}`);
+                if (!userDataResponse.ok) {
+                    throw new Error('Failed to fetch user data');
                 }
+                const userData = await userDataResponse.json();
+                setUserData(userData);
+                setUser(userData);
 
-                const createdUserData = await createUserResponse.json();
-                // Update local user data with the newly created user
-                setUserData(createdUserData);
-                setUser(createdUserData);
-            } else {
-                // Handle other errors
-                const errorData = await userDataResponse.json();
-                throw new Error(errorData.message || 'Failed to fetch user data');
+                // Store current values as previous values
+                setPrevCredits(userData.credits);
+                setPrevTokens(userData.tokens);
+
+                // Simulate changes for demonstration (remove in production)
+                setTimeout(() => {
+                    setUserData(prevData => ({
+                        ...prevData!,
+                        credits: prevData!.credits + 10,
+                        tokens: prevData!.tokens - 5
+                    }));
+                }, 5000);
+            } catch (error) {
+                console.error('Error handling sign in:', error);
+            } finally {
+                setIsLoading(false);
             }
-        } else {
-            // User exists, update local user data
-            const userData = await userDataResponse.json();
-            setUserData(userData);
-            setUser(userData);
         }
-    } catch (error) {
-        console.error('Error during sign-in:', error);
-        alert(`Sign-in failed: ${error instanceof Error ? error.message : 'An unknown error occurred'}`);
-    }
-}, [isSignedIn, userId, setUser]); // Added setUser to the dependency array
+    }, [isSignedIn, userId, setUser]);
 
-// Call handleSignIn when the component mounts or when isSignedIn changes
-useEffect(() => {
-    handleSignIn(); // Invoke the function to handle sign-in
-}, [isSignedIn, userId, handleSignIn]);
+    useEffect(() => {
+        if (isSignedIn && userId) {
+            handleSignIn();
+        }
+    }, [isSignedIn, userId, handleSignIn, refreshUserData]);
 
 
 
 
-       // Fetch the latest user data
+
 // Fetch the latest user data and update local state
 const fetchAndUpdateUserData = async (userId: string, promptId: string) => {
     try {
@@ -330,6 +318,7 @@ const fetchUserPrompts = async (userId: string) => {
     const handlePurchase = async (promptId: string) => {
         // Implement your purchase logic here
         console.log(`Purchasing prompt with ID: ${promptId}`);
+        await fetchAndUpdateUserData(userData?.id || '', promptId); // Call the function here
         // Add your purchase logic, e.g., API call to process the purchase
     };
 
