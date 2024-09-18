@@ -12,11 +12,9 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { User } from 'lucide-react';
 import SignInModal from './SignInModal';
+import { PrismaClient } from '@prisma/client'; // Add this line
 
-
-
-
-
+const prisma = new PrismaClient(); // Add this line
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY as string);
 
@@ -62,179 +60,194 @@ const AppUsers: React.FC = () => {
     const [showSignInModal, setShowSignInModal] = useState(false);
     const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);
 
+    // Fetch user data on sign-in
+   // Handle sign-in and user authentication
+const handleSignIn = useCallback(async () => {
+    if (!isSignedIn || !userId) {
+        return; // Early return if not signed in or no userId
+    }
+
+    try {
+        // Fetch user data to check existence
+        const userDataResponse = await fetch(`/api/user-data?userId=${userId}`);
+
+        if (!userDataResponse.ok) {
+            // User not found, so create a new user
+            if (userDataResponse.status === 404) {
+                const createUserResponse = await fetch('/api/create-user', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ userId }), // Send necessary data to create the user
+                });
+
+                if (!createUserResponse.ok) {
+                    throw new Error('Failed to create user');
+                }
+
+                const createdUserData = await createUserResponse.json();
+                // Update local user data with the newly created user
+                setUserData(createdUserData);
+                setUser(createdUserData);
+            } else {
+                // Handle other errors
+                const errorData = await userDataResponse.json();
+                throw new Error(errorData.message || 'Failed to fetch user data');
+            }
+        } else {
+            // User exists, update local user data
+            const userData = await userDataResponse.json();
+            setUserData(userData);
+            setUser(userData);
+        }
+    } catch (error) {
+        console.error('Error during sign-in:', error);
+        alert(`Sign-in failed: ${error instanceof Error ? error.message : 'An unknown error occurred'}`);
+    }
+}, [isSignedIn, userId, setUser]); // Added setUser to the dependency array
+
+// Call handleSignIn when the component mounts or when isSignedIn changes
+useEffect(() => {
+    handleSignIn(); // Invoke the function to handle sign-in
+}, [isSignedIn, userId, handleSignIn]);
 
 
 
-    const handleCardClick = (prompt: Prompt) => {
-        console.log('Selected Prompt:', prompt); // Log selected prompt
 
-        setSelectedPrompt(prompt);
-        setIsModalOpen(true);
-        setShowCopyButton(false); // Hide copy button initially
-    };
+       // Fetch the latest user data
+// Fetch the latest user data and update local state
+const fetchAndUpdateUserData = async (userId: string, promptId: string) => {
+    try {
+        // Fetch the latest user data
+        const userDataResponse = await fetch(`/api/user-data?userId=${userId}`);
+
+        if (!userDataResponse.ok) {
+            const errorData = await userDataResponse.json();
+            if (errorData.message === 'User not found') {
+                alert('User not found. Please sign in again.');
+                return; // Early return if the user is not found
+            }
+            throw new Error(errorData.message || 'Failed to fetch updated user data');
+        }
+
+        // Update local user data
+        const updatedUserData = await userDataResponse.json();
+
+        setUserData((prevData) => ({
+            ...prevData,
+            purchasedPromptIds: [...(prevData?.purchasedPromptIds || []), promptId],
+            id: updatedUserData.id || prevData?.id || '',
+            email: updatedUserData.email || prevData?.email || '',
+            firstName: updatedUserData.firstName || prevData?.firstName || null,
+            lastName: updatedUserData.lastName || prevData?.lastName || null,
+            planName: updatedUserData.planName || prevData?.planName || '',
+            credits: updatedUserData.credits || prevData?.credits || 0,
+            tokens: updatedUserData.tokens || prevData?.tokens || 0,
+            stripeSubscriptionId: updatedUserData.stripeSubscriptionId || prevData?.stripeSubscriptionId || null,
+            isPurchased: true,
+        }));
+
+        setShowCopyButton(true);
+        alert('Purchase successful!');
+    } catch (error) {
+        console.error('Error during purchase:', error);
+        alert(`Purchase failed: ${error instanceof Error ? error.message : 'An unknown error occurred'}`);
+    }
+};
 
 
+useEffect(() => {
+    if (userData && userData.id) {
+        fetchUserPrompts(userData.id).then(data => {
+            console.log('Setting User Prompts:', data); // Log state update
+            setUserPrompts(data);
+        });
+    }
+}, [userData]);
 
-    const handleCreditPurchase = async (priceId: string) => {
-        try {
-            const response = await fetch('/api/creditBuy', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ priceId }),
-            });
+useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('checkout') === 'success') {
+        setRefreshUserData(prev => !prev);
+    }
+}, []);
 
-            const { sessionId } = await response.json();
-            const stripe = await stripePromise;
 
-            // Redirect to Stripe for payment confirmation
-            if (stripe) {
-                const result = await stripe.redirectToCheckout({ sessionId });
-                if (result.error) {
-                    console.error('Failed to redirect to checkout:', result.error.message);
-                } else {
-                    // Fetch the latest user data after successful payment
-                    const userDataResponse = await fetch(`/api/user-data?userId=${userId}`);
+const handleCardClick = (prompt: Prompt) => {
+    console.log('Selected Prompt:', prompt); // Log selected prompt
+    setSelectedPrompt(prompt);
+    setIsModalOpen(true);
+    setShowCopyButton(false); // Hide copy button initially
+};
+
+
+const handleCreditPurchase = async (priceId: string) => {
+    try {
+        const response = await fetch('/api/creditBuy', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ priceId }),
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to create checkout session');
+        }
+
+        const { sessionId } = await response.json();
+        const stripe = await stripePromise;
+
+        // Redirect to Stripe for payment confirmation
+        if (stripe) {
+            const result = await stripe.redirectToCheckout({ sessionId });
+            if (result.error) {
+                console.error('Failed to redirect to checkout:', result.error.message);
+            } else {
+                // Fetch the latest user data after successful payment
+                if (userData) {
+                    const userDataResponse = await fetch(`/api/user-data?userId=${userData.id}`); // Define userDataResponse here
                     if (!userDataResponse.ok) {
                         throw new Error('Failed to fetch updated user data');
                     }
-                    const updatedUserData = await userDataResponse.json();
 
-                    // Update local user data
+                    const updatedUserData = await userDataResponse.json(); // Now this will work
                     setUserData(updatedUserData);
                     setUser(updatedUserData);
 
                     // Update previous values
                     setPrevCredits(updatedUserData.credits);
                     setPrevTokens(updatedUserData.tokens);
+                } else {
+                    throw new Error('User data is not available');
                 }
-            } else {
-                console.error('Stripe has not been initialized');
             }
-        } catch (error) {
-            console.error('Failed to create checkout session:', error);
+        } else {
+            console.error('Stripe has not been initialized');
         }
-    };
+    } catch (error) {
+        console.error('Failed to create checkout session:', error);
+    }
+};
 
-    const handlePurchase = async () => {
-        if (!selectedPrompt || !userData) {
-            alert('Please select a prompt and ensure you are signed in.');
-            return;
-        };
+    
 
-        const { creditPrice, promptTitle, imgSrc, category, promptData, id: promptId } = selectedPrompt;
-        const { id, credits } = userData;
-
-        // Check if the user has enough credits
-        if (credits < creditPrice) {
-            alert('Not enough credits to purchase this prompt.');
-            return;
+const fetchUserPrompts = async (userId: string) => {
+    try {
+        const response = await fetch(`/api/user-prompts?userId=${userId}`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch user prompts');
         }
+        const data = await response.json();
+        console.log('Fetched User Prompts:', data); // Log fetched data
+        return data;
+    } catch (error) {
+        console.error('Error fetching user prompts:', error);
+        return [];
+    }
+};
 
-        try {
-            const response = await fetch('/api/promptsBuy', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    userId: id,
-                    promptId: promptId?.toString() || 'No Prompts', // Convert ObjectId to string
-                    promptTitle,
-                    creditPrice,
-                    imgSrc,
-                    category,
-                    promptData,
-                }),
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Failed to complete purchase');
-            }
-
-            // Fetch the latest user data
-            const userDataResponse = await fetch(`/api/user-data?userId=${userId}`);
-            if (!userDataResponse.ok) {
-                const errorData = await userDataResponse.json();
-                if (errorData.message === 'User not found') {
-                    alert('User not found. Please sign in again.');
-                }
-                throw new Error(errorData.message || 'Failed to fetch updated user data');
-            }
-            // Update local user data
-            setUserData((prevData) => ({
-                ...prevData,
-                purchasedPromptIds: [...(prevData?.purchasedPromptIds || []), promptId],
-                id: prevData?.id || '',
-                email: prevData?.email || '',
-                firstName: prevData?.firstName || null,
-                lastName: prevData?.lastName || null,
-                planName: prevData?.planName || '',
-                credits: prevData?.credits || 0,
-                tokens: prevData?.tokens || 0,
-                stripeSubscriptionId: prevData?.stripeSubscriptionId || null,
-                isPurchased: true,
-            }));
-
-            setShowCopyButton(true);
-            alert('Purchase successful!');
-        } catch (error) {
-            console.error('Error during purchase:', error);
-            alert(`Purchase failed: ${error instanceof Error ? error.message : 'An unknown error occurred'}`);
-        }
-    };
-
-    // Fetch user data on sign-in
-    const handleSignIn = useCallback(async () => {
-        if (isSignedIn && userId) {
-            setIsLoading(true);
-            try {
-                console.log('Fetching user data for userId:', userId);
-                const userDataResponse = await fetch(`/api/user-data?userId=${userId}`);
-                console.log('Response from API:', userDataResponse);
-                if (!userDataResponse.ok) {
-                    throw new Error('Failed to fetch user data');
-                }
-                const userData = await userDataResponse.json();
-                setUserData(userData);
-                setUser(userData);
-
-
-                // Store current values as previous values
-                setPrevCredits(userData.credits);
-                setPrevTokens(userData.tokens);
-
-
-            } catch (error) {
-                console.error('Error handling sign in:', error);
-            } finally {
-                setIsLoading(false);
-            }
-        }
-    }, [isSignedIn, userId, setUser]);
-
-    useEffect(() => {
-        if (isSignedIn && userId) {
-            handleSignIn();
-        }
-    }, [isSignedIn, userId, handleSignIn, refreshUserData]);
-
-    const fetchUserPrompts = async (userId: string) => {
-        try {
-            const response = await fetch(`/api/user-prompts?userId=${userId}`);
-            if (!response.ok) {
-                throw new Error('Failed to fetch user prompts');
-            }
-            const data = await response.json();
-            console.log('Fetched User Prompts:', data); // Log fetched data
-            return data;
-        } catch (error) {
-            console.error('Error fetching user prompts:', error);
-            return [];
-        }
-    };
 
 
     useEffect(() => {
@@ -314,6 +327,11 @@ const AppUsers: React.FC = () => {
         }
     };
 
+    const handlePurchase = async (promptId: string) => {
+        // Implement your purchase logic here
+        console.log(`Purchasing prompt with ID: ${promptId}`);
+        // Add your purchase logic, e.g., API call to process the purchase
+    };
 
     return (
         <div>
@@ -545,7 +563,7 @@ const AppUsers: React.FC = () => {
                                     creditPrice={selectedPrompt.creditPrice}
                                     description={selectedPrompt.description}
                                     promptData={selectedPrompt.promptData}
-                                    onPurchase={handlePurchase}
+                                    onPurchase={() => handlePurchase(selectedPrompt.id || '')} // Provide a default value
                                     showCopyButton={showCopyButton}
                                     isPurchased={userData?.purchasedPromptIds?.includes(selectedPrompt.id) || false}
                                 />
