@@ -12,9 +12,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
+    const startTime = Date.now(); // Start timing
     const user = await prisma.user.findUnique({
       where: { clerkUserId: userId as string },
     });
+    const duration = Date.now() - startTime; // Calculate duration
+    console.log(`Database query duration: ${duration}ms`);
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
