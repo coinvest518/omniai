@@ -40,11 +40,11 @@ const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose }) => {
                 <h2>Welcome to Omni.Ai</h2>
                 <p>Please sign in or sign up to access the app.</p>
                 <div className="sign-in-buttons">
-                    <Link href="https://wise-gorilla-64.accounts.dev/sign-in" className="button">
+                    <Link href="https://accounts.omniai.icu/sign-in" className="button">
                         <i className="ph-lightning-bold"></i>
                         <span>Sign In</span>
                     </Link>
-                    <Link href="https://wise-gorilla-64.accounts.dev/sign-up" className="button">
+                    <Link href="https://accounts.omniai.icu/sign-up" className="button">
                         <i className="ph-bell-bold"></i>
                         <span>Sign Up</span>
                     </Link>

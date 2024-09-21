@@ -276,8 +276,9 @@ const handleCreditPurchase = async (priceId: string) => {
                     <div className="header-navigation">
                         <nav className="header-navigation-as">
                             <Link href="./" style={{ textDecoration: 'none' }}> Home </Link>
+                            <Link href="./" style={{ textDecoration: 'none' }}> Home </Link>
 
-                            <Link href="/" style={{ textDecoration: 'none' }}> Omni.AI </Link>
+                            <Link href="https://accounts.omniai.icu/sign-in" style={{ textDecoration: 'none' }}> Sign Up </Link>
                             <Link href="/price/PricingPage" style={{ textDecoration: 'none' }}> Plans </Link>
                             <div className="dropdown">
                                 <div className="credits-label">Credits</div>
@@ -311,7 +312,9 @@ const handleCreditPurchase = async (priceId: string) => {
                         <ul className="dropdown-menu">
                             <li><Link href="./">Home</Link></li>
                             <li><Link href="/">Omni.AI</Link></li>
-                            <li><Link href="https://wise-gorilla-64.accounts.dev/sign-in">Sign Up</Link></li>
+                            <li>
+                                <Link href="https://accounts.omniai.icu/sign-in">Sign Up</Link>
+                            </li>
                             <li><Link href="/price/PricingPage">Plans</Link></li>
                             <li className="dropdown">
                                 <span>Credits</span>
