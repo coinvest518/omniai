@@ -1,0 +1,45 @@
+.userButtonWrapper {
+    z-index: 10001;
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  
+  .userButtonWrapper :global(.cl-userButtonBox) {
+    width: 44px;
+    height: 44px;
+  }
+  
+  .userButtonWrapper :global(.cl-userButtonTrigger) {
+    width: 100%;
+    height: 100%;
+  }
+  
+  .userButtonWrapper :global(.cl-userButtonAvatarBox) {
+    width: 100%;
+    height: 100%;
+    border-radius: 15px;
+    overflow: hidden;
+  }
+  
+  .signInButton {
+    font: inherit;
+    color: var(--c-text-action);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 1em;
+    height: 40px;
+    border-radius: 8px;
+    line-height: 1;
+    border: 2px solid var(--c-border-primary);
+    font-size: 0.875rem;
+    transition: 0.15s ease;
+    background-color: var(--c-background-primary);
+  }
+  
+  .signInButton:hover {
+    border-color: var(--c-accent-primary);
+    color: var(--c-accent-primary);
+  }

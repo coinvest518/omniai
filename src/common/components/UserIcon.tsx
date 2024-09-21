@@ -11,10 +11,12 @@ const UserIcon: React.FC = () => {
   if (profileImageUrl) {
     return (
       <Image
-        src={profileImageUrl}
-        alt="User Icon"
-        style={{ width: '44px', height: '44px', borderRadius: '50%' }}
-      />
+      src={profileImageUrl}
+      alt="User Icon"
+      width={44} // Specify width here
+      height={44} // Specify height here
+      style={{ borderRadius: '50%' }}
+    />
     );
   }
   return <AccountCircle />;

@@ -2,7 +2,9 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { PrismaClient } from '@prisma/client';
 import { MongoClient } from 'mongodb';
 
-const prisma = new PrismaClient();
+
+const prisma = new PrismaClient()
+
 const mongoUri = process.env.MONGODB_URI || '';
 if (!mongoUri) {
     throw new Error('MONGODB_URI environment variable is not set');
@@ -18,7 +20,9 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         const mongoPrompts = await mongoDb.collection('prompts').find({ userId: req.query.userId }).toArray();
 
         const prismaPrompts = await prisma.userPrompt.findMany({
-            where: { userId: userId ? { equals: userId } : undefined },
+            where: { 
+                userId: userId ? { equals: userId } : undefined 
+            },
         });
 
         const combinedPrompts = [...mongoPrompts, ...prismaPrompts];

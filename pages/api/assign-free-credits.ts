@@ -17,31 +17,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(401).json({ message: 'Unauthorized' });
     }
 
-    const { email } = req.body;
+    const { credits = 10, tokens = 100 } = req.body; // Default values if not provided
 
-    if (typeof email !== 'string' || !email.includes('@')) {
-      return res.status(400).json({ message: 'Invalid email format' });
+    if (typeof credits !== 'number' || typeof tokens !== 'number') {
+      return res.status(400).json({ message: 'Invalid credits or tokens format' });
     }
 
     try {
-      const user = await prisma.user.upsert({
+      const user = await prisma.user.update({
         where: { clerkUserId: userId },
-        update: { email },
-        create: {
-          email,
-          clerkUserId: userId,
-          credits: 10,
-          tokens: 100,
+        data: {
+          credits: { increment: credits },
+          tokens: { increment: tokens },
         },
       });
-      console.log('User upserted successfully:', user);
+
+      console.log('Credits and tokens assigned successfully:', user);
       return res.status(200).json(user);
     } catch (prismaError) {
       console.error('Prisma operation failed:', prismaError);
       return res.status(500).json({ message: 'Database operation failed' });
     }
   } catch (error: unknown) {
-    console.error('Error handling user:', error);
+    console.error('Error handling credit and token assignment:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
     return res.status(500).json({ message: 'Internal Server Error', error: errorMessage });
   }

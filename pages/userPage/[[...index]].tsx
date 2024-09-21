@@ -10,11 +10,9 @@ import { loadStripe } from '@stripe/stripe-js';
 import { creditDetails } from '../../lib/creditDetails';
 import Image from 'next/image';
 import Link from 'next/link';
-import { User } from 'lucide-react';
 import SignInModal from './SignInModal';
-import { PrismaClient } from '@prisma/client'; // Add this line
+import styles from './AppUsers.module.css';
 
-const prisma = new PrismaClient(); // Add this line
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY as string);
 
@@ -61,86 +59,74 @@ const AppUsers: React.FC = (props) => {
     const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);
 
   
-    const handleSignIn = useCallback(async () => {
+    const fetchUserData = useCallback(async () => {
         if (isSignedIn && userId) {
             setIsLoading(true);
             try {
-                const response = await fetch('/api/create-user', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                });
-
-                if (!response.ok) {
-                    throw new Error('Failed to create user');
+                const userDataResponse = await fetch(`/api/user-data?userId=${userId}`);
+                if (!userDataResponse.ok) {
+                    throw new Error('Failed to fetch user data');
                 }
-
-                const userData = await response.json();
+                const userData = await userDataResponse.json();
                 setUserData(userData);
                 setUser(userData);
 
-                // Store current values as previous values
                 setPrevCredits(userData.credits);
                 setPrevTokens(userData.tokens);
             } catch (error) {
-                console.error('Error handling sign in:', error);
+                console.error('Error fetching user data:', error);
+                setError('Failed to fetch user data. Please try again.');
             } finally {
                 setIsLoading(false);
             }
         }
     }, [isSignedIn, userId, setUser]);
-
+    
     useEffect(() => {
-        if (isSignedIn && userId) {
-            handleSignIn();
-        }
-    }, [isSignedIn, userId, handleSignIn, refreshUserData]);
+        fetchUserData();
+    }, [fetchUserData, refreshUserData]);
+
+        useEffect(() => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const signinSuccess = urlParams.get('signin') === 'success';
+            setShowSignInModal(!isSignedIn && !signinSuccess);
+          }, [isSignedIn]);
+          
+        
+    
+        const closeSignInModal = () => {
+            setShowSignInModal(false);
+        };
 
 
 
 
 
-
-// Fetch the latest user data and update local state
-const fetchAndUpdateUserData = async (userId: string, promptId: string) => {
-    try {
-        // Fetch the latest user data
-        const userDataResponse = await fetch(`/api/user-data?userId=${userId}`);
-
-        if (!userDataResponse.ok) {
-            const errorData = await userDataResponse.json();
-            if (errorData.message === 'User not found') {
-                alert('User not found. Please sign in again.');
-                return; // Early return if the user is not found
+        const fetchAndUpdateUserData = async (userId: string, promptId: string) => {
+            try {
+                const userDataResponse = await fetch(`/api/user-data?userId=${userId}`);
+                if (!userDataResponse.ok) {
+                    const errorData = await userDataResponse.json();
+                    if (errorData.message === 'User not found') {
+                        alert('User not found. Please sign in again.');
+                        return;
+                    }
+                    throw new Error(errorData.message || 'Failed to fetch updated user data');
+                }
+                const updatedUserData = await userDataResponse.json();
+                setUserData(prevData => ({
+                    ...prevData,
+                    ...updatedUserData,
+                    purchasedPromptIds: [...(prevData?.purchasedPromptIds || []), promptId],
+                    isPurchased: true,
+                }));
+                setShowCopyButton(true);
+                alert('Purchase successful!');
+            } catch (error) {
+                console.error('Error during purchase:', error);
+                alert(`Purchase failed: ${error instanceof Error ? error.message : 'An unknown error occurred'}`);
             }
-            throw new Error(errorData.message || 'Failed to fetch updated user data');
-        }
-
-        // Update local user data
-        const updatedUserData = await userDataResponse.json();
-
-        setUserData((prevData) => ({
-            ...prevData,
-            purchasedPromptIds: [...(prevData?.purchasedPromptIds || []), promptId],
-            id: updatedUserData.id || prevData?.id || '',
-            email: updatedUserData.email || prevData?.email || '',
-            firstName: updatedUserData.firstName || prevData?.firstName || null,
-            lastName: updatedUserData.lastName || prevData?.lastName || null,
-            planName: updatedUserData.planName || prevData?.planName || '',
-            credits: updatedUserData.credits || prevData?.credits || 0,
-            tokens: updatedUserData.tokens || prevData?.tokens || 0,
-            stripeSubscriptionId: updatedUserData.stripeSubscriptionId || prevData?.stripeSubscriptionId || null,
-            isPurchased: true,
-        }));
-
-        setShowCopyButton(true);
-        alert('Purchase successful!');
-    } catch (error) {
-        console.error('Error during purchase:', error);
-        alert(`Purchase failed: ${error instanceof Error ? error.message : 'An unknown error occurred'}`);
-    }
-};
+        };
 
 
 const fetchUserPrompts = async (userId: string) => {
@@ -208,20 +194,8 @@ const handleCreditPurchase = async (priceId: string) => {
             if (result.error) {
                 console.error('Failed to redirect to checkout:', result.error.message);
             } else {
-                // Fetch the latest user data after successful payment
                 if (userData) {
-                    const userDataResponse = await fetch(`/api/user-data?userId=${userData.id}`); // Define userDataResponse here
-                    if (!userDataResponse.ok) {
-                        throw new Error('Failed to fetch updated user data');
-                    }
-
-                    const updatedUserData = await userDataResponse.json(); // Now this will work
-                    setUserData(updatedUserData);
-                    setUser(updatedUserData);
-
-                    // Update previous values
-                    setPrevCredits(updatedUserData.credits);
-                    setPrevTokens(updatedUserData.tokens);
+                    fetchUserData();
                 } else {
                     throw new Error('User data is not available');
                 }
@@ -233,7 +207,6 @@ const handleCreditPurchase = async (priceId: string) => {
         console.error('Failed to create checkout session:', error);
     }
 };
-
 
 
     const calculatePercentageChange = (current: number, previous: number | null) => {
@@ -254,34 +227,22 @@ const handleCreditPurchase = async (priceId: string) => {
             return prompt.category === activeTab;
         });
 
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            if (!isSignedIn) {
-                setShowSignInModal(true);
-            }
-        }, 5000); // 5000 milliseconds = 5 seconds
-
-        return () => clearTimeout(timer);
-    }, [isSignedIn]);
-
-    const closeSignInModal = () => {
-        setShowSignInModal(false);
-    };
+  
     const toggleMenuModal = () => {
         setShowSignInModal(true);
     };
-
     const handleFreeCredits = async () => {
         try {
-            const response = await fetch('/api/create-user', {
+            const response = await fetch('/api/assign-free-credits', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
+                body: JSON.stringify({ userId: userData?.id }),
             });
 
             if (!response.ok) {
-                throw new Error('Failed to create user and assign credits');
+                throw new Error('Failed to assign free credits');
             }
 
             const updatedUserData = await response.json();
@@ -315,7 +276,6 @@ const handleCreditPurchase = async (priceId: string) => {
                     <div className="header-navigation">
                         <nav className="header-navigation-as">
                             <Link href="./" style={{ textDecoration: 'none' }}> Home </Link>
-                            <Link href="https://accounts.omniai.icu/sign-in" style={{ textDecoration: 'none' }}> Sign In </Link>
 
                             <Link href="/" style={{ textDecoration: 'none' }}> Omni.AI </Link>
                             <Link href="/price/PricingPage" style={{ textDecoration: 'none' }}> Plans </Link>
@@ -334,8 +294,15 @@ const handleCreditPurchase = async (priceId: string) => {
                             </div>
                         </nav>
                     </div>
-                    <div className="icon-button" style={{ position: 'relative', zIndex: 10001 }}>
-                        <UserButton />
+                    <div className={styles.userButtonWrapper}>
+                        <SignedIn>
+                            <UserButton />
+                        </SignedIn>
+                        <SignedOut>
+                            <SignInButton mode="modal">
+                                <button className={styles.signInButton}>Sign In</button>
+                            </SignInButton>
+                        </SignedOut>
                     </div>
 
                     <div className="menu-button">
@@ -344,7 +311,7 @@ const handleCreditPurchase = async (priceId: string) => {
                         <ul className="dropdown-menu">
                             <li><Link href="./">Home</Link></li>
                             <li><Link href="/">Omni.AI</Link></li>
-                            <li><Link href="https://accounts.omniai.icu/sign-in">Sign Up</Link></li>
+                            <li><Link href="https://wise-gorilla-64.accounts.dev/sign-in">Sign Up</Link></li>
                             <li><Link href="/price/PricingPage">Plans</Link></li>
                             <li className="dropdown">
                                 <span>Credits</span>

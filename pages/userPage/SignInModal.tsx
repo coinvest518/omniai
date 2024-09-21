@@ -4,15 +4,18 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
-
+import { useAuth } from '@clerk/nextjs'; // Import useAuth
 
 interface SignInModalProps {
-    isOpen: boolean;
+    isOpen: boolean; // Add isOpen here
     onClose: () => void;
 }
 
 const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose }) => {
-    if (!isOpen) return null;
+    const { isSignedIn } = useAuth(); // Get isSignedIn from useAuth
+
+    // Only render the modal if the user is NOT signed in
+    if (!isOpen) return null; 
 
     const modalVariants = {
         hidden: { opacity: 0, scale: 0.8 },
@@ -37,11 +40,11 @@ const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose }) => {
                 <h2>Welcome to Omni.Ai</h2>
                 <p>Please sign in or sign up to access the app.</p>
                 <div className="sign-in-buttons">
-                    <Link href="https://accounts.omniai.icu/sign-in" className="button">
+                    <Link href="https://wise-gorilla-64.accounts.dev/sign-in" className="button">
                         <i className="ph-lightning-bold"></i>
                         <span>Sign In</span>
                     </Link>
-                    <Link href="https://accounts.omniai.icu/sign-up" className="button">
+                    <Link href="https://wise-gorilla-64.accounts.dev/sign-up" className="button">
                         <i className="ph-bell-bold"></i>
                         <span>Sign Up</span>
                     </Link>
@@ -54,7 +57,7 @@ const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose }) => {
                     whileTap="tap"
                 >
                     <FontAwesomeIcon icon={faTimes} />
-                    </motion.button>
+                </motion.button>
             </motion.div>
         </div>
     );

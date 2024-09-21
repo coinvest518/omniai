@@ -15,15 +15,19 @@ buildType && console.log(`   🧠 omni-AI: building for ${buildType}...\n`);
 let nextConfig = {
   reactStrictMode: true,
 
+  images: { 
+    domains: [
+      'img.clerk.com',
+      'lh3.googleusercontent.com',
+      'example.com', // Add your new domain here
+    ], 
+  },
+
   // Static HTML export settings
   ...buildType && {
     output: buildType,
     distDir: 'dist',
 
-   
-
-    // Optional: Change links `/me` -> `/me/` and emit `/me.html` -> `/me/index.html`
-    // trailingSlash: true,
   },
 
   // Experimental features

@@ -12,13 +12,16 @@
 	--c-background-quaternary: #e9ecf4;
 }
 
+img[src*="img.clerk.com"] {
+	width: 100px; /* or any other value that works for your use case */
+  }
 a[href="https://coinvestinc.medium.com/"] {
 	color: inherit;
 	font-weight: normal;
 	text-decoration: none;
 }
 
-body {
+.body {
 	line-height: 1.5;
 	min-height: 100vh;
 	font-family: "VietnamPro", sans-serif;
@@ -539,6 +542,7 @@ img {
 		font-weight: 500;
 	}
 }
+
 
 .icon-button {
 	font: inherit;

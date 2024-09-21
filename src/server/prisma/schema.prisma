@@ -43,11 +43,10 @@ model User {
   creditPurchases        CreditPurchase[]
   purchasedPromptIds     String[] 
 
-
 }
 
 model Plan {
-  id          String   @id @default(uuid()) @map("_id")
+  id          String   @id @default(uuid()) @map("_id") @db.ObjectId
   users       User[]
   priceId     String   @unique
   planName    String?
@@ -74,7 +73,7 @@ model UserPrompt {
   imgSrc      String?
   creditPrice Int?
   category    String?
-  userId      String? 
+  userId      String?      @db.ObjectId
   clerkUserId String?     
   user        User?        @relation(fields: [userId], references: [id])
   promptTitle String?      
