@@ -4,6 +4,7 @@ import { WebhookEvent } from '@clerk/nextjs/server';
 import prisma from 'lib/prisma';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  console.log('Webhook received');
   const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET;
 
   if (!WEBHOOK_SECRET) {
@@ -32,11 +33,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   // Verify the payload with the headers
   try {
+    console.log('Verifying webhook'); // Log before verification
+
     evt = wh.verify(body, {
       'svix-id': svix_id,
       'svix-timestamp': svix_timestamp,
       'svix-signature': svix_signature
     }) as WebhookEvent;
+    console.log('Webhook verified'); // Log after successful verification
+
   } catch (err) {
     console.error('Error verifying webhook:', err);
     return res.status(400).json({ error: 'Error occurred during webhook verification' });
@@ -46,6 +51,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   // Process the webhook event based on its type
   if (eventType === 'user.created') {
+    console.log('Processing user.created event');
     const { id, email_addresses, first_name, last_name } = evt.data;
 
     // Ensure required data fields are present
