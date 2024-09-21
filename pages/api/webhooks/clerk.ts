@@ -1,3 +1,4 @@
+// pages/api/webhooks/clerk.ts
 import { Webhook } from 'svix';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { WebhookEvent } from '@clerk/nextjs/server';
@@ -8,9 +9,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET;
 
   if (!WEBHOOK_SECRET) {
-    throw new Error(
-      'Please add CLERK_WEBHOOK_SECRET from Clerk Dashboard to .env or .env.local'
-    );
+    return res.status(500).json({ error: 'Please add CLERK_WEBHOOK_SECRET from Clerk Dashboard to .env or .env.local' });
   }
 
   // Get the headers
@@ -21,6 +20,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   // If there are no headers, error out
   if (!svix_id || !svix_timestamp || !svix_signature) {
     return res.status(400).json({ error: 'Error occurred -- missing svix headers' });
+  }
+
+  // Check for authentication tokens (if required)
+  const sessionToken = req.headers['authorization']?.split(' ')[1]; // Assuming Bearer token
+  if (!sessionToken) {
+    return res.status(401).json({ error: 'Unauthorized -- missing session token' });
   }
 
   // Get the body
