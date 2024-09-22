@@ -1,4 +1,3 @@
-// pages/api/webhooks/clerk.ts
 import { Webhook } from 'svix';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { WebhookEvent } from '@clerk/nextjs/server';
@@ -6,6 +5,12 @@ import prisma from 'lib/prisma';
 import { enqueueUserCreation } from 'lib/queue'; // Import the enqueue function
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method !== 'POST') {
+    // Return 405 for any other methods
+    res.setHeader('Allow', ['POST']);
+    return res.status(405).end(`Method ${req.method} Not Allowed`);
+  }
+
   console.log('Webhook received');
   const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET;
 
@@ -30,7 +35,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     evt = wh.verify(body, {
       'svix-id': svix_id,
       'svix-timestamp': svix_timestamp,
-      'svix-signature': svix_signature
+      'svix-signature': svix_signature,
     }) as WebhookEvent;
     console.log('Webhook verified');
   } catch (err) {
