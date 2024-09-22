@@ -22,12 +22,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(400).json({ error: 'Error occurred -- missing svix headers' });
   }
 
-  // Check for authentication tokens (if required)
-  const sessionToken = req.headers['authorization']?.split(' ')[1]; // Assuming Bearer token
-  if (!sessionToken) {
-    return res.status(401).json({ error: 'Unauthorized -- missing session token' });
-  }
-
   // Get the body
   const body = JSON.stringify(req.body);
 
@@ -38,15 +32,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   // Verify the payload with the headers
   try {
-    console.log('Verifying webhook'); // Log before verification
-
+    console.log('Verifying webhook');
     evt = wh.verify(body, {
       'svix-id': svix_id,
       'svix-timestamp': svix_timestamp,
       'svix-signature': svix_signature
     }) as WebhookEvent;
-    console.log('Webhook verified'); // Log after successful verification
-
+    console.log('Webhook verified');
   } catch (err) {
     console.error('Error verifying webhook:', err);
     return res.status(400).json({ error: 'Error occurred during webhook verification' });
@@ -93,6 +85,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
   }
 
-  // Return success response if event type is not 'user.created'
-  return res.status(200).json({ message: 'Webhook processed successfully' });
+  // Return 204 No Content for unsupported event types
+  return res.status(204).end();
 }
