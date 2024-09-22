@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import Stripe from 'stripe';
 import { PrismaClient } from '@prisma/client';
-import { planDetails } from '../../../../lib/planDetails'; // Adjust the path as per your actual file structure
+import { planDetails } from '../../../lib/planDetails'; // Adjust the path as per your actual file structure
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
   apiVersion: '2024-06-20',

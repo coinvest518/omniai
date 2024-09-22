@@ -1,4 +1,4 @@
-import create from 'zustand';
+import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { Prompt } from '../../../data/promptsData';
 
@@ -7,7 +7,7 @@ interface User {
   id: string;
   tokens: number;
   credits: number;
-  userPrompts: Prompt[];
+  userPrompts: Prompt[]
   setUserPrompts: (prompts: Prompt[]) => void;
 
 }

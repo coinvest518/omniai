@@ -2,8 +2,8 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import Stripe from 'stripe';
 import { PrismaClient } from '@prisma/client';
 import { getAuth } from '@clerk/nextjs/server';
-import { planDetails } from '../../../lib/planDetails';
-import { creditDetails } from '../../../lib/creditDetails'; // Assuming you have a similar file for credit details
+import { planDetails } from '../../lib/planDetails';
+import { creditDetails } from '../../lib/creditDetails'; // Assuming you have a similar file for credit details
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2024-06-20',

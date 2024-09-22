@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import prisma from '../../../lib/prisma';
-import { planDetails } from '../../../lib/planDetails';
+import prisma from '../../lib/prisma';
+import { planDetails } from '../../lib/planDetails';
 
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
