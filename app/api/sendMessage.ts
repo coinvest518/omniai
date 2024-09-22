@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { PrismaClient } from '@prisma/client';
-import tokenMiddleware from '../../middlewares/tokensMiddleware';
+import tokenMiddleware from '../../../middlewares/tokensMiddleware';
 import { countModelTokens } from 'src/common/util/token-counter';
 import type { DLLM } from '~/modules/llms/store-llms';
 import { useUserStore } from '~/common/state/userStore';
