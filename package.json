@@ -51,6 +51,7 @@
     "@vercel/speed-insights": "^1.0.10",
     "audit": "^0.0.6",
     "browser-fs-access": "^0.35.0",
+    "bull": "^4.16.3",
     "class-variance-authority": "^0.7.0",
     "dexie": "^4.0.4",
     "dotenv": "^16.4.5",
