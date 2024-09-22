@@ -26,11 +26,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   let evt: WebhookEvent;
 
   try {
+    console.log('Verifying webhook');
     evt = wh.verify(body, {
       'svix-id': svix_id,
       'svix-timestamp': svix_timestamp,
       'svix-signature': svix_signature
     }) as WebhookEvent;
+    console.log('Webhook verified');
   } catch (err) {
     console.error('Error verifying webhook:', err);
     return res.status(400).json({ error: 'Error occurred during webhook verification' });
@@ -52,11 +54,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ error: 'Error occurred -- missing email' });
     }
 
-    // Enqueue user creation for asynchronous processing
-    await enqueueUserCreation({ id, email, first_name, last_name });
+    try {
+      // Check if user already exists
+      let user = await prisma.user.findUnique({ where: { clerkUserId: id } });
 
-    return res.status(202).json({ message: 'User creation in progress' });
+      if (!user) {
+        // Create new user if not found
+        user = await prisma.user.create({
+          data: {
+            clerkUserId: id,
+            email: email,
+            firstName: first_name || undefined,
+            lastName: last_name || undefined,
+          },
+        });
+      }
+
+      return res.status(200).json({ user });
+    } catch (error) {
+      console.error('Error processing user:', error);
+      return res.status(500).json({ error: 'An error occurred while processing the user' });
+    }
   }
 
-  return res.status(204).end();
+  // Return success response if event type is not 'user.created'
+  return res.status(200).json({ message: 'Webhook processed successfully' });
 }
