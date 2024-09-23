@@ -339,7 +339,7 @@ const handleCreditPurchase = async (priceId: string) => {
 
                     <div className="horizontal-tabs">
                         <div className="horizontal-tab-item">
-                            <Link href="#" onClick={handleFreeCredits} style={{ textDecoration: 'none' }}>10 Free Credits</Link>
+                            <Link href="#" onClick={handleFreeCredits} style={{ textDecoration: 'none' }}>100 Free Credits</Link>
                         </div>
                         <div className="horizontal-tab-item">
                             <Link href="/" style={{ textDecoration: 'none' }}>Omni Chat</Link>
@@ -381,7 +381,7 @@ const handleCreditPurchase = async (priceId: string) => {
                             <div className="button">
                                 <i className="ph-plus-bold"></i>
                                 <Link style={{ textDecoration: 'none' }} href="https://gleam.io/1Pm9S/omni-credits-giveaway" rel="nofollow">
-                                    <p>Omni Credits Giveaway</p>
+                                    <p>Omni 1000 Credits Giveaway</p>
                                 </Link>
                                 <script type="text/javascript" src="https://widget.gleamjs.io/e.js" async></script>
                             </div>

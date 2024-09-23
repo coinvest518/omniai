@@ -17,7 +17,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(401).json({ message: 'Unauthorized' });
     }
 
-    const { credits = 10, tokens = 100 } = req.body; // Default values if not provided
+    const { credits = 100, tokens = 100 } = req.body; // Default values if not provided
 
     if (typeof credits !== 'number' || typeof tokens !== 'number') {
       return res.status(400).json({ message: 'Invalid credits or tokens format' });
