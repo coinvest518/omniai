@@ -272,7 +272,7 @@ export const navItems: {
       type: 'extLink',
       name: 'Product Hunt',
       icon: ProductHuntIcon,
-      href: 'https://www.producthunt.com/posts/omni-ai-multi-ai-chat-interface?embed=true&utm_source=badge-featured&utm_medium=badge&utm_souce=badge-omni&#0045;ai&#0045;multi&#0045;ai&#0045;chat&#0045;interface',
+      href: 'https://www.producthunt.com/products/omni-ai-multi-ai-chat-interface',
     },
   ],
 
