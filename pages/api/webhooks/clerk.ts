@@ -1,12 +1,10 @@
 import { Webhook } from 'svix';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { WebhookEvent } from '@clerk/nextjs/server';
-import  prisma  from '../../../lib/prisma';
-import { enqueueUserCreation } from 'lib/queue'; // Import the enqueue function
+import prisma from '../../../lib/prisma';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
-    // Return 405 for any other methods
     res.setHeader('Allow', ['POST']);
     return res.status(405).end(`Method ${req.method} Not Allowed`);
   }
@@ -15,7 +13,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET;
 
   if (!WEBHOOK_SECRET) {
-    return res.status(500).json({ error: 'Please add CLERK_WEBHOOK_SECRET from Clerk Dashboard to .env or .env.local' });
+    return res.status(500).json({ error: 'Please add CLERK_WEBHOOK_SECRET to .env' });
   }
 
   const svix_id = req.headers['svix-id'] as string;
@@ -23,7 +21,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const svix_signature = req.headers['svix-signature'] as string;
 
   if (!svix_id || !svix_timestamp || !svix_signature) {
-    return res.status(400).json({ error: 'Error occurred -- missing svix headers' });
+    return res.status(400).json({ error: 'Missing svix headers' });
   }
 
   const body = JSON.stringify(req.body);
@@ -40,31 +38,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.log('Webhook verified');
   } catch (err) {
     console.error('Error verifying webhook:', err);
-    return res.status(400).json({ error: 'Error occurred during webhook verification' });
+    return res.status(400).json({ error: 'Webhook verification failed' });
   }
 
-  const eventType = evt.type;
-
-  if (eventType === 'user.created') {
+  if (evt.type === 'user.created') {
     console.log('Processing user.created event');
     const { id, email_addresses, first_name, last_name } = evt.data;
 
     if (!id || !email_addresses) {
-      return res.status(400).json({ error: 'Error occurred -- missing data' });
+      return res.status(400).json({ error: 'Missing user data' });
     }
 
-    const email = email_addresses[0].email_address || ''; // Provide a fallback value
+    const email = email_addresses[0].email_address || '';
 
     if (!email) {
-      return res.status(400).json({ error: 'Error occurred -- missing email' });
+      return res.status(400).json({ error: 'Missing email' });
     }
 
     try {
-      // Check if user already exists
+      // Directly create the user in Prisma
       let user = await prisma.user.findUnique({ where: { clerkUserId: id } });
 
       if (!user) {
-        // Create new user if not found
+        console.log('Creating new user:', { clerkUserId: id, email, firstName: first_name, lastName: last_name });
         user = await prisma.user.create({
           data: {
             clerkUserId: id,
@@ -73,6 +69,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             lastName: last_name || undefined,
           },
         });
+        console.log('User created successfully:', user);
+      } else {
+        console.log('User already exists:', user);
       }
 
       return res.status(200).json({ user });
@@ -82,6 +81,5 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
   }
 
-  // Return success response if event type is not 'user.created'
   return res.status(200).json({ message: 'Webhook processed successfully' });
 }
