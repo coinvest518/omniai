@@ -33,6 +33,7 @@ model User {
   stripeSessionId        String?
   stripeCurrentPeriodEnd DateTime?
   credits                Int          @default(10)
+  lastCreditsAssigned    DateTime?
   createdAt              DateTime     @default(now())
   updatedAt              DateTime     @updatedAt
   tokens                 Int          @default(0)
