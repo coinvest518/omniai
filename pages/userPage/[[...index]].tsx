@@ -275,9 +275,7 @@ const handleCreditPurchase = async (priceId: string) => {
                     </div>
                     <div className="header-navigation">
                         <nav className="header-navigation-as">
-                            <Link href="./" style={{ textDecoration: 'none' }}> Home </Link>
-                            <Link href="./" style={{ textDecoration: 'none' }}> Home </Link>
-
+                            <Link href="/" style={{ textDecoration: 'none' }}> Home </Link>
                             <Link href="https://accounts.omniai.icu/sign-in" style={{ textDecoration: 'none' }}> Sign Up </Link>
                             <Link href="/price/PricingPage" style={{ textDecoration: 'none' }}> Plans </Link>
                             <div className="dropdown">
