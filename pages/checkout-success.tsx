@@ -13,7 +13,7 @@ const CheckoutSuccess = () => {
         .then((data) => {
           setMessage(`Purchase successful! Your account has been updated with ${data.planName}. You now have ${data.credits} credits and ${data.tokens} tokens.`);
           setTimeout(() => router.push({
-            pathname: '/userPrompts',
+            pathname: '/userPage',
             query: { updated: 'true' }
           }), 5000);
         })

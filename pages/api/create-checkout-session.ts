@@ -32,7 +32,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       ],
       mode: 'subscription',
       success_url: `${req.headers.origin}/checkout-success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${req.headers.origin}/userPrompts`,
+      cancel_url: `${req.headers.origin}/userPage`,
       metadata: {
         userId: userId,
         planId: planId,

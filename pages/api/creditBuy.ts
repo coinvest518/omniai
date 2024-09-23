@@ -43,7 +43,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       ],
       mode: 'payment',
       success_url: `${req.headers.origin}/checkout-success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${req.headers.origin}/userPrompts`,
+      cancel_url: `${req.headers.origin}/userPage`,
       metadata: {
         userId: userId,
       },
@@ -51,10 +51,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     console.log('Stripe Session ID:', session.id);
 
-    const user = await prisma.user.findUnique({
-      where: { clerkUserId: userId },
-      select: { credits: true },
+    
+    // Create a Stripe payment intent
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: 1000,
+      currency: 'usd',
+      payment_method_types: ['card'],
     });
+
+    // Update the user's credits only after the payment has been successfully processed
+    try {
+      const payment = await stripe.paymentIntents.confirm(paymentIntent.id, {
+        payment_method: req.body.payment_method,
+      });
+
+      if (payment.status === 'succeeded') {
+        // Update the user's credits
+        const user = await prisma.user.findUnique({
+          where: { clerkUserId: userId },
+          select: { credits: true },
+        });
 
     if (user) {
       const updatedCredits = (user.credits || 0) + creditDetail.credits;
@@ -71,6 +87,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     } else {
       console.error('User not found:', userId);
     }
+  }
+} catch (error) {
+  // Handle payment failure
+}
 
     res.status(200).json({ sessionId: session.id });
   } catch (error) {

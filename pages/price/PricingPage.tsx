@@ -12,8 +12,8 @@ const NavBar: React.FC = () => {
     <nav className="navbar">
       <div className="navbar-logo">OMNI AI</div>
       <ul className="navbar-links">
-        <li><Link href="/userPrompts" className="btn-hover color-3">Home</Link></li>
-        <li><Link href="/userPrompts" className="btn-hover color-3">User Page</Link></li>
+        <li><Link href="/userPage" className="btn-hover color-3">Home</Link></li>
+        <li><Link href="/userPage" className="btn-hover color-3">User Page</Link></li>
         <li><Link href="/" className="btn-hover color-3">Omni.Ai</Link></li>
         <li><Link href="/contact" className="btn-hover color-3">Contact</Link></li>
       </ul>
@@ -138,7 +138,7 @@ const PricingTable: React.FC = () => {
   );
 };
 
-const PricingPage: React.FC = () => {
+const PricingPage: React.FC = (props) => {
   return (
     <div className="pricing-page">
       <NavBar />
