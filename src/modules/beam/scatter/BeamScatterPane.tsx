@@ -9,12 +9,12 @@ import StopRoundedIcon from '@mui/icons-material/StopRounded';
 
 import { FormLabelStart } from '~/common/components/forms/FormLabelStart';
 import { animationColorBeamScatter } from '~/common/util/animUtils';
+import { useUserStore } from '~/common/state/userStore'; // Import user store
 
 import type { BeamStoreApi } from '../store-beam.hooks';
 import { BEAM_BTN_SX, SCATTER_COLOR, SCATTER_RAY_PRESETS } from '../beam.config';
 import { BeamScatterDropdown } from './BeamScatterPaneDropdown';
 import { beamPaneSx } from '../BeamCard';
-
 
 const scatterPaneSx: SxProps = {
   ...beamPaneSx,
@@ -37,7 +37,6 @@ const desktopScatterPaneSx: SxProps = {
   top: 0,
 };
 
-
 export function BeamScatterPane(props: {
   beamStore: BeamStoreApi
   isMobile: boolean,
@@ -49,6 +48,59 @@ export function BeamScatterPane(props: {
   onStop: () => void,
   onExplainerShow: () => any,
 }) {
+  const { user, updateCredits, updateTokens } = useUserStore((state) => ({
+    user: state.user,
+    updateCredits: state.updateCredits,
+    updateTokens: state.updateTokens,
+  }));
+
+  const handleStart = async () => {
+    if (!user || user.credits < 1) {
+      alert('Not enough credits to start.');
+      return;
+    }
+
+    const newCredits = user.credits - 1; // Deduct 1 credit
+    try {
+      // Update user data on the server
+      await fetch('/api/updateUserdata', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ credits: newCredits }),
+      });
+      updateCredits(newCredits); // Update local state
+      props.onStart(); // Call the original start function
+    } catch (error) {
+      console.error('Error updating user credits:', error);
+      alert('Failed to update credits. Please try again.');
+    }
+  };
+
+  const handleStop = async () => {
+    if (!user || user.tokens < 1) {
+      alert('Not enough tokens to stop.');
+      return;
+    }
+
+    const newTokens = user.tokens - 1; // Deduct 1 token
+    try {
+      // Update user data on the server
+      await fetch('/api/updateUserdata', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ tokens: newTokens }),
+      });
+      updateTokens(newTokens); // Update local state
+      props.onStop(); // Call the original stop function
+    } catch (error) {
+      console.error('Error updating user tokens:', error);
+      alert('Failed to update tokens. Please try again.');
+    }
+  };
 
   const dropdownMemo = React.useMemo(() => (
     <BeamScatterDropdown
@@ -59,6 +111,13 @@ export function BeamScatterPane(props: {
 
   return (
     <Box sx={props.isMobile ? mobileScatterPaneSx : desktopScatterPaneSx}>
+
+      {/* Display user credits and tokens */}
+      <Box sx={{ mb: 2 }}>
+        <Typography level='body-sm'>
+          Credits: {user?.credits || 0} | Tokens: {user?.tokens || 0}
+        </Typography>
+      </Box>
 
       {/* Title */}
       <Box>
@@ -112,7 +171,7 @@ export function BeamScatterPane(props: {
           variant='solid' color={SCATTER_COLOR}
           disabled={!props.startEnabled || props.startBusy} loading={props.startBusy}
           endDecorator={<PlayArrowRoundedIcon />}
-          onClick={props.onStart}
+          onClick={handleStart}
           sx={BEAM_BTN_SX}
         >
           Start
@@ -122,7 +181,7 @@ export function BeamScatterPane(props: {
           // key='scatter-stop'
           variant='solid' color='danger'
           endDecorator={<StopRoundedIcon />}
-          onClick={props.onStop}
+          onClick={handleStop}
           sx={BEAM_BTN_SX}
         >
           Stop
