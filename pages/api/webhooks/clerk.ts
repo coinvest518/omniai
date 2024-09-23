@@ -1,7 +1,7 @@
 import { Webhook } from 'svix';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { WebhookEvent } from '@clerk/nextjs/server';
-import { prisma } from '../../../lib/prisma';
+import  prisma  from '../../../lib/prisma';
 import { enqueueUserCreation } from 'lib/queue'; // Import the enqueue function
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
