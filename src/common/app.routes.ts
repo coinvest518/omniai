@@ -13,7 +13,7 @@ import type { DConversationId } from '~/common/state/store-chats';
 import { isBrowser } from './util/pwaUtils';
 
 
-export const ROUTE_INDEX = '/userPage';
+export const ROUTE_INDEX = '/';
 export const ROUTE_APP_CHAT = '/';
 export const ROUTE_APP_CALL = '/call';
 export const ROUTE_APP_LINK_CHAT = '/link/chat/[chatLinkId]';

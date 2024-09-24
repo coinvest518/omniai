@@ -103,10 +103,12 @@ const AppUsers: React.FC = (props) => {
 
 
         const fetchAndUpdateUserData = async (userId: string, promptId: string) => {
+            console.log('Fetching user data for userId:', userId);
             try {
                 const userDataResponse = await fetch(`/api/user-data?userId=${userId}`);
                 if (!userDataResponse.ok) {
                     const errorData = await userDataResponse.json();
+                    console.error('Error data:', errorData);
                     if (errorData.message === 'User not found') {
                         alert('User not found. Please sign in again.');
                         return;
@@ -114,6 +116,7 @@ const AppUsers: React.FC = (props) => {
                     throw new Error(errorData.message || 'Failed to fetch updated user data');
                 }
                 const updatedUserData = await userDataResponse.json();
+                console.log('Updated user data:', updatedUserData); 
                 setUserData(prevData => ({
                     ...prevData,
                     ...updatedUserData,
