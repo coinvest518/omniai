@@ -19,7 +19,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Find the user by their Clerk user ID
     const user = await prisma.user.findUnique({
-      where: { id: userId as string },
+      where: { clerkUserId: userId as string }, // Change to clerkUserId
     });
 
     console.log('User Query Result:', user);
@@ -32,18 +32,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // Deduct the credits from the user
-    const prompt = promptTitle;
     const updatedUser = await prisma.user.update({
-      where: { id: userId },
+      where: { clerkUserId: userId }, // Change to clerkUserId
       data: {
         credits: user.credits - creditPrice,
-          purchasedPromptIds: {
-              push: prompt,
-          },
+        purchasedPromptIds: {
+          push: promptTitle,
+        },
       },
-  });
+    });
 
-  console.log('Updated User:', updatedUser)
+    console.log('Updated User:', updatedUser)
 
     // Create the userPrompt record
     await prisma.userPrompt.create({
