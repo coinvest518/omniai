@@ -258,12 +258,36 @@ const AppUsers: React.FC = (props) => {
         }
     };
 
-    const handlePurchase = async (promptId: string) => {
-        // Implement your purchase logic here
-        console.log(`Purchasing prompt with ID: ${promptId}`);
-        await fetchAndUpdateUserData(userData?.id || '', promptId); // Call the function here
-        // Add your purchase logic, e.g., API call to process the purchase
-    };
+    const handlePurchase = async (userId: string, promptId: string) => {
+        try {
+          const response = await fetch('/api/promptsbuy', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              userId,       // Include userId (from Clerk)
+              promptId,     // Include promptId (selected prompt)
+              promptTitle: 'Example Title', // Pass any other necessary data
+              promptData: 'Example Prompt',
+              imgSrc: 'example.jpg',
+              creditPrice: 10,
+              category: 'General',
+            }),
+          });
+      
+          const result = await response.json();
+      
+          if (response.ok) {
+            alert('Purchase successful');
+          } else {
+            alert(result.message || 'Purchase failed');
+          }
+        } catch (error) {
+          console.error('Error purchasing prompt:', error);
+          alert('An error occurred during the purchase.');
+        }
+      };
 
     return (
         <div>
@@ -502,10 +526,9 @@ const AppUsers: React.FC = (props) => {
                                     creditPrice={selectedPrompt.creditPrice}
                                     description={selectedPrompt.description}
                                     promptData={selectedPrompt.promptData}
-                                    onPurchase={() => handlePurchase(selectedPrompt.id || '')} // Provide a default value
+                                    onPurchase={() => handlePurchase(user?.id || '', selectedPrompt.id || '')} // Pass both userId and promptId
                                     showCopyButton={showCopyButton}
                                     isPurchased={userData?.purchasedPromptIds?.includes(selectedPrompt.id) || false}
-                                    userId={userData?.id ?? ''}
                                     promptId={selectedPrompt.id ?? ''}
                                 />
                             )}
