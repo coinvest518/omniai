@@ -49,7 +49,7 @@ const Modal: React.FC<ModalProps> = ({
         <p>Description: {description}</p>
         <p>Prompt Data: {localPromptData}</p>
         {!isPurchased && <button onClick={handlePurchase}>Purchase</button>}
-        {!isPurchased && (
+        {isPurchased && (
           <button onClick={handleCopyClick}>Copy to Clipboard</button>
         )}
         <button onClick={onClose}>Close</button>

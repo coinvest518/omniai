@@ -58,6 +58,21 @@ const AppUsers: React.FC = (props) => {
     const [showSignInModal, setShowSignInModal] = useState(false);
     const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);
 
+    const fetchUserPrompts = useCallback(async (userId: string) => {
+        try {
+            const response = await fetch(`/api/user-prompts?userId=${userId}`);
+            if (!response.ok) {
+                throw new Error('Failed to fetch user prompts');
+            }
+            const data = await response.json();
+            console.log('Fetched User Prompts:', data);
+            return data;
+        } catch (error) {
+            console.error('Error fetching user prompts:', error);
+            return [];
+        }
+    }, []);
+
 
     const fetchUserData = useCallback(async () => {
         if (isSignedIn && userId) {
@@ -73,6 +88,10 @@ const AppUsers: React.FC = (props) => {
 
                 setPrevCredits(userData.credits);
                 setPrevTokens(userData.tokens);
+
+                // Fetch user prompts after getting user data
+                const fetchedUserPrompts = await fetchUserPrompts(userId);
+                setUserPrompts(fetchedUserPrompts);
             } catch (error) {
                 console.error('Error fetching user data:', error);
                 setError('Failed to fetch user data. Please try again.');
@@ -80,7 +99,7 @@ const AppUsers: React.FC = (props) => {
                 setIsLoading(false);
             }
         }
-    }, [isSignedIn, userId, setUser]);
+    }, [isSignedIn, userId, setUser, setUserPrompts, fetchUserPrompts]);
 
     useEffect(() => {
         fetchUserData();
@@ -117,51 +136,28 @@ const AppUsers: React.FC = (props) => {
             }
             const updatedUserData = await userDataResponse.json();
             console.log('Updated user data:', updatedUserData);
+
+            const isPurchased = updatedUserData.purchasedPromptIds.includes(promptId);
+
             setUserData(prevData => ({
                 ...prevData,
                 ...updatedUserData,
                 purchasedPromptIds: [...(prevData?.purchasedPromptIds || []), promptId],
-                isPurchased: true,
+                isPurchased: isPurchased,
             }));
             setUser(updatedUserData);
-            
-            setShowCopyButton(true);
+
+
+
+            // Fetch and update userPrompts immediately after userData is updated
+            const updatedPrompts = await fetchUserPrompts(userId);
+            setUserPrompts(updatedPrompts);
             alert('Purchase successful!');
         } catch (error) {
             console.error('Error during purchase:', error);
             alert(`Purchase failed: ${error instanceof Error ? error.message : 'An unknown error occurred'}`);
         }
-    }, [setUser]);
-
-
-
-
-    const fetchUserPrompts = useCallback(async (userId: string) => {
-        try {
-            const response = await fetch(`/api/user-prompts?userId=${userId}`);
-            if (!response.ok) {
-                throw new Error('Failed to fetch user prompts');
-            }
-            const data = await response.json();
-            console.log('Fetched User Prompts:', data); // Log fetched data
-            return data;
-        } catch (error) {
-            console.error('Error fetching user prompts:', error);
-            return [];
-        }
-    }, []);
-
-
-
-
-    useEffect(() => {
-        if (userData && userData.id) {
-            fetchUserPrompts(userData.id).then(data => {
-                console.log('Setting User Prompts:', data); // Log state update
-                setUserPrompts(data);
-            });
-        }
-    }, [userData, fetchUserPrompts]);
+    }, [setUser, fetchUserPrompts]);
 
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
@@ -175,7 +171,6 @@ const AppUsers: React.FC = (props) => {
         console.log('Selected Prompt:', prompt); // Log selected prompt
         setSelectedPrompt(() => prompt);
         setIsModalOpen(true);
-        setShowCopyButton(false); // Hide copy button initially
     };
 
 
@@ -265,36 +260,48 @@ const AppUsers: React.FC = (props) => {
 
     const handlePurchase = async (userId: string, promptId: string) => {
         try {
-          const response = await fetch('/api/promptsBuy', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              userId,       // Include userId (from Clerk)
-              promptId,     // Include promptId (selected prompt)
-              promptTitle: 'Example Title', // Pass any other necessary data
-              promptData: 'Example Prompt',
-              imgSrc: 'example.jpg',
-              creditPrice: 10,
-              category: 'General',
-            }),
-          });
-      
-          const result = await response.json();
-      
-          if (response.ok) {
-            alert('Purchase successful');
-            fetchAndUpdateUserData(userId, promptId);
+            const response = await fetch('/api/promptsBuy', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    userId,       // Include userId (from Clerk)
+                    promptId,     // Include promptId (selected prompt)
+                    promptTitle: 'Example Title', // Pass any other necessary data
+                    promptData: 'Example Prompt',
+                    imgSrc: 'example.jpg',
+                    creditPrice: 10,
+                    category: 'General',
+                }),
+            });
 
-          } else {
-            alert(result.message || 'Purchase failed');
-          }
-        } catch (error) {
-          console.error('Error purchasing prompt:', error);
-          alert('An error occurred during the purchase.');
-        }
-      };
+            const result = await response.json();
+            const updatedUserData = result;
+            if (response.ok) {
+                alert('Purchase successful');
+                // Update isPurchased immediately in handlePurchase
+                setUserData(prevData => ({
+                    ...prevData, 
+                    ...updatedUserData, // Spread updatedUserData last to prioritize its 'id'
+                    purchasedPromptIds: [...(prevData?.purchasedPromptIds || []), promptId],
+                    isPurchased: updatedUserData.isPurchased, // assuming the API returns an object with this property
+                }));
+        
+                // Delay calling fetchAndUpdateUserData
+                setTimeout(() => {
+                  if (userData?.id) {
+                    fetchAndUpdateUserData(userData.id, promptId);
+                  }
+                }, 500); // Adjust the delay (in milliseconds) as needed
+              } else {
+                alert(result.message || 'Purchase failed');
+              }
+            } catch (error) {
+              console.error('Error purchasing prompt:', error);
+              alert('An error occurred during the purchase.');
+            }
+          };
 
     return (
         <div>
