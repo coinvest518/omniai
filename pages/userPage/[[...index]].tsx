@@ -280,6 +280,7 @@ const AppUsers: React.FC = (props) => {
       
           if (response.ok) {
             alert('Purchase successful');
+            setShowCopyButton(true); 
           } else {
             alert(result.message || 'Purchase failed');
           }
