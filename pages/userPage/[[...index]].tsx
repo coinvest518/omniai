@@ -117,20 +117,12 @@ const AppUsers: React.FC = (props) => {
             }
             const updatedUserData = await userDataResponse.json();
             console.log('Updated user data:', updatedUserData);
-            setUserData((prevData) => ({
+            setUserData(prevData => ({
                 ...prevData,
                 ...updatedUserData,
                 purchasedPromptIds: [...(prevData?.purchasedPromptIds || []), promptId],
                 isPurchased: true,
             }));
-
-            
-      // Fetch and update userPrompts immediately
-      const updatedPrompts = await fetchUserPrompts(userId);
-      setUserPrompts(updatedPrompts);
-
-
-
             setShowCopyButton(true);
             alert('Purchase successful!');
         } catch (error) {
@@ -157,7 +149,14 @@ const AppUsers: React.FC = (props) => {
 
 
 
-    
+    useEffect(() => {
+        if (userData && userData.id) {
+            fetchUserPrompts(userData.id).then(data => {
+                console.log('Setting User Prompts:', data); // Log state update
+                setUserPrompts(data);
+            });
+        }
+    }, [userData]);
 
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
@@ -191,8 +190,6 @@ const AppUsers: React.FC = (props) => {
 
             const { sessionId } = await response.json();
             const stripe = await stripePromise;
-
-            
 
             // Redirect to Stripe for payment confirmation
             if (stripe) {
@@ -283,12 +280,7 @@ const AppUsers: React.FC = (props) => {
       
           if (response.ok) {
             alert('Purchase successful');
-
-            if (userData?.id) {
-                await fetchAndUpdateUserData(userData.id, promptId);
-              }
-              
-            setRefreshUserData(prev => !prev);
+            
           } else {
             alert(result.message || 'Purchase failed');
           }
@@ -520,6 +512,7 @@ const AppUsers: React.FC = (props) => {
                                             promptTitle={prompt.promptTitle || prompt.promptTitle} // Ensure this is correct
                                             description={prompt.description}
                                             onClick={() => handleCardClick(prompt, userData?.id || '')}
+                                            isPurchased={userData?.purchasedPromptIds?.includes(prompt.id) || false}
                                         />
                                     ))
                                 ) : (
@@ -535,12 +528,11 @@ const AppUsers: React.FC = (props) => {
                                     description={selectedPrompt.description}
                                     promptData={selectedPrompt.promptData}
                                     onPurchase={() => handlePurchase(user?.id || '', selectedPrompt.id || '')} // Pass both userId and promptId
-                                    showCopyButton={Boolean(showCopyButton && userData?.purchasedPromptIds?.includes(selectedPrompt.id))}                                    isPurchased={userData?.purchasedPromptIds?.includes(selectedPrompt.id) || false}
+                                    showCopyButton={showCopyButton}
+                                    isPurchased={userData?.purchasedPromptIds?.includes(selectedPrompt.id) || false}
                                     promptId={selectedPrompt.id ?? ''}
                                     userId={userData?.id ?? ''}
-
                                 />
-                                
                             )}
                         </div>
                     </div>
