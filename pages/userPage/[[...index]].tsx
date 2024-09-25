@@ -102,7 +102,7 @@ const AppUsers: React.FC = (props) => {
 
 
 
-    const fetchAndUpdateUserData = async (userId: string, promptId: string) => {
+    const fetchAndUpdateUserData = useCallback(async (userId: string, promptId: string) => {
         console.log('Fetching user data for userId:', userId);
         try {
             const userDataResponse = await fetch(`/api/user-data?userId=${userId}`);
@@ -123,16 +123,20 @@ const AppUsers: React.FC = (props) => {
                 purchasedPromptIds: [...(prevData?.purchasedPromptIds || []), promptId],
                 isPurchased: true,
             }));
+            setUser(updatedUserData);
+            
             setShowCopyButton(true);
             alert('Purchase successful!');
         } catch (error) {
             console.error('Error during purchase:', error);
             alert(`Purchase failed: ${error instanceof Error ? error.message : 'An unknown error occurred'}`);
         }
-    };
+    }, [setUser]);
 
 
-    const fetchUserPrompts = async (userId: string) => {
+
+
+    const fetchUserPrompts = useCallback(async (userId: string) => {
         try {
             const response = await fetch(`/api/user-prompts?userId=${userId}`);
             if (!response.ok) {
@@ -145,7 +149,8 @@ const AppUsers: React.FC = (props) => {
             console.error('Error fetching user prompts:', error);
             return [];
         }
-    };
+    }, []);
+
 
 
 
@@ -156,7 +161,7 @@ const AppUsers: React.FC = (props) => {
                 setUserPrompts(data);
             });
         }
-    }, [userData]);
+    }, [userData, fetchUserPrompts]);
 
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
@@ -280,7 +285,8 @@ const AppUsers: React.FC = (props) => {
       
           if (response.ok) {
             alert('Purchase successful');
-            
+            fetchAndUpdateUserData(userId, promptId);
+
           } else {
             alert(result.message || 'Purchase failed');
           }
