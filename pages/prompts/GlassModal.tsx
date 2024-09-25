@@ -49,13 +49,11 @@ const Modal: React.FC<ModalProps> = ({
         <p>Credit Price: {creditPrice}</p>
         <p>Description: {description}</p>
         <p>Prompt Data: {localPromptData}</p>
-        {!isPurchased && (
-          <button onClick={handlePurchase}>Purchase</button>
+        {!isPurchased && <button onClick={handlePurchase}>Purchase</button>}
+        {showCopyButton && (
+          <button onClick={handleCopyClick}>Copy to Clipboard</button>
         )}
-        {isPurchased && (
-      <button onClick={handleCopyClick}>Copy to Clipboard</button>
-      
-        )}
+        <button onClick={onClose}>Close</button>
       </div>
     </div>
   );
