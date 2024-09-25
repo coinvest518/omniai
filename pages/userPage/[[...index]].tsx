@@ -285,8 +285,8 @@ const AppUsers: React.FC = (props) => {
             setShowCopyButton(true); 
 
             if (userData?.id) { 
-                await fetchAndUpdateUserData(userData.id, promptId); // Call here!
-            
+                const updatedPrompts = await fetchUserPrompts(userData.id);
+                setUserPrompts(updatedPrompts);
               }
 
           } else {
