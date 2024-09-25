@@ -191,6 +191,8 @@ const AppUsers: React.FC = (props) => {
             const { sessionId } = await response.json();
             const stripe = await stripePromise;
 
+            
+
             // Redirect to Stripe for payment confirmation
             if (stripe) {
                 const result = await stripe.redirectToCheckout({ sessionId });
@@ -280,7 +282,13 @@ const AppUsers: React.FC = (props) => {
       
           if (response.ok) {
             alert('Purchase successful');
-            setShowCopyButton(true); 
+            
+
+            if (userData?.id) { 
+                await fetchAndUpdateUserData(userData.id, promptId);
+
+              }
+
           } else {
             alert(result.message || 'Purchase failed');
           }
