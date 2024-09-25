@@ -122,6 +122,14 @@ const AppUsers: React.FC = (props) => {
                 purchasedPromptIds: [...(updatedUserData.purchasedPromptIds || []), promptId],
                 isPurchased: true,
             });
+
+            
+      // Fetch and update userPrompts immediately
+      const updatedPrompts = await fetchUserPrompts(userId);
+      setUserPrompts(updatedPrompts);
+
+
+
             setShowCopyButton(true);
             alert('Purchase successful!');
         } catch (error) {
@@ -148,14 +156,7 @@ const AppUsers: React.FC = (props) => {
 
 
 
-    useEffect(() => {
-        if (userData && userData.id) {
-            fetchUserPrompts(userData.id).then(data => {
-                console.log('Setting User Prompts:', data); // Log state update
-                setUserPrompts(data);
-            });
-        }
-    }, [userData]);
+    
 
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
