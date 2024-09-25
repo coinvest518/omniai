@@ -351,7 +351,7 @@ const AppUsers: React.FC = (props) => {
                             <Link href="/personas" style={{ textDecoration: 'none' }}>Omni YouTube</Link>
                         </div>
                         <div className="horizontal-tab-item">
-                            <Link href="/chat" style={{ textDecoration: 'none' }}>Omni Art</Link>
+                            <Link href="/" style={{ textDecoration: 'none' }}>Omni Art</Link>
                         </div>
                         <div className="horizontal-tab-item">
                             <Link href="/" style={{ textDecoration: 'none' }}>Omni Beam</Link>
