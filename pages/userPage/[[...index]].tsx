@@ -528,11 +528,11 @@ const AppUsers: React.FC = (props) => {
                                     description={selectedPrompt.description}
                                     promptData={selectedPrompt.promptData}
                                     onPurchase={() => handlePurchase(user?.id || '', selectedPrompt.id || '')} // Pass both userId and promptId
-                                    showCopyButton={showCopyButton}
-                                    isPurchased={userData?.purchasedPromptIds?.includes(selectedPrompt.id) || false}
+                                    showCopyButton={Boolean(showCopyButton && userData?.purchasedPromptIds?.includes(selectedPrompt.id))}                                    isPurchased={userData?.purchasedPromptIds?.includes(selectedPrompt.id) || false}
                                     promptId={selectedPrompt.id ?? ''}
                                     userId={userData?.id ?? ''}
                                 />
+                                
                             )}
                         </div>
                     </div>
