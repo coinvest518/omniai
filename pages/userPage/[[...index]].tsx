@@ -117,11 +117,12 @@ const AppUsers: React.FC = (props) => {
             }
             const updatedUserData = await userDataResponse.json();
             console.log('Updated user data:', updatedUserData);
-            setUserData({
+            setUserData((prevData) => ({
+                ...prevData,
                 ...updatedUserData,
-                purchasedPromptIds: [...(updatedUserData.purchasedPromptIds || []), promptId],
+                purchasedPromptIds: [...(prevData?.purchasedPromptIds || []), promptId],
                 isPurchased: true,
-            });
+            }));
 
             
       // Fetch and update userPrompts immediately
@@ -286,6 +287,8 @@ const AppUsers: React.FC = (props) => {
             if (userData?.id) {
                 await fetchAndUpdateUserData(userData.id, promptId);
               }
+              
+            setRefreshUserData(prev => !prev);
           } else {
             alert(result.message || 'Purchase failed');
           }
