@@ -1,12 +1,14 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import   prisma   from  '../../lib/prisma';
+import { getAuth } from '@clerk/nextjs/server';
 
 
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   console.log(req.body); // Debugging: Log the request body to check what is being sent
-
-  const { userId, promptTitle, promptData, imgSrc, creditPrice, category } = req.body;
+  const auth = getAuth(req);
+  const userId = auth.userId;
+  const { promptTitle, promptData, imgSrc, creditPrice, category } = req.body;
 
   if (!userId || !promptTitle || !promptData || !imgSrc || !creditPrice || !category) {
     console.log('Missing fields:', { userId, promptTitle, promptData, imgSrc, creditPrice, category }); // Log missing fields
@@ -19,7 +21,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Find the user by their Clerk user ID
     const user = await prisma.user.findUnique({
-      where: { clerkUserId: userId as string }, // Change to clerkUserId
+      where: { clerkUserId: userId },
     });
 
     console.log('User Query Result:', user);
@@ -32,22 +34,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // Deduct the credits from the user
-    const updatedUser = await prisma.user.update({
-      where: { clerkUserId: userId }, // Change to clerkUserId
+    await prisma.user.update({
+      where: { clerkUserId: user.id },
       data: {
         credits: user.credits - creditPrice,
-        purchasedPromptIds: {
-          push: promptTitle,
-        },
       },
     });
 
-    console.log('Updated User:', updatedUser)
 
     // Create the userPrompt record
     await prisma.userPrompt.create({
       data: {
-        userId: user.id,
         promptTitle,
         promptData,
         imgSrc,

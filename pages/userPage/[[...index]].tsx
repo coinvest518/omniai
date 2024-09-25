@@ -58,7 +58,7 @@ const AppUsers: React.FC = (props) => {
     const [showSignInModal, setShowSignInModal] = useState(false);
     const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);
 
-  
+
     const fetchUserData = useCallback(async () => {
         if (isSignedIn && userId) {
             setIsLoading(true);
@@ -81,135 +81,135 @@ const AppUsers: React.FC = (props) => {
             }
         }
     }, [isSignedIn, userId, setUser]);
-    
+
     useEffect(() => {
         fetchUserData();
     }, [fetchUserData, refreshUserData]);
 
-        useEffect(() => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const signinSuccess = urlParams.get('signin') === 'success';
-            setShowSignInModal(!isSignedIn && !signinSuccess);
-          }, [isSignedIn]);
-          
-        
-    
-        const closeSignInModal = () => {
-            setShowSignInModal(false);
-        };
+    useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const signinSuccess = urlParams.get('signin') === 'success';
+        setShowSignInModal(!isSignedIn && !signinSuccess);
+    }, [isSignedIn]);
+
+
+
+    const closeSignInModal = () => {
+        setShowSignInModal(false);
+    };
 
 
 
 
 
-        const fetchAndUpdateUserData = async (userId: string, promptId: string) => {
-            console.log('Fetching user data for userId:', userId);
-            try {
-                const userDataResponse = await fetch(`/api/user-data?userId=${userId}`);
-                if (!userDataResponse.ok) {
-                    const errorData = await userDataResponse.json();
-                    console.error('Error data:', errorData);
-                    if (errorData.message === 'User not found') {
-                        alert('User not found. Please sign in again.');
-                        return;
-                    }
-                    throw new Error(errorData.message || 'Failed to fetch updated user data');
+    const fetchAndUpdateUserData = async (userId: string, promptId: string) => {
+        console.log('Fetching user data for userId:', userId);
+        try {
+            const userDataResponse = await fetch(`/api/user-data?userId=${userId}`);
+            if (!userDataResponse.ok) {
+                const errorData = await userDataResponse.json();
+                console.error('Error data:', errorData);
+                if (errorData.message === 'User not found') {
+                    alert('User not found. Please sign in again.');
+                    return;
                 }
-                const updatedUserData = await userDataResponse.json();
-                console.log('Updated user data:', updatedUserData); 
-                setUserData(prevData => ({
-                    ...prevData,
-                    ...updatedUserData,
-                    purchasedPromptIds: [...(prevData?.purchasedPromptIds || []), promptId],
-                    isPurchased: true,
-                }));
-                setShowCopyButton(true);
-                alert('Purchase successful!');
-            } catch (error) {
-                console.error('Error during purchase:', error);
-                alert(`Purchase failed: ${error instanceof Error ? error.message : 'An unknown error occurred'}`);
+                throw new Error(errorData.message || 'Failed to fetch updated user data');
             }
-        };
-
-
-const fetchUserPrompts = async (userId: string) => {
-    try {
-        const response = await fetch(`/api/user-prompts?userId=${userId}`);
-        if (!response.ok) {
-            throw new Error('Failed to fetch user prompts');
+            const updatedUserData = await userDataResponse.json();
+            console.log('Updated user data:', updatedUserData);
+            setUserData(prevData => ({
+                ...prevData,
+                ...updatedUserData,
+                purchasedPromptIds: [...(prevData?.purchasedPromptIds || []), promptId],
+                isPurchased: true,
+            }));
+            setShowCopyButton(true);
+            alert('Purchase successful!');
+        } catch (error) {
+            console.error('Error during purchase:', error);
+            alert(`Purchase failed: ${error instanceof Error ? error.message : 'An unknown error occurred'}`);
         }
-        const data = await response.json();
-        console.log('Fetched User Prompts:', data); // Log fetched data
-        return data;
-    } catch (error) {
-        console.error('Error fetching user prompts:', error);
-        return [];
-    }
-};
+    };
 
 
-
-useEffect(() => {
-    if (userData && userData.id) {
-        fetchUserPrompts(userData.id).then(data => {
-            console.log('Setting User Prompts:', data); // Log state update
-            setUserPrompts(data);
-        });
-    }
-}, [userData]);
-
-useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('checkout') === 'success') {
-        setRefreshUserData(prev => !prev);
-    }
-}, []);
-
-
-const handleCardClick = (prompt: Prompt) => {
-    console.log('Selected Prompt:', prompt); // Log selected prompt
-    setSelectedPrompt(prompt);
-    setIsModalOpen(true);
-    setShowCopyButton(false); // Hide copy button initially
-};
-
-
-const handleCreditPurchase = async (priceId: string) => {
-    try {
-        const response = await fetch('/api/creditBuy', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ priceId }),
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to create checkout session');
+    const fetchUserPrompts = async (userId: string) => {
+        try {
+            const response = await fetch(`/api/user-prompts?userId=${userId}`);
+            if (!response.ok) {
+                throw new Error('Failed to fetch user prompts');
+            }
+            const data = await response.json();
+            console.log('Fetched User Prompts:', data); // Log fetched data
+            return data;
+        } catch (error) {
+            console.error('Error fetching user prompts:', error);
+            return [];
         }
+    };
 
-        const { sessionId } = await response.json();
-        const stripe = await stripePromise;
 
-        // Redirect to Stripe for payment confirmation
-        if (stripe) {
-            const result = await stripe.redirectToCheckout({ sessionId });
-            if (result.error) {
-                console.error('Failed to redirect to checkout:', result.error.message);
-            } else {
-                if (userData) {
-                    fetchUserData();
+
+    useEffect(() => {
+        if (userData && userData.id) {
+            fetchUserPrompts(userData.id).then(data => {
+                console.log('Setting User Prompts:', data); // Log state update
+                setUserPrompts(data);
+            });
+        }
+    }, [userData]);
+
+    useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('checkout') === 'success') {
+            setRefreshUserData(prev => !prev);
+        }
+    }, []);
+
+
+    const handleCardClick = (prompt: Prompt) => {
+        console.log('Selected Prompt:', prompt); // Log selected prompt
+        setSelectedPrompt(prompt);
+        setIsModalOpen(true);
+        setShowCopyButton(false); // Hide copy button initially
+    };
+
+
+    const handleCreditPurchase = async (priceId: string) => {
+        try {
+            const response = await fetch('/api/creditBuy', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ priceId }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to create checkout session');
+            }
+
+            const { sessionId } = await response.json();
+            const stripe = await stripePromise;
+
+            // Redirect to Stripe for payment confirmation
+            if (stripe) {
+                const result = await stripe.redirectToCheckout({ sessionId });
+                if (result.error) {
+                    console.error('Failed to redirect to checkout:', result.error.message);
                 } else {
-                    throw new Error('User data is not available');
+                    if (userData) {
+                        fetchUserData();
+                    } else {
+                        throw new Error('User data is not available');
+                    }
                 }
+            } else {
+                console.error('Stripe has not been initialized');
             }
-        } else {
-            console.error('Stripe has not been initialized');
+        } catch (error) {
+            console.error('Failed to create checkout session:', error);
         }
-    } catch (error) {
-        console.error('Failed to create checkout session:', error);
-    }
-};
+    };
 
 
     const calculatePercentageChange = (current: number, previous: number | null) => {
@@ -230,7 +230,7 @@ const handleCreditPurchase = async (priceId: string) => {
             return prompt.category === activeTab;
         });
 
-  
+
     const toggleMenuModal = () => {
         setShowSignInModal(true);
     };
@@ -258,13 +258,51 @@ const handleCreditPurchase = async (priceId: string) => {
         }
     };
 
-    const handlePurchase = async (promptId: string) => {
-        // Implement your purchase logic here
-        console.log(`Purchasing prompt with ID: ${promptId}`);
-        await fetchAndUpdateUserData(userData?.id || '', promptId); // Call the function here
-        // Add your purchase logic, e.g., API call to process the purchase
-    };
 
+
+    const handlePurchase = async (promptId: string) => {
+        console.log('Attempting to purchase prompt with ID:', promptId);
+        console.log('Current userId:', userData?.id); // Ensure this is the correct clerkUserId
+        console.log('Current userData:', userData); // Verify the contents of the userData object
+      
+        try {
+          const userDataResponse = await fetch(`/api/user-data?userId=${userData?.id}`);
+          if (!userDataResponse.ok) {
+            const errorData = await userDataResponse.json();
+            console.error('Error fetching user data:', errorData);
+            alert('User not found. Please sign in again.');
+            return;
+          }
+          // Proceed with the purchase using updatedUserData
+          const purchaseResponse = await fetch('/api/promptsBuy', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userId: userData?.id,
+              promptTitle: promptId,
+              promptData: '', // You need to provide the prompt data
+              imgSrc: '', // You need to provide the image source
+              creditPrice: 0, // You need to provide the credit price
+              category: '', // You need to provide the category
+            }),
+          });
+          if (!purchaseResponse.ok) {
+            const errorData = await purchaseResponse.json();
+            console.error('Error during purchase:', errorData);
+            alert(`Purchase failed: ${errorData.message}`);
+            return;
+          }
+          const purchaseData = await purchaseResponse.json();
+          console.log('Purchase successful:', purchaseData);
+          // Update the user data and prompt data accordingly
+        } catch (error) {
+          console.error('Error during purchase:', error);
+          alert('An error occurred during the purchase. Please try again later.');
+        }
+      };
+
+
+      
     return (
         <div>
             <header className="header">
@@ -351,7 +389,7 @@ const handleCreditPurchase = async (priceId: string) => {
                             <Link href="/personas" style={{ textDecoration: 'none' }}>Omni YouTube</Link>
                         </div>
                         <div className="horizontal-tab-item">
-                            <Link href="/chat" style={{ textDecoration: 'none' }}>Omni Art</Link>
+                            <Link href="/" style={{ textDecoration: 'none' }}>Omni Art</Link>
                         </div>
                         <div className="horizontal-tab-item">
                             <Link href="/" style={{ textDecoration: 'none' }}>Omni Beam</Link>

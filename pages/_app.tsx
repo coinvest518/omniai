@@ -5,6 +5,7 @@ import { Analytics as VercelAnalytics } from '@vercel/analytics/next';
 import { SpeedInsights as VercelSpeedInsights } from '@vercel/speed-insights/next';
 import { ClerkProvider } from '@clerk/nextjs';
 import { useRouter } from 'next/router';
+import { Analytics } from "@vercel/analytics/react"
 
 import { Brand } from '~/common/app.config';
 import { apiQuery } from '~/common/util/trpc.client';
