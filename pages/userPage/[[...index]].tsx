@@ -260,7 +260,7 @@ const AppUsers: React.FC = (props) => {
 
     const handlePurchase = async (userId: string, promptId: string) => {
         try {
-          const response = await fetch('/api/promptsbuy', {
+          const response = await fetch('/api/promptsBuy', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
