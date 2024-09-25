@@ -1,14 +1,27 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import prisma from '../../lib/prisma';
+import { PrismaClient } from '@prisma/client';
 import { getAuth } from '@clerk/nextjs/server';
 
+
+
+
+
+const prisma = new PrismaClient();
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  // Extract userId and other data from the request body
-  const { userId, promptTitle, promptData, imgSrc, creditPrice, category } = req.body;
+  if (req.method !== 'POST') {
+    return res.status(405).json({ message: 'Method not allowed' });
+  }  
+  const { promptTitle, promptData, imgSrc, creditPrice, category } = req.body;
+  const { userId } = getAuth(req);
+
+  console.log('Request Payload:', req.body);
+  console.log('Authenticated User ID:', userId);
 
   // Validate required fields
   if (!userId || !promptTitle || !promptData || !imgSrc || !creditPrice || !category) {
-    return res.status(400).json({ message: 'All fields are required' });
+    console.error('Unauthorized or missing parameters');
+    return res.status(401).json({ message: 'Unauthorized or missing parameters' });
   }
 
   try {

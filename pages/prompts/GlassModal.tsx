@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { useUser } from '@clerk/nextjs';
-import './Modal.css'; 
-import { copyToClipboard } from '~/common/util/clipboardUtils'; // Import the utility function
-// Create a CSS file for modal styles
+import './Modal.css';
+import { copyToClipboard } from '~/common/util/clipboardUtils';
 
 interface ModalProps {
     isOpen: boolean;
@@ -11,46 +10,38 @@ interface ModalProps {
     creditPrice: number;
     description: string;
     promptData: string;
-    onPurchase: (userId: string, promptId: string) => void; // Update onPurchase prop
+    onPurchase: (userId: string, promptId: string) => void;
     showCopyButton: boolean;
     isPurchased?: boolean; 
-    userId: string; // Add userId prop
-    promptId: string; // Add promptId prop
-  }
+    promptId: string;
+    userId: string;
+}
 
+const Modal: React.FC<ModalProps> = ({ isOpen, onClose, promptTitle, description, promptData, onPurchase, showCopyButton, creditPrice, isPurchased, promptId }) => {
+    const { user } = useUser(); // Directly access the user
+    const [localPromptData, setLocalPromptData] = useState(promptData);
 
-  
-  
-  const Modal: React.FC<ModalProps> = ({ isOpen, onClose, promptTitle, description, promptData, onPurchase, showCopyButton, creditPrice, isPurchased, userId,
-    promptId, }) => {
-    const user = useUser();
-    const [localPromptData, setLocalPromptData] = useState(promptData); // Local state for prompt data
-  
-    if (!isOpen) return null;
+    if (!isOpen || !user) return null; // Ensure modal doesn't open unless user is authenticated
 
-    const handleCopy = () => {
-        copyToClipboard(promptData, promptTitle); 
-      alert(`${promptTitle} prompt data copied to clipboard!`); // Feedback to the user
+    const handlePurchase = () => {
+        if (user.id) {
+            onPurchase(user.id, promptId); // Use Clerk's user ID directly
+        } else {
+            alert('User not authenticated');
+        }
     };
-    const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        setLocalPromptData(e.target.value); // Update local state
-         // Call the parent function to update prompt data
-      };
 
-      console.log(user); // Example usage
-
-
-      return (
+    return (
         <div className="modal-overlay">
             <div className="modal-content">
-                <h2>{promptTitle}</h2>  {/* Add this line to display the title */}
+                <h2>{promptTitle}</h2>
                 <p>Credit Price: {creditPrice}</p>
                 <p>Description: {description}</p>
                 <p>Prompt Data: {promptData}</p>
                 {!isPurchased && (
-          <button onClick={() => onPurchase(userId, promptId)}>Purchase</button>
-        )}
-          {showCopyButton && (
+                    <button onClick={handlePurchase}>Purchase</button>
+                )}
+                {showCopyButton && (
                     <button onClick={() => navigator.clipboard.writeText(promptData)}>
                         Copy Prompt
                     </button>
@@ -60,5 +51,5 @@ interface ModalProps {
         </div>
     );
 };
-  
-  export default Modal;
+
+export default Modal;

@@ -260,7 +260,7 @@ const AppUsers: React.FC = (props) => {
 
     const handlePurchase = async (userId: string, promptId: string) => {
         try {
-          const response = await fetch('/api/promptsbuy', {
+          const response = await fetch('/api/promptsBuy', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -530,6 +530,7 @@ const AppUsers: React.FC = (props) => {
                                     showCopyButton={showCopyButton}
                                     isPurchased={userData?.purchasedPromptIds?.includes(selectedPrompt.id) || false}
                                     promptId={selectedPrompt.id ?? ''}
+                                    userId={userData?.id ?? ''}
                                 />
                             )}
                         </div>
