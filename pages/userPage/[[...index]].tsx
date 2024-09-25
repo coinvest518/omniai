@@ -517,7 +517,6 @@ const AppUsers: React.FC = (props) => {
                                             promptTitle={prompt.promptTitle || prompt.promptTitle} // Ensure this is correct
                                             description={prompt.description}
                                             onClick={() => handleCardClick(prompt, userData?.id || '')}
-                                            isPurchased={userData?.purchasedPromptIds?.includes(prompt.id) || false}
                                         />
                                     ))
                                 ) : (
@@ -536,6 +535,7 @@ const AppUsers: React.FC = (props) => {
                                     showCopyButton={Boolean(showCopyButton && userData?.purchasedPromptIds?.includes(selectedPrompt.id))}                                    isPurchased={userData?.purchasedPromptIds?.includes(selectedPrompt.id) || false}
                                     promptId={selectedPrompt.id ?? ''}
                                     userId={userData?.id ?? ''}
+
                                 />
                                 
                             )}
