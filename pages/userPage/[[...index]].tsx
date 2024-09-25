@@ -166,9 +166,9 @@ const AppUsers: React.FC = (props) => {
     }, []);
 
 
-    const handleCardClick = (prompt: Prompt) => {
+    const handleCardClick = (prompt: Prompt, userId: string) => {
         console.log('Selected Prompt:', prompt); // Log selected prompt
-        setSelectedPrompt(prompt);
+        setSelectedPrompt(() => prompt);
         setIsModalOpen(true);
         setShowCopyButton(false); // Hide copy button initially
     };
@@ -258,51 +258,13 @@ const AppUsers: React.FC = (props) => {
         }
     };
 
-
-
     const handlePurchase = async (promptId: string) => {
-        console.log('Attempting to purchase prompt with ID:', promptId);
-        console.log('Current userId:', userData?.id); // Ensure this is the correct clerkUserId
-        console.log('Current userData:', userData); // Verify the contents of the userData object
-      
-        try {
-          const userDataResponse = await fetch(`/api/user-data?userId=${userData?.id}`);
-          if (!userDataResponse.ok) {
-            const errorData = await userDataResponse.json();
-            console.error('Error fetching user data:', errorData);
-            alert('User not found. Please sign in again.');
-            return;
-          }
-          // Proceed with the purchase using updatedUserData
-          const purchaseResponse = await fetch('/api/promptsBuy', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              userId: userData?.id,
-              promptTitle: promptId,
-              promptData: '', // You need to provide the prompt data
-              imgSrc: '', // You need to provide the image source
-              creditPrice: 0, // You need to provide the credit price
-              category: '', // You need to provide the category
-            }),
-          });
-          if (!purchaseResponse.ok) {
-            const errorData = await purchaseResponse.json();
-            console.error('Error during purchase:', errorData);
-            alert(`Purchase failed: ${errorData.message}`);
-            return;
-          }
-          const purchaseData = await purchaseResponse.json();
-          console.log('Purchase successful:', purchaseData);
-          // Update the user data and prompt data accordingly
-        } catch (error) {
-          console.error('Error during purchase:', error);
-          alert('An error occurred during the purchase. Please try again later.');
-        }
-      };
+        // Implement your purchase logic here
+        console.log(`Purchasing prompt with ID: ${promptId}`);
+        await fetchAndUpdateUserData(userData?.id || '', promptId); // Call the function here
+        // Add your purchase logic, e.g., API call to process the purchase
+    };
 
-
-      
     return (
         <div>
             <header className="header">
@@ -389,7 +351,7 @@ const AppUsers: React.FC = (props) => {
                             <Link href="/personas" style={{ textDecoration: 'none' }}>Omni YouTube</Link>
                         </div>
                         <div className="horizontal-tab-item">
-                            <Link href="/" style={{ textDecoration: 'none' }}>Omni Art</Link>
+                            <Link href="/chat" style={{ textDecoration: 'none' }}>Omni Art</Link>
                         </div>
                         <div className="horizontal-tab-item">
                             <Link href="/" style={{ textDecoration: 'none' }}>Omni Beam</Link>
@@ -509,7 +471,7 @@ const AppUsers: React.FC = (props) => {
                                         imgSrc={prompt.imgSrc}
                                         promptTitle={prompt.promptTitle || prompt.promptTitle}
                                         description={prompt.description}
-                                        onClick={() => handleCardClick(prompt)}
+                                        onClick={() => handleCardClick(prompt, userData?.id || '')}
                                         prompts={userPrompts}
 
                                         isPurchased={userData?.purchasedPromptIds?.includes(prompt.id) || false}
@@ -524,7 +486,7 @@ const AppUsers: React.FC = (props) => {
                                             prompts={filteredPrompts}
                                             promptTitle={prompt.promptTitle || prompt.promptTitle} // Ensure this is correct
                                             description={prompt.description}
-                                            onClick={() => handleCardClick(prompt)}
+                                            onClick={() => handleCardClick(prompt, userData?.id || '')}
                                             isPurchased={userData?.purchasedPromptIds?.includes(prompt.id) || false}
                                         />
                                     ))
@@ -543,6 +505,8 @@ const AppUsers: React.FC = (props) => {
                                     onPurchase={() => handlePurchase(selectedPrompt.id || '')} // Provide a default value
                                     showCopyButton={showCopyButton}
                                     isPurchased={userData?.purchasedPromptIds?.includes(selectedPrompt.id) || false}
+                                    userId={userData?.id ?? ''}
+                                    promptId={selectedPrompt.id ?? ''}
                                 />
                             )}
                         </div>
