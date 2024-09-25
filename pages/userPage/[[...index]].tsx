@@ -282,13 +282,7 @@ const AppUsers: React.FC = (props) => {
       
           if (response.ok) {
             alert('Purchase successful');
-            
-
-            if (userData?.id) { 
-                await fetchAndUpdateUserData(userData.id, promptId);
-
-              }
-
+            setShowCopyButton(true); 
           } else {
             alert(result.message || 'Purchase failed');
           }
