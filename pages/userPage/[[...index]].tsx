@@ -117,12 +117,11 @@ const AppUsers: React.FC = (props) => {
             }
             const updatedUserData = await userDataResponse.json();
             console.log('Updated user data:', updatedUserData);
-            setUserData(prevData => ({
-                ...prevData,
+            setUserData({
                 ...updatedUserData,
-                purchasedPromptIds: [...(prevData?.purchasedPromptIds || []), promptId],
+                purchasedPromptIds: [...(updatedUserData.purchasedPromptIds || []), promptId],
                 isPurchased: true,
-            }));
+            });
             setShowCopyButton(true);
             alert('Purchase successful!');
         } catch (error) {
