@@ -94,7 +94,6 @@ const AppUsers: React.FC = (props) => {
                 setUserPrompts(fetchedUserPrompts);
             } catch (error) {
                 console.error('Error fetching user data:', error);
-                setError('Failed to fetch user data. Please try again.');
             } finally {
                 setIsLoading(false);
             }
@@ -102,17 +101,11 @@ const AppUsers: React.FC = (props) => {
     }, [isSignedIn, userId, setUser, setUserPrompts, fetchUserPrompts]);
 
     useEffect(() => {
-        fetchUserData();
-    }, [fetchUserData, refreshUserData]);
-    
-    useEffect(() => {
-        if (userData && userData.id) {
-            fetchUserPrompts(userData.id).then(data => {
-                console.log('Setting User Prompts:', data); // Log state update
-                setUserPrompts(data);
-            });
+        if (isSignedIn && userId) {
+            fetchUserData();
         }
-    }, [fetchUserPrompts, userData]);
+    }, [isSignedIn, userId, fetchUserData]);
+
 
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
