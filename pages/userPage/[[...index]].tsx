@@ -60,250 +60,238 @@ const AppUsers: React.FC = (props) => {
 
     const fetchUserPrompts = useCallback(async (userId: string) => {
         try {
-            const response = await fetch(`/api/user-prompts?userId=${userId}`);
-            if (!response.ok) {
-                throw new Error('Failed to fetch user prompts');
-            }
-            const data = await response.json();
-            console.log('Fetched User Prompts:', data);
-            return data || [];
+          const response = await fetch(`/api/user-prompts?userId=${userId}`);
+          if (!response.ok) {
+            throw new Error('Failed to fetch user prompts');
+          }
+          const data = await response.json();
+          console.log('Fetched User Prompts:', data);
+          return data || [];
         } catch (error) {
-            console.error('Error fetching user prompts:', error);
-            return [];
+          console.error('Error fetching user prompts:', error);
+          return [];
         }
-    }, []);
-
-
-    const fetchUserData = useCallback(async () => {
+      }, []);
+    
+      const fetchUserData = useCallback(async () => {
         if (isSignedIn && userId) {
-            setIsLoading(true);
-            try {
-                const userDataResponse = await fetch(`/api/user-data?userId=${userId}`);
-                if (!userDataResponse.ok) {
-                    throw new Error('Failed to fetch user data');
-                }
-                const userData = await userDataResponse.json();
-                setUserData(userData);
-                setUser(userData);
-
-                setPrevCredits(userData.credits);
-                setPrevTokens(userData.tokens);
-
-                // Fetch user prompts after getting user data
-                const fetchedUserPrompts = await fetchUserPrompts(userId);
-                setUserPrompts(fetchedUserPrompts);
-            } catch (error) {
-                console.error('Error fetching user data:', error);
-            } finally {
-                setIsLoading(false);
+          setIsLoading(true);
+          try {
+            const userDataResponse = await fetch(`/api/user-data?userId=${userId}`);
+            if (!userDataResponse.ok) {
+              throw new Error('Failed to fetch user data');
             }
+            const userData = await userDataResponse.json();
+            setUserData(userData);
+            setUser(userData);
+    
+            setPrevCredits(userData.credits);
+            setPrevTokens(userData.tokens);
+    
+            // Fetch user prompts after getting user data
+            const fetchedUserPrompts = await fetchUserPrompts(userId);
+            setUserPrompts(fetchedUserPrompts);
+          } catch (error) {
+            console.error('Error fetching user data:', error);
+          } finally {
+            setIsLoading(false);
+          }
         }
-    }, [isSignedIn, userId, setUser, setUserPrompts, fetchUserPrompts]);
-
-    useEffect(() => {
+      }, [isSignedIn, userId, setUser, fetchUserPrompts]);
+    
+      useEffect(() => {
         if (isSignedIn && userId) {
-            fetchUserData();
+          fetchUserData();
         }
-    }, [isSignedIn, userId, fetchUserData]);
-
-
-    useEffect(() => {
+      }, [isSignedIn, userId, fetchUserData]);
+    
+      useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
         const signinSuccess = urlParams.get('signin') === 'success';
         setShowSignInModal(!isSignedIn && !signinSuccess);
-    }, [isSignedIn]);
-
-
-
-    const closeSignInModal = () => {
+      }, [isSignedIn]);
+    
+      const closeSignInModal = () => {
         setShowSignInModal(false);
-    };
-
-
-
-
-
-    const fetchAndUpdateUserData = useCallback(async (userId: string, promptId: string) => {
-        console.log('Fetching user data for userId:', userId);
-        try {
+      };
+    
+      const fetchAndUpdateUserData = useCallback(
+        async (userId: string, promptId: string) => {
+          console.log('Fetching user data for userId:', userId);
+          try {
             const userDataResponse = await fetch(`/api/user-data?userId=${userId}`);
             if (!userDataResponse.ok) {
-                const errorData = await userDataResponse.json();
-                console.error('Error data:', errorData);
-                if (errorData.message === 'User not found') {
-                    alert('User not found. Please sign in again.');
-                    return;
-                }
-                throw new Error(errorData.message || 'Failed to fetch updated user data');
+              const errorData = await userDataResponse.json();
+              console.error('Error data:', errorData);
+              if (errorData.message === 'User not found') {
+                alert('User not found. Please sign in again.');
+                return;
+              }
+              throw new Error(errorData.message || 'Failed to fetch updated user data');
             }
             const updatedUserData = await userDataResponse.json();
             console.log('Updated user data:', updatedUserData);
-
+    
             const isPurchased = updatedUserData.purchasedPromptIds.includes(promptId);
-
-            setUserData(prevData => ({
-                ...prevData,
-                ...updatedUserData,
-                purchasedPromptIds: [...(prevData?.purchasedPromptIds || []), promptId],
-                isPurchased: isPurchased,
+    
+            setUserData((prevData) => ({
+              ...prevData,
+              ...updatedUserData,
+              purchasedPromptIds: [...(prevData?.purchasedPromptIds || []), promptId],
+              isPurchased: isPurchased,
             }));
             setUser(updatedUserData);
-
-
-
+    
             // Fetch and update userPrompts immediately after userData is updated
             const updatedPrompts = await fetchUserPrompts(userId);
             setUserPrompts(updatedPrompts);
             alert('Purchase successful!');
-        } catch (error) {
+          } catch (error) {
             console.error('Error during purchase:', error);
             alert(`Purchase failed: ${error instanceof Error ? error.message : 'An unknown error occurred'}`);
-        }
-    }, [setUser, fetchUserPrompts]);
-
-    useEffect(() => {
+          }
+        },
+        [setUser, fetchUserPrompts]
+      );
+    
+      useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('checkout') === 'success') {
-            setRefreshUserData(prev => !prev);
+          setRefreshUserData((prev) => !prev);
         }
-    }, []);
-
-
-    const handleCardClick = (prompt: Prompt, userId: string) => {
+      }, []);
+    
+      const handleCardClick = (prompt: Prompt, userId: string) => {
         console.log('Selected Prompt:', prompt); // Log selected prompt
         setSelectedPrompt(() => prompt);
         setIsModalOpen(true);
-    };
-
-
-    const handleCreditPurchase = async (priceId: string) => {
+      };
+    
+      const handleCreditPurchase = async (priceId: string) => {
         try {
-            const response = await fetch('/api/creditBuy', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ priceId }),
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to create checkout session');
-            }
-
-            const { sessionId } = await response.json();
-            const stripe = await stripePromise;
-
-            // Redirect to Stripe for payment confirmation
-            if (stripe) {
-                const result = await stripe.redirectToCheckout({ sessionId });
-                if (result.error) {
-                    console.error('Failed to redirect to checkout:', result.error.message);
-                } else {
-                    if (userData) {
-                        fetchUserData();
-                    } else {
-                        throw new Error('User data is not available');
-                    }
-                }
+          const response = await fetch('/api/creditBuy', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ priceId }),
+          });
+    
+          if (!response.ok) {
+            throw new Error('Failed to create checkout session');
+          }
+    
+          const { sessionId } = await response.json();
+          const stripe = await stripePromise;
+    
+          // Redirect to Stripe for payment confirmation
+          if (stripe) {
+            const result = await stripe.redirectToCheckout({ sessionId });
+            if (result.error) {
+              console.error('Failed to redirect to checkout:', result.error.message);
             } else {
-                console.error('Stripe has not been initialized');
+              if (userData) {
+                fetchUserData();
+              } else {
+                throw new Error('User data is not available');
+              }
             }
+          } else {
+            console.error('Stripe has not been initialized');
+          }
         } catch (error) {
-            console.error('Failed to create checkout session:', error);
+          console.error('Failed to create checkout session:', error);
         }
-    };
-
-
-    const calculatePercentageChange = (current: number, previous: number | null) => {
+      };
+    
+      const calculatePercentageChange = (current: number, previous: number | null) => {
         if (previous === null || previous === 0) return 0;
         return ((current - previous) / previous) * 100;
-    };
-
-    const handleTabChange = (tab: string) => {
+      };
+    
+      const handleTabChange = (tab: string) => {
         setActiveTab(tab);
-    };
-
-
-
-    const filteredPrompts = activeTab === 'user-prompts'
-        ? userPrompts
-        : prompts.filter(prompt => {
-            if (activeTab === 'all') return true;
-            return prompt.category === activeTab;
-        });
-
-
-    const toggleMenuModal = () => {
+      };
+    
+      const filteredPrompts =
+        activeTab === 'user-prompts'
+          ? userPrompts
+          : prompts.filter((prompt) => {
+              if (activeTab === 'all') return true;
+              return prompt.category === activeTab;
+            });
+    
+      const toggleMenuModal = () => {
         setShowSignInModal(true);
-    };
-    const handleFreeCredits = async () => {
+      };
+    
+      const handleFreeCredits = async () => {
         try {
-            const response = await fetch('/api/assign-free-credits', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ userId: userData?.id }),
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to assign free credits');
-            }
-
-            const updatedUserData = await response.json();
-            setUserData(updatedUserData);
-            setUser(updatedUserData);
-            alert('You have received 10 free credits!');
+          const response = await fetch('/api/assign-free-credits', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ userId: userData?.id }),
+          });
+    
+          if (!response.ok) {
+            throw new Error('Failed to assign free credits');
+          }
+    
+          const updatedUserData = await response.json();
+          setUserData(updatedUserData);
+          setUser(updatedUserData);
+          alert('You have received 10 free credits!');
         } catch (error) {
-            console.error('Error assigning free credits:', error);
-            alert(`Failed to assign free credits: ${error instanceof Error ? error.message : 'An unknown error occurred'}`);
+          console.error('Error assigning free credits:', error);
+          alert(`Failed to assign free credits: ${error instanceof Error ? error.message : 'An unknown error occurred'}`);
         }
-    };
-
-    const handlePurchase = async (userId: string, promptId: string) => {
+      };
+    
+      const handlePurchase = async (userId: string, promptId: string) => {
         try {
-            const response = await fetch('/api/promptsBuy', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    userId,       // Include userId (from Clerk)
-                    promptId,     // Include promptId (selected prompt)
-                    promptTitle: 'Example Title', // Pass any other necessary data
-                    promptData: 'Example Prompt',
-                    imgSrc: 'example.jpg',
-                    creditPrice: 10,
-                    category: 'General',
-                }),
-            });
-
-            const result = await response.json();
-            const updatedUserData = result;
-            if (response.ok) {
-                alert('Purchase successful');
-                // Update isPurchased immediately in handlePurchase
-                setUserData(prevData => ({
-                    ...prevData, 
-                    ...updatedUserData, // Spread updatedUserData last to prioritize its 'id'
-                    purchasedPromptIds: [...(prevData?.purchasedPromptIds || []), promptId],
-                    isPurchased: updatedUserData.isPurchased, // assuming the API returns an object with this property
-                }));
-        
-                // Delay calling fetchAndUpdateUserData
-                setTimeout(() => {
-                  if (userData?.id) {
-                    fetchAndUpdateUserData(userData.id, promptId);
-                  }
-                }, 500); // Adjust the delay (in milliseconds) as needed
-              } else {
-                alert(result.message || 'Purchase failed');
+          const response = await fetch('/api/promptsBuy', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              userId, // Include userId (from Clerk)
+              promptId, // Include promptId (selected prompt)
+              promptTitle: 'Example Title', // Pass any other necessary data
+              promptData: 'Example Prompt',
+              imgSrc: 'example.jpg',
+              creditPrice: 10,
+              category: 'General',
+            }),
+          });
+    
+          const result = await response.json();
+          const updatedUserData = result;
+          if (response.ok) {
+            alert('Purchase successful');
+            setUserData((prevData) => ({
+              ...prevData,
+              ...updatedUserData, // Spread updatedUserData last to prioritize its 'id'
+              purchasedPromptIds: [...(prevData?.purchasedPromptIds || []), promptId],
+              isPurchased: updatedUserData.isPurchased, // assuming the API returns an object with this property
+            }));
+    
+            // Delay calling fetchAndUpdateUserData
+            setTimeout(() => {
+              if (userData?.id) {
+                fetchAndUpdateUserData(userData.id, promptId);
               }
-            } catch (error) {
-              console.error('Error purchasing prompt:', error);
-              alert('An error occurred during the purchase.');
-            }
-          };
+            }, 500); // Adjust the delay (in milliseconds) as needed
+          } else {
+            alert(result.message || 'Purchase failed');
+          }
+        } catch (error) {
+          console.error('Error purchasing prompt:', error);
+          alert('An error occurred during the purchase.');
+        }
+      };
 
     return (
         <div>
