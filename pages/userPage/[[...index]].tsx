@@ -273,13 +273,8 @@ const AppUsers: React.FC = (props) => {
       const updatedUserData = result;
       if (response.ok) {
         alert('Purchase successful');
-        setUserData((prevData) => (
-          {
-            ...prevData,
-            ...updatedUserData, // Spread updatedUserData last to prioritize its 'id'
-            purchasedPromptIds: [...(prevData?.purchasedPromptIds || []), promptId],
-            isPurchased: updatedUserData.isPurchased, // assuming the API returns an object with this property
-          }));
+        await fetchAndUpdateUserData(userData?.id ?? '', promptId ?? '');
+
         // Delay calling fetchAndUpdateUserData
         setTimeout(() => {
           if (userData?.id) {
