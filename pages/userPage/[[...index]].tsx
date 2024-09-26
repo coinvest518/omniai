@@ -65,6 +65,8 @@ const AppUsers: React.FC = (props) => {
         throw new Error('Failed to fetch user prompts');
       }
       const data = await response.json();
+      setUserPrompts(data.userPrompts); // Assuming your API response is { userPrompts: [...] }
+
       console.log('Fetched User Prompts:', data);
       return data || [];
     } catch (error) {
@@ -500,11 +502,11 @@ const AppUsers: React.FC = (props) => {
             <div className="card-grid">
 
               {activeTab === 'user-prompts' && userPrompts.length > 0 ? (
-                userPrompts.map((prompt: Prompt, index: any) => (
+                userPrompts.map((prompt: Prompt) => (
                   <GlassmorphismCard
-                    key={index}
+                    key={prompt.id}
                     imgSrc={prompt.imgSrc}
-                    promptTitle={prompt.promptTitle || prompt.promptTitle}
+                    promptTitle={prompt.promptTitle}
                     description={prompt.description}
                     onClick={() => handleCardClick(prompt, userData?.id || '')}
                     prompts={userPrompts}
@@ -514,12 +516,12 @@ const AppUsers: React.FC = (props) => {
                 ))
               ) : (
                 filteredPrompts.length > 0 ? (
-                  filteredPrompts.map((prompt, index) => (
+                  filteredPrompts.map((prompt: Prompt) => (
                     <GlassmorphismCard
-                      key={index}
+                      key={prompt.id}
                       imgSrc={prompt.imgSrc}
                       prompts={filteredPrompts}
-                      promptTitle={prompt.promptTitle || prompt.promptTitle} // Ensure this is correct
+                      promptTitle={prompt.promptTitle} // Ensure this is correct
                       description={prompt.description}
                       onClick={() => handleCardClick(prompt, userData?.id || '')}
                       isPurchased={userData?.purchasedPromptIds?.includes(prompt.id) || false}

@@ -18,17 +18,17 @@ interface ModalProps {
 }
 
 const Modal: React.FC<ModalProps> = ({
-  isOpen,
-  onClose,
-  promptTitle,
-  description,
-  promptData,
-  onPurchase,
-  creditPrice,
-  isPurchased,
-  promptId,
-  userId,
-}) => {
+      isOpen,
+      onClose,
+      promptTitle,
+      description,
+      promptData,
+      onPurchase,
+      creditPrice,
+      isPurchased,
+      promptId,
+      userId,
+    }) => {
   const { user } = useUser(); // Directly access the user
   const [localPromptData, setLocalPromptData] = useState(promptData);
   const handleCopyClick = () => {
