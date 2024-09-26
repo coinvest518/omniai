@@ -249,7 +249,7 @@ const AppUsers: React.FC = (props) => {
         }
       };
     
-      const handlePurchase = async (userId: string, promptId: string) => {
+      const handlePurchase = async (promptId: string) => {
         try {
           const response = await fetch('/api/promptsBuy', {
             method: 'POST',
@@ -530,7 +530,7 @@ const AppUsers: React.FC = (props) => {
                                     creditPrice={selectedPrompt.creditPrice}
                                     description={selectedPrompt.description}
                                     promptData={selectedPrompt.promptData}
-                                    onPurchase={() => handlePurchase(user?.id || '', selectedPrompt.id || '')} // Pass both userId and promptId
+                                    onPurchase={() => handlePurchase(selectedPrompt.id || '')} // Pass both userId and promptId
                                     showCopyButton={showCopyButton}
                                     isPurchased={userData?.purchasedPromptIds?.includes(selectedPrompt.id) || false}
                                     promptId={selectedPrompt.id ?? ''}

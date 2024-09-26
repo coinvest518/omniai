@@ -13,6 +13,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     const user = await prisma.user.findUnique({
       where: { clerkUserId: userId as string },
+      select: { purchasedPromptIds: true },
     });
 
     if (!user) {
@@ -20,8 +21,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     const userPrompts = await prisma.userPrompt.findMany({
-      where: { userId: user.id },
+      where: { clerkUserId: userId as string},
+      select: { id: true },
+
     });
+
+    
 
     return res.status(200).json(userPrompts);
   } catch (error) {
