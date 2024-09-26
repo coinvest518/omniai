@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useUser } from '@clerk/nextjs';
 import './Modal.css';
 import { copyToClipboard } from '~/common/util/clipboardUtils';
@@ -18,19 +18,23 @@ interface ModalProps {
 }
 
 const Modal: React.FC<ModalProps> = ({
-      isOpen,
-      onClose,
-      promptTitle,
-      description,
-      promptData,
-      onPurchase,
-      creditPrice,
-      isPurchased,
-      promptId,
-      userId,
-    }) => {
+          isOpen,
+          onClose,
+          promptTitle,
+          description,
+          promptData,
+          onPurchase,
+          creditPrice,
+          isPurchased,
+          promptId,
+          userId,
+        }) => {
   const { user } = useUser(); // Directly access the user
   const [localPromptData, setLocalPromptData] = useState(promptData);
+
+  useEffect(() => {
+    setLocalPromptData(promptData);
+  }, [promptData]);
   const handleCopyClick = () => {
     copyToClipboard(promptData, 'Prompt Data Copied to Clipboard!');
   };
