@@ -68,7 +68,7 @@ const AppUsers: React.FC = (props) => {
       setUserPrompts(data.userPrompts); // Assuming your API response is { userPrompts: [...] }
 
       console.log('Fetched User Prompts:', data);
-      return data || [];
+      return data.userPrompts || [];
     } catch (error) {
       console.error('Error fetching user prompts:', error);
       return [];
@@ -510,7 +510,6 @@ const AppUsers: React.FC = (props) => {
                     description={prompt.description}
                     onClick={() => handleCardClick(prompt, userData?.id || '')}
                     prompts={userPrompts}
-
                     isPurchased={userData?.purchasedPromptIds?.includes(prompt.id) || false}
                   />
                 ))
