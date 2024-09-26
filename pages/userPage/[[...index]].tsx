@@ -125,7 +125,7 @@ const AppUsers: React.FC = (props) => {
               console.error('Error data:', errorData);
               if (errorData.message === 'User not found') {
                 alert('User not found. Please sign in again.');
-                return;
+                return null;
               }
               throw new Error(errorData.message || 'Failed to fetch updated user data');
             }
@@ -257,41 +257,49 @@ const AppUsers: React.FC = (props) => {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              userId, // Include userId (from Clerk)
-              promptId, // Include promptId (selected prompt)
-              promptTitle: 'Example Title', // Pass any other necessary data
-              promptData: 'Example Prompt',
-              imgSrc: 'example.jpg',
-              creditPrice: 10,
-              category: 'General',
+              userId: userData?.id,
+              promptId,
+              promptTitle: selectedPrompt?.promptTitle,
+              promptData: selectedPrompt?.promptData,
+              imgSrc: selectedPrompt?.imgSrc,
+              creditPrice: selectedPrompt?.creditPrice,
+              category: selectedPrompt?.category,
             }),
-          });
+            });
     
           const result = await response.json();
           const updatedUserData = result;
           if (response.ok) {
             alert('Purchase successful');
-            setUserData((prevData) => ({
+            setUserData((prevData) => (
+              {
               ...prevData,
               ...updatedUserData, // Spread updatedUserData last to prioritize its 'id'
               purchasedPromptIds: [...(prevData?.purchasedPromptIds || []), promptId],
               isPurchased: updatedUserData.isPurchased, // assuming the API returns an object with this property
             }));
-    
-            // Delay calling fetchAndUpdateUserData
-            setTimeout(() => {
-              if (userData?.id) {
-                fetchAndUpdateUserData(userData.id, promptId);
+          // Delay calling fetchAndUpdateUserData
+          setTimeout(async () => {
+            if (userData?.id) {
+              const updatedData = await fetchAndUpdateUserData(userData.id, promptId);
+              if (updatedData) {
+                setUserData(updatedData);
+              } else {
+                console.error('Failed to fetch updated user data');
               }
-            }, 500); // Adjust the delay (in milliseconds) as needed
-          } else {
-            alert(result.message || 'Purchase failed');
-          }
-        } catch (error) {
-          console.error('Error purchasing prompt:', error);
-          alert('An error occurred during the purchase.');
+            } else {
+              console.error('User data is not available');
+            }
+          }, 500); // Adjust the delay (in milliseconds) as needed
+        } else {
+          alert(result.message || 'Purchase failed');
         }
-      };
+      } catch (error) {
+        console.error('Error purchasing prompt:', error);
+        alert('An error occurred during the purchase.');
+      }
+    };
+    
 
     return (
         <div>
