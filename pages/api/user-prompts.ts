@@ -53,9 +53,14 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     });
 
     res.status(200).json(mappedPrompts);
-  } catch (error) {
-    console.error('Error fetching prompts:', error);
+  }catch (error) {
+    if (error instanceof Error) {
+      console.error('Error fetching prompts:', error.message, error.stack);
+    } else {
+      console.error('Unknown error:', error);
+    }
     res.status(500).json({ error: 'Failed to fetch prompts' });
+  
   } finally {
     await mongoClient.close();
   }
