@@ -66,7 +66,7 @@ const AppUsers: React.FC = (props) => {
             }
             const data = await response.json();
             console.log('Fetched User Prompts:', data);
-            return data;
+            return data || [];
         } catch (error) {
             console.error('Error fetching user prompts:', error);
             return [];
@@ -104,6 +104,15 @@ const AppUsers: React.FC = (props) => {
     useEffect(() => {
         fetchUserData();
     }, [fetchUserData, refreshUserData]);
+    
+    useEffect(() => {
+        if (userData && userData.id) {
+            fetchUserPrompts(userData.id).then(data => {
+                console.log('Setting User Prompts:', data); // Log state update
+                setUserPrompts(data);
+            });
+        }
+    }, [fetchUserPrompts, userData]);
 
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
