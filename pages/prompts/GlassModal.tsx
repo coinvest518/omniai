@@ -56,6 +56,7 @@ const Modal: React.FC<ModalProps> = ({
     onPurchase(userId, promptId); // Use Clerk's user ID directly
   };
   return (
+    isOpen && (
     <div className="modal-overlay">
       <div className="modal-content">
         <h2>{promptTitle}</h2>
@@ -75,6 +76,7 @@ const Modal: React.FC<ModalProps> = ({
         <button onClick={onClose}>Close</button>
       </div>
     </div>
+    )
   );
 
 };
