@@ -82,7 +82,7 @@ const AppUsers: React.FC = (props) => {
       console.error('Error fetching user prompts:', error);
       return [];
     }
-  }, [userData?.purchasedPromptIds]);
+  }, []);
 
   const fetchUserData = useCallback(async () => {
     if (!isSignedIn || !userId) {
@@ -116,13 +116,13 @@ const AppUsers: React.FC = (props) => {
         setIsLoading(false);
       }
     
-  }, [isSignedIn, userId, setUser, userPrompts.length, fetchUserPrompts]);
+  }, [isSignedIn, userId, setUser]);
 
   useEffect(() => {
     if (isSignedIn && userId) {
       fetchUserData();
     }
-  }, [isSignedIn, userId, fetchUserData]);
+  }, [isSignedIn, userId]);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
