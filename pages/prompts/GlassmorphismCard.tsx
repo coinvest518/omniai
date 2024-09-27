@@ -16,7 +16,7 @@ interface GlassmorphismCardProps {
 }
 
 
-const GlassmorphismCard: React.FC<GlassmorphismCardProps> = ({ imgSrc, promptTitle, description, onClick,  }) => {
+const GlassmorphismCard: React.FC<GlassmorphismCardProps> = ({ imgSrc, promptTitle, description, onClick, isPurchased }) => {
     
   
   return (

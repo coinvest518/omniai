@@ -268,24 +268,19 @@ const AppUsers: React.FC = (props) => {
       if (response.ok) {
         alert('Purchase successful');
         const isPurchased = await fetchAndUpdateUserData(userData?.id ?? '', promptId ?? '');
-        setIsModalOpen(true);
-        setSelectedPrompt({ ...selectedPrompt, isPurchased: isPurchased } as Prompt);
-  
-        
-        setTimeout(() => {
-          if (userData?.id) {
-            setUserData((prevData) => ({
+       
+       setUserData((prevData) => ({
               ...updatedUserData,
               ...prevData,
               purchasedPromptIds: [...(prevData?.purchasedPromptIds || []), promptId],
             }));
+
+            setIsModalOpen(true);
+            setSelectedPrompt({ ...selectedPrompt, isPurchased: isPurchased } as Prompt);
           } else {
             console.error('User data is not available');
           }
-        }, 500);
-      } else {
-        alert(result.message || 'Purchase failed');
-      }
+      
     } catch (error) {
       console.error('Error purchasing prompt:', error);
       alert('An error occurred during the purchase.');
@@ -530,7 +525,6 @@ const AppUsers: React.FC = (props) => {
                   promptData={selectedPrompt.promptData}
                   onPurchase={() => handlePurchase(selectedPrompt.id || '')} // Pass both userId and promptId
                   showCopyButton={showCopyButton}
-                  isPurchased={userData?.purchasedPromptIds?.includes(selectedPrompt.id) || false}
                   promptId={selectedPrompt.id ?? ''}
                   userId={userData?.id ?? ''}
                 />
