@@ -3,6 +3,7 @@
 
 // promptsData.ts
 export interface Prompt {
+  isPurchased?: boolean;
   id?: string; // Change to ObjectId
   promptTitle: string;
   description: string;

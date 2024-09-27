@@ -62,7 +62,10 @@ const AppUsers: React.FC = (props) => {
         throw new Error('Failed to fetch user prompts');
       }
       const data = await response.json();
-      setUserPrompts(data.userPrompts);
+      setUserPrompts(data.userPrompts.map((prompt: { id: string | undefined; }) => ({
+        ...prompt,
+        isPurchased: userData?.purchasedPromptIds?.includes(prompt.id) || false 
+      })));
 
       console.log('Fetched User Prompts:', data);
       return data.userPrompts || [];
@@ -70,7 +73,7 @@ const AppUsers: React.FC = (props) => {
       console.error('Error fetching user prompts:', error);
       return [];
     }
-  }, []);
+  }, [userData?.purchasedPromptIds]);
 
   const fetchUserData = useCallback(async () => {
     if (isSignedIn && userId) {
@@ -509,8 +512,9 @@ const AppUsers: React.FC = (props) => {
                       promptTitle={prompt.promptTitle} // Ensure this is correct
                       description={prompt.description}
                       onClick={() => handleCardClick(prompt, userData?.id || '')}
-                      isPurchased={userData?.purchasedPromptIds?.includes(prompt.id) || false}                    />
-                  ))
+                      isPurchased={userData?.purchasedPromptIds?.includes(prompt.id) || false} 
+                      />
+                    ))
                 ) : (
                   <p>No prompts available for this user.</p>
                 )
@@ -527,6 +531,8 @@ const AppUsers: React.FC = (props) => {
                   showCopyButton={showCopyButton}
                   promptId={selectedPrompt.id ?? ''}
                   userId={userData?.id ?? ''}
+                  isPurchased={userData?.purchasedPromptIds?.includes(selectedPrompt.id) || false} 
+
                 />
               )}
             </div>
