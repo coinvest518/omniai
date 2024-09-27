@@ -503,6 +503,7 @@ const AppUsers: React.FC = (props) => {
                     imgSrc={prompt.imgSrc}
                     promptTitle={prompt.promptTitle}
                     description={prompt.description}
+                    promptData={userData?.purchasedPromptIds?.includes(prompt.id) ? prompt.promptData : undefined} 
                     onClick={() => handleCardClick(prompt, userData?.id || '')}
                     prompts={userPrompts}
                     isPurchased={userData?.purchasedPromptIds?.includes(prompt.id) || false}
