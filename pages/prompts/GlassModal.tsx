@@ -19,23 +19,24 @@ interface ModalProps {
 }
 
 const Modal: React.FC<ModalProps> = ({
-              isOpen,
-              onClose,
-              promptTitle,
-              description,
-              promptData,
-              onPurchase,
-              creditPrice,
-              isPurchased,
-              promptId,
-              userId,
-            }) => {
+                  isOpen,
+                  onClose,
+                  promptTitle,
+                  description,
+                  promptData,
+                  onPurchase,
+                  creditPrice,
+                  isPurchased,
+                  promptId,
+                  userId,
+                }) => {
   const { user } = useUser(); // Directly access the user
   const [localPromptData, setLocalPromptData] = useState(promptData);
 
   useEffect(() => {
     setLocalPromptData(promptData);
   }, [promptData]);
+
   const handleCopyClick = () => {
     if (localPromptData) { // Only copy if localPromptData exists
       copyToClipboard(localPromptData, 'Prompt Data Copied to Clipboard!');
@@ -54,7 +55,7 @@ const Modal: React.FC<ModalProps> = ({
         <h2>{promptTitle}</h2>
         <p>Credit Price: {creditPrice}</p>
         <p>Description: {description}</p>
-        {isPurchased && localPromptData && ( 
+        {localPromptData && ( 
           <div>
             <p>Prompt Data: {localPromptData}</p>
             <button onClick={handleCopyClick}>Copy to Clipboard</button>

@@ -51,7 +51,6 @@ const AppUsers: React.FC = (props) => {
   const [prevCredits, setPrevCredits] = useState<number | null>(null);
   const [prevTokens, setPrevTokens] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState('all');
-  const [error, setError] = useState<string | null>(null);
   const [userPrompts, setUserPrompts] = useState<Prompt[]>([]);
   const [showSignInModal, setShowSignInModal] = useState(false);
   const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);
@@ -512,8 +511,7 @@ const AppUsers: React.FC = (props) => {
                       promptTitle={prompt.promptTitle} // Ensure this is correct
                       description={prompt.description}
                       onClick={() => handleCardClick(prompt, userData?.id || '')}
-                      isPurchased={userData?.purchasedPromptIds?.includes(prompt.id) || false}
-                    />
+                      isPurchased={userData?.purchasedPromptIds?.includes(prompt.id) || false}                    />
                   ))
                 ) : (
                   <p>No prompts available for this user.</p>
