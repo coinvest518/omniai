@@ -55,13 +55,16 @@ const Modal: React.FC<ModalProps> = ({
         <h2>{promptTitle}</h2>
         <p>Credit Price: {creditPrice}</p>
         <p>Description: {description}</p>
-        <p>Prompt Data: {localPromptData}</p>
-        <button onClick={handleCopyClick}>Copy to Clipboard</button>
-        </div>
+        {isPurchased && ( // Conditionally render prompt data and copy button
+          <div> 
+            <p>Prompt Data: {localPromptData}</p>
+            <button onClick={handleCopyClick}>Copy to Clipboard</button>
+          </div>
+        )}
         {!isPurchased && <button onClick={() => onPurchase(userId, promptId)}>Purchase</button>}
         <button onClick={onClose}>Close</button>
       </div>
-    
+    </div>
   );
 };
 
