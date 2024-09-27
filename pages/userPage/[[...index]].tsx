@@ -528,7 +528,7 @@ const AppUsers: React.FC = (props) => {
                   description={selectedPrompt.description}
                   promptData={selectedPrompt.promptData}
                   onPurchase={() => handlePurchase(selectedPrompt.id || '')} // Pass both userId and promptId
-                  showCopyButton={showCopyButton}
+                  showCopyButton={selectedPrompt.isPurchased && activeTab === 'user-prompts' && userData?.purchasedPromptIds?.includes(selectedPrompt.id)}
                   promptId={selectedPrompt.id ?? ''}
                   userId={userData?.id ?? ''}
                   isPurchased={userData?.purchasedPromptIds?.includes(selectedPrompt.id) || false} 
