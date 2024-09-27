@@ -267,8 +267,11 @@ const AppUsers: React.FC = (props) => {
       const updatedUserData = result;
       if (response.ok) {
         alert('Purchase successful');
-        await fetchAndUpdateUserData(userData?.id ?? '', promptId ?? '');
-
+        const isPurchased = await fetchAndUpdateUserData(userData?.id ?? '', promptId ?? '');
+        setIsModalOpen(true);
+        setSelectedPrompt({ ...selectedPrompt, isPurchased: isPurchased } as Prompt);
+  
+        
         setTimeout(() => {
           if (userData?.id) {
             setUserData((prevData) => ({
