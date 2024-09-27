@@ -12,11 +12,12 @@ interface GlassmorphismCardProps {
   description: string;
   onClick: () => void;
   isPurchased?: boolean;
+  onCopyClick?: () => void;
   
 }
 
 
-const GlassmorphismCard: React.FC<GlassmorphismCardProps> = ({ imgSrc, promptTitle, description, onClick, isPurchased }) => {
+const GlassmorphismCard: React.FC<GlassmorphismCardProps> = ({ imgSrc, promptTitle, description, onClick}) => {
     
   
   return (
