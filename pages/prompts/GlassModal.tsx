@@ -33,19 +33,25 @@ const Modal: React.FC<ModalProps> = ({
                         }) => {
   const { user } = useUser(); // Directly access the user
   const [localPromptData, setLocalPromptData] = useState(promptData);
+  const [isCopied, setIsCopied] = useState(false);
 
   useEffect(() => {
     setLocalPromptData(promptData);
   }, [promptData]);
 
   const handleCopyClick = () => {
-    if (localPromptData) { // Only copy if localPromptData exists
+    if (localPromptData) {
       copyToClipboard(localPromptData, 'Prompt Data Copied to Clipboard!');
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
     }
   };
 
-  if (!isOpen || !user) return null; // Ensure modal doesn't open unless user is authenticated
-
+  useEffect(() => {
+    if (isCopied) {
+      setTimeout(() => setIsCopied(false), 2000);
+    }
+  }, [isCopied]);
   const handlePurchase = () => {
     onPurchase(userId, promptId); // Use Clerk's user ID directly
   };
@@ -57,7 +63,11 @@ const Modal: React.FC<ModalProps> = ({
         <p>Description: {description}</p>
         <p>Prompt Data: {promptData}</p>
         {isPurchased && showCopyButton && (
-          <button onClick={handleCopyClick}>Copy to Clipboard</button>
+          <div>
+          <button onClick={handleCopyClick}>
+          {isCopied ? 'Copied!' : 'Copy to Clipboard'}
+          </button>
+          </div>
         )}
         {!isPurchased && (
           <button onClick={handlePurchase}>Purchase</button>
