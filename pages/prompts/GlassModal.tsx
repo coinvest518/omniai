@@ -52,21 +52,20 @@ const Modal: React.FC<ModalProps> = ({
 
   return (
     <div className="modal-overlay">
-    <div className="modal-content">
-      <h2>{promptTitle}</h2>
-      <p>Credit Price: {creditPrice}</p>
-      <p>Description: {description}</p>
-      <p>Prompt Data: {promptData}</p>
-      {isPurchased && showCopyButton ? (
-        <button onClick={handleCopyClick}>Copy to Clipboard</button>
-      ) : (
-        <button onClick={handlePurchase}>Purchase</button>
-      )}
-      
-      <button onClick={onClose}>Close</button>
+      <div className="modal-content">
+        <h2>{promptTitle}</h2>
+        <p>Credit Price: {creditPrice}</p>
+        <p>Description: {description}</p>
+        <p>Prompt Data: {promptData}</p>
+        {isPurchased ? (
+          <button onClick={handleCopyClick}>Copy to Clipboard</button>
+        ) : (
+          <button onClick={handlePurchase}>Purchase</button>
+        )}
+        <button onClick={onClose}>Close</button>
+      </div>
     </div>
-  </div>
-);
-}
-
+  );
+                }
+                
 export default Modal;
