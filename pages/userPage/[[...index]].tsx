@@ -64,7 +64,7 @@ const AppUsers: React.FC = (props) => {
       const data = await response.json();
       setUserPrompts(data.userPrompts.map((prompt: { id: string | undefined; }) => ({
         ...prompt,
-        isPurchased: userData?.purchasedPromptIds?.includes(prompt.id) || false 
+        isPurchased: userData?.purchasedPromptIds?.includes(prompt.id) || false
       })));
 
       console.log('Fetched User Prompts:', data);
@@ -91,7 +91,11 @@ const AppUsers: React.FC = (props) => {
         setPrevTokens(userData.tokens);
 
         const fetchedUserPrompts = await fetchUserPrompts(userId);
-        setUserPrompts(fetchedUserPrompts);
+        setUserPrompts(fetchedUserPrompts.map((prompt: { id: any; }) => ({
+          ...prompt,
+          isPurchased: userData.purchasedPromptIds.includes(prompt.id)
+        })));
+
       } catch (error) {
         console.error('Error fetching user data:', error);
       } finally {
@@ -268,22 +272,23 @@ const AppUsers: React.FC = (props) => {
 
       const result = await response.json();
       const updatedUserData = result;
+
+
       if (response.ok) {
         alert('Purchase successful');
-       
-         // Update local state directly after successful purchase
-      setUserData((prevData) => ({
-        ...updatedUserData, // Data from /api/promptsBuy
-        ...prevData, 
-        purchasedPromptIds: [...(prevData?.purchasedPromptIds || []), promptId],
-      }));
 
-            setIsModalOpen(true);
-            setSelectedPrompt({ ...selectedPrompt, isPurchased: true } as Prompt); 
-          } else {
-            console.error('User data is not available');
-          }
-      
+        // Update local state directly after successful purchase
+        setUserData((prevData) => ({
+          ...updatedUserData, // Data from /api/promptsBuy
+          ...prevData,
+          purchasedPromptIds: [...(prevData?.purchasedPromptIds || []), promptId],
+        }));
+        setSelectedPrompt({ ...selectedPrompt, isPurchased: true } as Prompt);
+        setIsModalOpen(false); // Close the modal here
+      } else {
+        console.error('User data is not available');
+      }
+
     } catch (error) {
       console.error('Error purchasing prompt:', error);
       alert('An error occurred during the purchase.');
@@ -512,9 +517,9 @@ const AppUsers: React.FC = (props) => {
                       promptTitle={prompt.promptTitle} // Ensure this is correct
                       description={prompt.description}
                       onClick={() => handleCardClick(prompt, userData?.id || '')}
-                      isPurchased={userData?.purchasedPromptIds?.includes(prompt.id) || false} 
-                      />
-                    ))
+                      isPurchased={userData?.purchasedPromptIds?.includes(prompt.id) || false}
+                    />
+                  ))
                 ) : (
                   <p>No prompts available for this user.</p>
                 )
@@ -527,11 +532,11 @@ const AppUsers: React.FC = (props) => {
                   creditPrice={selectedPrompt.creditPrice}
                   description={selectedPrompt.description}
                   promptData={selectedPrompt.promptData}
-                  onPurchase={() => handlePurchase(selectedPrompt.id || '')} // Pass both userId and promptId
+                  onPurchase={() => handlePurchase(selectedPrompt.id || '')}
                   showCopyButton={selectedPrompt.isPurchased && activeTab === 'user-prompts' && userData?.purchasedPromptIds?.includes(selectedPrompt.id)}
                   promptId={selectedPrompt.id ?? ''}
                   userId={userData?.id ?? ''}
-                  isPurchased={userData?.purchasedPromptIds?.includes(selectedPrompt.id) || false} 
+                  isPurchased={userData?.purchasedPromptIds?.includes(selectedPrompt.id) || false}
 
                 />
               )}
