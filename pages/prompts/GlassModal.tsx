@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useUser } from '@clerk/nextjs';
 import './Modal.css';
 import { copyToClipboard } from '~/common/util/clipboardUtils';
+import { Prompt } from '../../data/promptsData';
 
 interface ModalProps {
   isOpen: boolean;
@@ -9,7 +10,7 @@ interface ModalProps {
   promptTitle: string;
   creditPrice: number;
   description: string;
-  promptData: string;
+  promptData?: string;
   onPurchase: (userId: string, promptId: string) => void;
   showCopyButton: boolean;
   isPurchased?: boolean;
@@ -18,17 +19,17 @@ interface ModalProps {
 }
 
 const Modal: React.FC<ModalProps> = ({
-          isOpen,
-          onClose,
-          promptTitle,
-          description,
-          promptData,
-          onPurchase,
-          creditPrice,
-          isPurchased,
-          promptId,
-          userId,
-        }) => {
+              isOpen,
+              onClose,
+              promptTitle,
+              description,
+              promptData,
+              onPurchase,
+              creditPrice,
+              isPurchased,
+              promptId,
+              userId,
+            }) => {
   const { user } = useUser(); // Directly access the user
   const [localPromptData, setLocalPromptData] = useState(promptData);
 
@@ -36,7 +37,9 @@ const Modal: React.FC<ModalProps> = ({
     setLocalPromptData(promptData);
   }, [promptData]);
   const handleCopyClick = () => {
-    copyToClipboard(promptData, 'Prompt Data Copied to Clipboard!');
+    if (localPromptData) { // Only copy if localPromptData exists
+      copyToClipboard(localPromptData, 'Prompt Data Copied to Clipboard!');
+    }
   };
 
   if (!isOpen || !user) return null; // Ensure modal doesn't open unless user is authenticated
@@ -51,11 +54,13 @@ const Modal: React.FC<ModalProps> = ({
         <h2>{promptTitle}</h2>
         <p>Credit Price: {creditPrice}</p>
         <p>Description: {description}</p>
-        <p>Prompt Data: {localPromptData}</p>
-        {!isPurchased && <button onClick={handlePurchase}>Purchase</button>}
-        {isPurchased && (
-          <button onClick={handleCopyClick}>Copy to Clipboard</button>
+        {isPurchased && localPromptData && ( 
+          <div>
+            <p>Prompt Data: {localPromptData}</p>
+            <button onClick={handleCopyClick}>Copy to Clipboard</button>
+          </div>
         )}
+       {!isPurchased && <button onClick={() => onPurchase(userId, promptId)}>Purchase</button>}
         <button onClick={onClose}>Close</button>
       </div>
     </div>

@@ -30,6 +30,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           description: true,
           creditPrice: true,
           category: true,
+          promptData: true
         },
       });
   

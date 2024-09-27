@@ -17,8 +17,6 @@ import styles from './AppUsers.module.css';
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY as string);
 
 
-
-
 interface UserData {
   id: string;
   email: string;
@@ -28,7 +26,7 @@ interface UserData {
   credits: number;
   tokens: number;
   stripeSubscriptionId: string | null;
-  purchasedPromptIds: Prompt["id"][]; // Add this line
+  purchasedPromptIds: Prompt["id"][];
   isPurchased?: boolean;
   promptTitle?: string;
   creditPrice?: number;
@@ -49,7 +47,7 @@ const AppUsers: React.FC = (props) => {
   const [refreshUserData, setRefreshUserData] = useState(false);
   const [selectedPrompt, setSelectedPrompt] = useState<Prompt | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [showCopyButton, setShowCopyButton] = useState(false); // State 
+  const [showCopyButton, setShowCopyButton] = useState(false);
   const [prevCredits, setPrevCredits] = useState<number | null>(null);
   const [prevTokens, setPrevTokens] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState('all');
@@ -65,7 +63,7 @@ const AppUsers: React.FC = (props) => {
         throw new Error('Failed to fetch user prompts');
       }
       const data = await response.json();
-      setUserPrompts(data.userPrompts); // Assuming your API response is { userPrompts: [...] }
+      setUserPrompts(data.userPrompts);
 
       console.log('Fetched User Prompts:', data);
       return data.userPrompts || [];
@@ -90,7 +88,6 @@ const AppUsers: React.FC = (props) => {
         setPrevCredits(userData.credits);
         setPrevTokens(userData.tokens);
 
-        // Fetch user prompts after getting user data
         const fetchedUserPrompts = await fetchUserPrompts(userId);
         setUserPrompts(fetchedUserPrompts);
       } catch (error) {
@@ -144,7 +141,6 @@ const AppUsers: React.FC = (props) => {
         }));
         setUser(updatedUserData);
 
-        // Fetch and update userPrompts immediately after userData is updated
         const updatedPrompts = await fetchUserPrompts(userId);
         setUserPrompts(updatedPrompts);
         alert('Purchase successful!');
@@ -164,7 +160,7 @@ const AppUsers: React.FC = (props) => {
   }, []);
 
   const handleCardClick = (prompt: Prompt, userId: string) => {
-    console.log('Selected Prompt:', prompt); // Log selected prompt
+    console.log('Selected Prompt:', prompt);
     setSelectedPrompt(() => prompt);
     setIsModalOpen(true);
   };
@@ -186,7 +182,6 @@ const AppUsers: React.FC = (props) => {
       const { sessionId } = await response.json();
       const stripe = await stripePromise;
 
-      // Redirect to Stripe for payment confirmation
       if (stripe) {
         const result = await stripe.redirectToCheckout({ sessionId });
         if (result.error) {
@@ -275,18 +270,17 @@ const AppUsers: React.FC = (props) => {
         alert('Purchase successful');
         await fetchAndUpdateUserData(userData?.id ?? '', promptId ?? '');
 
-        // Delay calling fetchAndUpdateUserData
         setTimeout(() => {
           if (userData?.id) {
             setUserData((prevData) => ({
-              ...updatedUserData, // Spread updatedUserData first to prioritize its values
-              ...prevData, // Then spread prevData to fill in any missing properties
+              ...updatedUserData,
+              ...prevData,
               purchasedPromptIds: [...(prevData?.purchasedPromptIds || []), promptId],
             }));
           } else {
             console.error('User data is not available');
           }
-        }, 500); // Adjust the delay (in milliseconds) as needed // Adjust the delay (in milliseconds) as needed
+        }, 500);
       } else {
         alert(result.message || 'Purchase failed');
       }
