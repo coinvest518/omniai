@@ -12,25 +12,25 @@ interface ModalProps {
   description: string;
   promptData?: string;
   onPurchase: (userId: string, promptId: string) => void;
-  showCopyButton?: boolean;
+  showCopyButton: boolean;
   isPurchased: boolean;
   promptId: string;
   userId: string;
 }
 
 const Modal: React.FC<ModalProps> = ({
-                                      isOpen,
-                                      onClose,
-                                      promptTitle,
-                                      description,
-                                      promptData,
-                                      onPurchase,
-                                      creditPrice,
-                                      isPurchased,
-                                      promptId,
-                                      showCopyButton,
-                                      userId,
-                                    }) => {
+          isOpen,
+          onClose,
+          promptTitle,
+          description,
+          promptData,
+          onPurchase,
+          creditPrice,
+          isPurchased,
+          promptId,
+          showCopyButton,
+          userId,
+        }) => {
   const { user } = useUser(); // Directly access the user
   const [localPromptData, setLocalPromptData] = useState(promptData);
 
@@ -56,8 +56,8 @@ const Modal: React.FC<ModalProps> = ({
         <h2>{promptTitle}</h2>
         <p>Credit Price: {creditPrice}</p>
         <p>Description: {description}</p>
-        <p>Prompt Data: {promptData}</p> 
-        {isPurchased && showCopyButton ? (
+        <p>Prompt Data: {promptData}</p>
+        {!isPurchased && showCopyButton ? (
           <button onClick={handleCopyClick}>Copy to Clipboard</button>
         ) : (
           <button onClick={handlePurchase}>Purchase</button>

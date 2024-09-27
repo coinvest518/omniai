@@ -260,8 +260,10 @@ const AppUsers: React.FC = (props) => {
         isPurchased: true,
       }) as Prompt);
 
-      setShowCopyButton(true);
-      setIsModalOpen(false);
+      console.log("Purchase successful - Setting showCopyButton to true");
+    setShowCopyButton(true); 
+    console.log("showCopyButton state:", showCopyButton); // Check if it's actually true
+    setIsModalOpen(false); 
 
       // Refresh user data
       await fetchUserData();
@@ -278,11 +280,14 @@ const AppUsers: React.FC = (props) => {
     alert('An error occurred during the purchase.');
   }
 };
-  useEffect(() => {
-    if (selectedPrompt?.isPurchased) {
-      setShowCopyButton(true);
-    }
-  }, [selectedPrompt]);
+useEffect(() => {
+  console.log("selectedPrompt changed:", selectedPrompt);
+  console.log("isPurchased:", selectedPrompt?.isPurchased);
+  if (selectedPrompt?.isPurchased) {
+    console.log("Setting showCopyButton to true inside useEffect");
+    setShowCopyButton(true);
+  }
+}, [selectedPrompt]); 
 
 
   return (
@@ -494,6 +499,7 @@ const AppUsers: React.FC = (props) => {
                     onClick={() => handleCardClick(prompt, userData?.id || '')}
                     prompts={userPrompts}
                     isPurchased={userData?.purchasedPromptIds?.includes(prompt.id) || false}
+                    
                   />
                 ))
               ) : (
@@ -526,10 +532,9 @@ const AppUsers: React.FC = (props) => {
                   promptId={selectedPrompt.id ?? ''}
                   userId={userData?.id ?? ''}
                   isPurchased={userData?.purchasedPromptIds?.includes(selectedPrompt.id) || false}
-                >
+                />
                   
 
-                </Modal>
                 
               )}
             </div>
