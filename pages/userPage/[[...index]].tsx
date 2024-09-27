@@ -12,6 +12,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import SignInModal from './SignInModal';
 import styles from './AppUsers.module.css';
+import { copyToClipboard } from '~/common/util/clipboardUtils';
 
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY as string);
@@ -82,7 +83,7 @@ const AppUsers: React.FC = (props) => {
       console.error('Error fetching user prompts:', error);
       return [];
     }
-  }, []);
+  }, [userData?.purchasedPromptIds]);
 
   const fetchUserData = useCallback(async () => {
     if (!isSignedIn || !userId) {
@@ -116,13 +117,13 @@ const AppUsers: React.FC = (props) => {
         setIsLoading(false);
       }
     
-  }, [isSignedIn, userId, setUser]);
+  }, [isSignedIn, userId, setUser, userPrompts.length, fetchUserPrompts]);
 
   useEffect(() => {
     if (isSignedIn && userId) {
       fetchUserData();
     }
-  }, [isSignedIn, userId]);
+  }, [fetchUserData, isSignedIn, userId]);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -285,20 +286,25 @@ const AppUsers: React.FC = (props) => {
       });
 
       const result = await response.json();
-      const updatedUserData = result;
 
 
       if (response.ok) {
         alert('Purchase successful');
+        
 
-        // Update local state directly after successful purchase
-        setUserData((prevData) => ({
-          ...updatedUserData, // Data from /api/promptsBuy
-          ...prevData,
-          purchasedPromptIds: [...(prevData?.purchasedPromptIds || []), promptId],
-        }));
-        setSelectedPrompt({ ...selectedPrompt, isPurchased: true } as Prompt);
-        setIsModalOpen(false); // Close the modal here
+        setSelectedPrompt((prevPrompt) => ({
+          ...prevPrompt,
+          isPurchased: true,
+        }) as Prompt);
+
+
+
+        setShowCopyButton(true); 
+        setIsModalOpen(false);
+
+
+        await fetchAndUpdateUserData(userData?.id || '', promptId); 
+
       } else {
         console.error('User data is not available');
       }
@@ -308,6 +314,11 @@ const AppUsers: React.FC = (props) => {
       alert('An error occurred during the purchase.');
     }
   };
+  useEffect(() => {
+    if (selectedPrompt?.isPurchased) {
+      setShowCopyButton(true);
+    }
+  }, [selectedPrompt]);
 
 
   return (
