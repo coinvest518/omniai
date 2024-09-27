@@ -277,7 +277,7 @@ const AppUsers: React.FC = (props) => {
     }
   } catch (error) {
     console.error('Error purchasing prompt:', error);
-    alert('An error occurred during the purchase.');
+    alert('You dont have enough credits');
   }
 };
 useEffect(() => {
