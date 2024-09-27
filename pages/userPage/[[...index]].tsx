@@ -267,16 +267,16 @@ const AppUsers: React.FC = (props) => {
       const updatedUserData = result;
       if (response.ok) {
         alert('Purchase successful');
-        const isPurchased = await fetchAndUpdateUserData(userData?.id ?? '', promptId ?? '');
        
-       setUserData((prevData) => ({
-              ...updatedUserData,
-              ...prevData,
-              purchasedPromptIds: [...(prevData?.purchasedPromptIds || []), promptId],
-            }));
+         // Update local state directly after successful purchase
+      setUserData((prevData) => ({
+        ...updatedUserData, // Data from /api/promptsBuy
+        ...prevData, 
+        purchasedPromptIds: [...(prevData?.purchasedPromptIds || []), promptId],
+      }));
 
             setIsModalOpen(true);
-            setSelectedPrompt({ ...selectedPrompt, isPurchased: isPurchased } as Prompt);
+            setSelectedPrompt({ ...selectedPrompt, isPurchased: true } as Prompt); 
           } else {
             console.error('User data is not available');
           }
