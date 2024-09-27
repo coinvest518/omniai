@@ -19,18 +19,18 @@ interface ModalProps {
 }
 
 const Modal: React.FC<ModalProps> = ({
-          isOpen,
-          onClose,
-          promptTitle,
-          description,
-          promptData,
-          onPurchase,
-          creditPrice,
-          isPurchased,
-          promptId,
-          showCopyButton,
-          userId,
-        }) => {
+              isOpen,
+              onClose,
+              promptTitle,
+              description,
+              promptData,
+              onPurchase,
+              creditPrice,
+              isPurchased,
+              promptId,
+              showCopyButton,
+              userId,
+            }) => {
   const { user } = useUser(); // Directly access the user
   const [localPromptData, setLocalPromptData] = useState(promptData);
 
@@ -57,7 +57,7 @@ const Modal: React.FC<ModalProps> = ({
         <p>Credit Price: {creditPrice}</p>
         <p>Description: {description}</p>
         <p>Prompt Data: {promptData}</p>
-        {!isPurchased && showCopyButton ? (
+        {isPurchased ? (
           <button onClick={handleCopyClick}>Copy to Clipboard</button>
         ) : (
           <button onClick={handlePurchase}>Purchase</button>
