@@ -531,7 +531,7 @@ useEffect(() => {
                   showCopyButton={showCopyButton}
                   promptId={selectedPrompt.id ?? ''}
                   userId={userData?.id ?? ''}
-                  isPurchased={userData?.purchasedPromptIds?.includes(selectedPrompt.id) || false}
+                  isPurchased={selectedPrompt?.isPurchased || false}
                 />
                   
 
