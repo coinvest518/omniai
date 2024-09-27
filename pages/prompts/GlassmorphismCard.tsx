@@ -8,13 +8,15 @@ import Link from 'next/link';
 interface GlassmorphismCardProps {
   imgSrc: string;
   promptTitle: string;
-  prompts: Prompt[]; 
+  prompts: Prompt[];
   description: string;
-  onClick: () => void; 
+  onClick: () => void;
   isPurchased?: boolean;
+  
 }
 
-const GlassmorphismCard: React.FC<GlassmorphismCardProps> = ({ imgSrc, promptTitle, description, onClick }) => {
+
+const GlassmorphismCard: React.FC<GlassmorphismCardProps> = ({ imgSrc, promptTitle, description, onClick,  }) => {
     
   
   return (
