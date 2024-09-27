@@ -56,11 +56,10 @@ const Modal: React.FC<ModalProps> = ({
         <p>Credit Price: {creditPrice}</p>
         <p>Description: {description}</p>
         <p>Prompt Data: {promptData}</p>
-        {isPurchased ? (
-          showCopyButton ? (
-            <button onClick={handleCopyClick}>Copy to Clipboard</button>
-          ) : null
-        ) : (
+        {isPurchased && showCopyButton && (
+          <button onClick={handleCopyClick}>Copy to Clipboard</button>
+        )}
+        {!isPurchased && (
           <button onClick={handlePurchase}>Purchase</button>
         )}
         <button onClick={onClose}>Close</button>
