@@ -56,18 +56,27 @@ const AppUsers: React.FC = (props) => {
   const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);
 
   const fetchUserPrompts = useCallback(async (userId: string) => {
+    if (!userId) return []; // Early return if no userId
+  
     try {
       const response = await fetch(`/api/user-prompts?userId=${userId}`);
       if (!response.ok) {
         throw new Error('Failed to fetch user prompts');
       }
       const data = await response.json();
-      setUserPrompts(data.userPrompts.map((prompt: { id: string | undefined; }) => ({
-        ...prompt,
-        isPurchased: userData?.purchasedPromptIds?.includes(prompt.id) || false
-      })));
-
-      console.log('Fetched User Prompts:', data);
+  
+      setUserPrompts(prevPrompts => {
+        const newPrompts = data.userPrompts.map((prompt: { id: string | undefined; }) => ({
+          ...prompt,
+          isPurchased: userData?.purchasedPromptIds?.includes(prompt.id) || false
+        }));
+        // Avoid re-setting state if prompts have not changed
+        if (JSON.stringify(prevPrompts) !== JSON.stringify(newPrompts)) {
+          return newPrompts;
+        }
+        return prevPrompts;
+      });
+  
       return data.userPrompts || [];
     } catch (error) {
       console.error('Error fetching user prompts:', error);
@@ -76,7 +85,13 @@ const AppUsers: React.FC = (props) => {
   }, [userData?.purchasedPromptIds]);
 
   const fetchUserData = useCallback(async () => {
-    if (isSignedIn && userId) {
+    if (!isSignedIn || !userId) {
+      console.error('User is not signed in or userId is missing.');
+      return;
+    }
+    
+
+
       setIsLoading(true);
       try {
         const userDataResponse = await fetch(`/api/user-data?userId=${userId}`);
@@ -90,19 +105,18 @@ const AppUsers: React.FC = (props) => {
         setPrevCredits(userData.credits);
         setPrevTokens(userData.tokens);
 
-        const fetchedUserPrompts = await fetchUserPrompts(userId);
-        setUserPrompts(fetchedUserPrompts.map((prompt: { id: any; }) => ({
-          ...prompt,
-          isPurchased: userData.purchasedPromptIds.includes(prompt.id)
-        })));
+        if (!userPrompts.length) {
+          const fetchedUserPrompts = await fetchUserPrompts(userId);
+          setUserPrompts(fetchedUserPrompts);
+        }
 
       } catch (error) {
         console.error('Error fetching user data:', error);
       } finally {
         setIsLoading(false);
       }
-    }
-  }, [isSignedIn, userId, setUser, fetchUserPrompts]);
+    
+  }, [isSignedIn, userId, setUser, userPrompts.length, fetchUserPrompts]);
 
   useEffect(() => {
     if (isSignedIn && userId) {
