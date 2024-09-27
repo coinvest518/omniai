@@ -83,7 +83,7 @@ const AppUsers: React.FC = (props) => {
       console.error('Error fetching user prompts:', error);
       return [];
     }
-  }, []);
+  }, [userData?.purchasedPromptIds]);
 
   const fetchUserData = useCallback(async () => {
     if (!isSignedIn || !userId) {
@@ -143,10 +143,6 @@ const AppUsers: React.FC = (props) => {
         if (!userDataResponse.ok) {
           const errorData = await userDataResponse.json();
           console.error('Error data:', errorData);
-          if (errorData.message === 'User not found') {
-            alert('User not found. Please sign in again.');
-            return null;
-          }
           throw new Error(errorData.message || 'Failed to fetch updated user data');
         }
         const updatedUserData = await userDataResponse.json();
@@ -182,9 +178,13 @@ const AppUsers: React.FC = (props) => {
 
   const handleCardClick = (prompt: Prompt, userId: string) => {
     console.log('Selected Prompt:', prompt);
-    setSelectedPrompt(() => prompt);
+    setSelectedPrompt(() => ({
+      ...prompt,
+      isPurchased: userData?.purchasedPromptIds?.includes(prompt.id) || false
+    }));
     setIsModalOpen(true);
   };
+  
 
   const handleCreditPurchase = async (priceId: string) => {
     try {
@@ -558,7 +558,8 @@ const AppUsers: React.FC = (props) => {
                   description={selectedPrompt.description}
                   promptData={selectedPrompt.promptData}
                   onPurchase={() => handlePurchase(selectedPrompt.id || '')}
-                  showCopyButton={selectedPrompt.isPurchased && activeTab === 'user-prompts' && userData?.purchasedPromptIds?.includes(selectedPrompt.id)}
+                  showCopyButton={selectedPrompt.isPurchased || userData?.purchasedPromptIds?.includes(selectedPrompt.id)}
+
                   promptId={selectedPrompt.id ?? ''}
                   userId={userData?.id ?? ''}
                   isPurchased={userData?.purchasedPromptIds?.includes(selectedPrompt.id) || false}
