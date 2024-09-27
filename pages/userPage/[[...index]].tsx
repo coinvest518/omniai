@@ -254,13 +254,20 @@ const AppUsers: React.FC = (props) => {
     const result = await response.json();
 
     if (response.ok) {
-      alert('Purchase successful');
+      alert('Prompt Purchase successful');
       setSelectedPrompt((prevPrompt) => ({
         ...prevPrompt,
         isPurchased: true,
       }) as Prompt);
 
-      console.log("Purchase successful - Setting showCopyButton to true");
+       // Update userPrompts with the purchased status
+       setUserPrompts(prevPrompts => 
+        prevPrompts.map(p => 
+          p.id === promptId ? { ...p, isPurchased: true } : p
+        )
+      );
+
+    console.log("Purchase successful - Setting showCopyButton to true");
     setShowCopyButton(true); 
     console.log("showCopyButton state:", showCopyButton); // Check if it's actually true
     setIsModalOpen(false); 
