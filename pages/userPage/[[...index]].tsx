@@ -147,7 +147,7 @@ const AppUsers: React.FC = (props) => {
     setSelectedPrompt(() => ({
       ...prompt,
       isPurchased: userData?.purchasedPromptIds?.includes(prompt.id) || false,
-      showCopyButton: userData?.purchasedPromptIds?.includes(prompt.id) || prompt.userId === userData?.id || false,
+      showCopyButton: activeTab === 'user-prompts' || userData?.purchasedPromptIds?.includes(prompt.id) || prompt.userId === userData?.id,
     }));
     setIsModalOpen(true);
   };
@@ -507,7 +507,8 @@ useEffect(() => {
                     onClick={() => handleCardClick(prompt, userData?.id || '')}
                     prompts={userPrompts}
                     isPurchased={userData?.purchasedPromptIds?.includes(prompt.id) || false}
-                    
+                    showCopyButton={true} // Always show copy button for user prompts
+
                   />
                 ))
               ) : (

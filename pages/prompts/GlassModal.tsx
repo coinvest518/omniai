@@ -19,22 +19,21 @@ interface ModalProps {
 }
 
 const Modal: React.FC<ModalProps> = ({
-                              isOpen,
-                              onClose,
-                              promptTitle,
-                              description,
-                              promptData,
-                              onPurchase,
-                              creditPrice,
-                              isPurchased,
-                              promptId,
-                              showCopyButton,
-                              userId,
-                            }) => {
+                                      isOpen,
+                                      onClose,
+                                      promptTitle,
+                                      description,
+                                      promptData,
+                                      onPurchase,
+                                      creditPrice,
+                                      isPurchased,
+                                      promptId,
+                                      showCopyButton,
+                                      userId,
+                                    }) => {
   const { user } = useUser(); // Directly access the user
   const [localPromptData, setLocalPromptData] = useState(promptData);
   const isUserPrompt = user?.id === userId;
-
   const [isCopied, setIsCopied] = useState(false);
 
   useEffect(() => {
@@ -65,23 +64,21 @@ const Modal: React.FC<ModalProps> = ({
         <p>Credit Price: {creditPrice}</p>
         <p>Description: {description}</p>
         <p>Prompt Data: {promptData}</p>
-        {showCopyButton && (
-          <div>
-          <button onClick={handleCopyClick}>
-          {isCopied ? 'Copied!' : 'Copy to Clipboard'}
-          </button>
-          </div>
-        )}
-
-        {!isPurchased && (
-          <button onClick={handlePurchase}>Purchase</button>
-        )}
-        <button onClick={onClose}>Close</button>
+        {(showCopyButton || isUserPrompt || isPurchased) && (
+            <div>
+              <button onClick={handleCopyClick}>
+                {isCopied ? 'Copied!' : 'Copy to Clipboard'}
+              </button>
+            </div>
+          )}
+          {!isPurchased && !isUserPrompt && (
+            <button onClick={handlePurchase}>Purchase</button>
+          )}
+          <button onClick={onClose}>Close</button>
+        </div>
       </div>
-    </div>
     )
   );
-
 };
 
 export default Modal;

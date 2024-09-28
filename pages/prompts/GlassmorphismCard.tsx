@@ -30,6 +30,7 @@ const GlassmorphismCard: React.FC<GlassmorphismCardProps> = ({ imgSrc, promptTit
             <h3>{promptTitle}</h3>
             <p>{description}</p>
             
+            
           </div>
           <ul className="sci">
             <li>
