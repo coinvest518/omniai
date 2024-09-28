@@ -43,6 +43,8 @@ model User {
   userPrompts            UserPrompt[]
   creditPurchases        CreditPurchase[]
   purchasedPromptIds     String[] 
+   dailyStreak           Int      @default(0)
+  lastClaimDate          DateTime?
 
 }
 

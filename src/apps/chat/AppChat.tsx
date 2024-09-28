@@ -43,6 +43,7 @@ import { Composer } from './components/composer/Composer';
 import { usePanesManager } from './components/panes/usePanesManager';
 import { useUserStore } from '../../common/state/userStore';
 import { _handleExecute } from './editors/_handleExecute';
+import { DailyRewards } from '@/common/components/DailyRewards';
 
 // what to say when a chat is new and has no title
 export const CHAT_NOVEL_TITLE = 'Chat';
@@ -468,7 +469,9 @@ export function AppChat() {
 
 
   return <>
-
+  <div>
+  <DailyRewards />
+  </div>
     <PanelGroup
       direction={isMobile ? 'vertical' : 'horizontal'}
       id='app-chat-panels'
@@ -579,6 +582,7 @@ export function AppChat() {
       })}
 
     </PanelGroup>
+      
 
     <Composer
       isMobile={isMobile}
@@ -634,6 +638,6 @@ export function AppChat() {
         positiveActionText={deleteConversationIds.length === 1 ? 'Delete conversation' : `Yes, delete all ${deleteConversationIds.length} conversations`}
       />
     )}
-
+  
   </>;
 }

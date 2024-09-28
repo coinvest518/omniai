@@ -33,6 +33,7 @@ let nextConfig = {
   // Experimental features
   experimental: {
     serverComponentsExternalPackages: ['puppeteer-core'],
+    
   },
 
   webpack: (config) => {
