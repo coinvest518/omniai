@@ -23,7 +23,7 @@ It's like having a brainstorm session with several smart people,
 each adding their own unique perspective.
 Beam lets you make the best of them all.
 
-![Omni Ai BEAM Rays]<img src="https://i.ibb.co/GMgr4my/Black-Blue-Pink-Technology-Geometric-Desktop-Wallpaper.png" alt="Omni Ai BEAM Rays" width="300" style="display: inline-block; margin: 10px 0;" />
+<img src="https://i.ibb.co/GMgr4my/Black-Blue-Pink-Technology-Geometric-Desktop-Wallpaper.png" alt="Omni Ai BEAM Rays" width="300" style="display: inline-block; margin: 10px 0;" />
 
 
 
@@ -58,8 +58,9 @@ Merging is **combining the best parts of each response** into a great, coherent 
 You can choose from various merge options, including **Fusion**, **Checklist**, **Compare**, and **Custom**.
 Experiment with different options to find the one that works best for your chat.
 
-![Omni Ai BEAM Rays]<img src="https://i.ibb.co/GMgr4my/Black-Blue-Pink-Technology-Geometric-Desktop-Wallpaper.png" alt="Omni Ai BEAM Rays" width="300" style="display: inline-block; margin: 10px 0;" />
-    `, // > Merge until you have a single, high-quality response. Or choose the final response manually, skipping merge.
+<img src="https://i.ibb.co/GMgr4my/Black-Blue-Pink-Technology-Geometric-Desktop-Wallpaper.png" alt="Omni Ai BEAM Rays" width="300" style="display: inline-block; margin: 10px 0;" /> 
+
+`, // > Merge until you have a single, high-quality response. Or choose the final response manually, skipping merge.
   },
 //   {
 //     stepDigits: '',
