@@ -12,6 +12,7 @@ export interface Prompt {
   imgSrc: string;
   creditPrice: number;
   category: string;
+  showCopyButton?: boolean;
 }
 
 export const prompts = [
