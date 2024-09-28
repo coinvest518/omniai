@@ -43,7 +43,7 @@ import { Composer } from './components/composer/Composer';
 import { usePanesManager } from './components/panes/usePanesManager';
 import { useUserStore } from '../../common/state/userStore';
 import { _handleExecute } from './editors/_handleExecute';
-import { DailyRewards } from 'pages/DailyRewards';
+import  DailyRewards  from 'pages/DailyRewards';
 
 // what to say when a chat is new and has no title
 export const CHAT_NOVEL_TITLE = 'Chat';

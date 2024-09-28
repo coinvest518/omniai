@@ -71,7 +71,7 @@ const DailyRewardButton = styled.button`
 `;
 
 
-export function DailyRewards() {
+export default function DailyRewards({}): JSX.Element {
   const { user } = useUser();
   const [isOpen, setIsOpen] = useState(false);
   const [reward, setReward] = useState(0);
