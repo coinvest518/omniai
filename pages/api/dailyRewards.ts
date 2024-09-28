@@ -1,6 +1,8 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getAuth } from '@clerk/nextjs/server';
-import prisma from '../../lib/prisma';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -9,13 +11,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const { userId } = getAuth(req);
 
+
+  console.log('Authenticated User ID:', userId);
+
   if (!userId) {
     return res.status(401).json({ message: 'Unauthorized' });
   }
 
   try {
     const user = await prisma.user.findUnique({
-      where: { clerkUserId: userId as string},
+      where: { clerkUserId: userId },
     });
 
     if (!user) {
@@ -39,7 +44,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     const updatedUser = await prisma.user.update({
-      where: { clerkUserId: userId },
+      where: { clerkUserId: user.clerkUserId },
       data: {
         dailyStreak: newStreak,
         lastClaimDate: today,
