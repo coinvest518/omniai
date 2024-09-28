@@ -142,11 +142,12 @@ const AppUsers: React.FC = (props) => {
     }
   }, []);
 
-  const handleCardClick = (prompt: Prompt, userId: string) => {
+  const handleCardClick = (prompt: Prompt, _userId: string) => {
     console.log('Selected Prompt:', prompt);
     setSelectedPrompt(() => ({
       ...prompt,
-      isPurchased: userData?.purchasedPromptIds?.includes(prompt.id) || false
+      isPurchased: userData?.purchasedPromptIds?.includes(prompt.id) || false,
+      showCopyButton: userData?.purchasedPromptIds?.includes(prompt.id) || prompt.userId === userData?.id || false,
     }));
     setIsModalOpen(true);
   };

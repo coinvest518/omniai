@@ -13,7 +13,7 @@ interface GlassmorphismCardProps {
   onClick: () => void;
   isPurchased?: boolean;
   onCopyClick?: () => void;
-  
+  showCopyButton?: boolean;
 }
 
 
