@@ -15,13 +15,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   console.log('Authenticated User ID:', userId);
 
   if (!userId) {
+    console.error('Unauthorized or missing parameters');
+
     return res.status(401).json({ message: 'Unauthorized' });
   }
 
   try {
+    console.log('Looking up user with ID:', userId);
+
     const user = await prisma.user.findUnique({
-      where: { clerkUserId: userId },
+      where: { clerkUserId: userId as string},
     });
+    console.log('User lookup result:', user);
+
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
