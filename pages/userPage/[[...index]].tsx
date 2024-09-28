@@ -537,7 +537,7 @@ useEffect(() => {
                   onPurchase={() => handlePurchase(selectedPrompt.id || '')}
                   showCopyButton={showCopyButton}
                   promptId={selectedPrompt.id ?? ''}
-                  userId={userData?.id ?? ''}
+                  userId={userData?.id || ''}
                   isPurchased={selectedPrompt?.isPurchased || false}
                 />
                   
