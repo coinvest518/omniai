@@ -9,7 +9,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ message: 'Method not allowed' });
   }
 
-  const { userId } = getAuth(req);
+  const userId = req.body.userId || getAuth(req).userId; // Get userId from body or Clerk
 
 
   console.log('Authenticated User ID:', userId);
