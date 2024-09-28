@@ -134,7 +134,7 @@ export function DailyRewards() {
     setError(null);
 
     try {
-      const response = await fetch('/api/dailyReward', {
+      const response = await fetch('/api/dailyRewards', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: user?.id }), // Add userId to body
