@@ -390,7 +390,7 @@ useEffect(() => {
               <Link href="/" style={{ textDecoration: 'none' }}>Omni Beam</Link>
             </div>
             <div className="horizontal-tab-item">
-              <Link href="https://discord.gg/NTNszcwE" style={{ textDecoration: 'none' }}>Bug Bounty</Link>
+              <Link href="https://streets2entretrepreneurs.myshopify.com/" style={{ textDecoration: 'none' }}>Omni Alien Merch</Link>
             </div>
             <div className="horizontal-tab-item">
               <Link href="https://discord.gg/NTNszcwE" style={{ textDecoration: 'none' }}>White Label</Link>
