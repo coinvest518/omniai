@@ -49,8 +49,8 @@ const RewardButton = styled.button`
 
 const DailyRewardButton = styled.button`
   position: fixed;
-  top: 5rem;
-  right: 9rem;
+  top: 4rem;
+  right: 7rem;
   z-index: 1000;
   background-color: #4393E4;
   color: white;
