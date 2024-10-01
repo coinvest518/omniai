@@ -156,7 +156,7 @@ export function ScrollToBottom(props: {
         if (DEBUG_SCROLL_TO_BOTTOM)
           console.log('   -> large enough window', entries.length);
 
-        // udpate state only if this changed
+        // update state only if this changed
         setState(state => (state.atBottom !== true)
           ? ({ ...state, atBottom: true })
           : state,
