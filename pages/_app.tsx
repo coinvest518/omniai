@@ -33,6 +33,8 @@ const MyApp = ({ Component, emotionCache, pageProps }: MyAppProps) => {
     <>
       <Head>
         <title>{Brand.Title.Common}</title>
+        
+        
       </Head>
 
       <ClerkProvider publishableKey={clerkPublishableKey} {...pageProps}>
@@ -57,6 +59,23 @@ const MyApp = ({ Component, emotionCache, pageProps }: MyAppProps) => {
       {hasGoogleAnalytics && <OptionalGoogleAnalytics />}
       {/* Load jQuery */}
       <Script src="https://code.jquery.com/jquery-3.6.0.min.js" />
+      <Script 
+        strategy="afterInteractive" 
+        src="https://www.googletagmanager.com/gtag/js?id=G-2F95CCPLE6"
+      />
+      <Script
+        id="google-analytics-init"
+        strategy="afterInteractive"
+      >
+        {`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-2F95CCPLE6');
+        `}
+      </Script>
+      
     </>
   );
 };

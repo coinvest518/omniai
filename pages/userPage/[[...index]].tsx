@@ -12,8 +12,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import SignInModal from './SignInModal';
 import styles from './AppUsers.module.css';
-import { copyToClipboard } from '~/common/util/clipboardUtils';
-
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY as string);
 
@@ -300,6 +298,7 @@ useEffect(() => {
 
   return (
     <div>
+
       <header className="header">
         <div className="header-content responsive-wrapper">
           <div className="header-logo">

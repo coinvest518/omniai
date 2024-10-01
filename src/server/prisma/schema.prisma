@@ -5,7 +5,7 @@
 //  - make sure to run 'prisma db push' to sync the remote database with the schema
 //
 // Database is optional: when the environment variables are not set, the database is not used at all,
-// and the storage of data in Big-AGI is limited to client-side (browser) storage.
+// and the storage of data in Omni-Ai is limited to client-side (browser) storage.
 //
 // The database is used for:
 //  - the 'sharing' function, to let users share the chats with each other

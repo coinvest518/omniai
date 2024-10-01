@@ -196,12 +196,12 @@ export function Composer(props: {
   // Credit costs for each feature
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const creditCosts = {
-    'generate-text': 20,
+    'generate-text': 10,
     'generate-text-beam': 50,
     'generate-image': 30,
-    'textImagine': 30,
+    'textImagine': 25,
     'callFeature': 15,
-     'drawOption': 30,
+     'drawOption': 15,
 
   };
 
