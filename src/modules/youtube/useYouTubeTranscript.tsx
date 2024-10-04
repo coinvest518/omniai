@@ -14,34 +14,36 @@ export interface YTVideoTranscript {
 }
 
 export function useYouTubeTranscript(videoID: string | null, onNewTranscript: (transcript: YTVideoTranscript) => void) {
-
-  // state
   const [transcript, setTranscript] = React.useState<YTVideoTranscript | null>(null);
 
-  // data
   const { data, isFetching, isError, error } = useQuery({
     enabled: !!videoID,
     queryKey: ['transcript', videoID],
-    queryFn: async () => USE_FRONTEND_FETCH
-      ? fetchYouTubeTranscript(videoID!, url => frontendSideFetch(url).then(res => res.text()))
-      : apiAsync.youtube.getTranscript.query({ videoId: videoID! }),
+    queryFn: async () => {
+      try {
+        return USE_FRONTEND_FETCH
+          ? fetchYouTubeTranscript(videoID!, url => frontendSideFetch(url).then(res => res.text()))
+          : apiAsync.youtube.getTranscript.query({ videoId: videoID! });
+      } catch (err) {
+        console.error('Failed to fetch transcript:', err);
+        throw err; // Propagate the error to the isError state
+      }
+    },
     staleTime: Infinity,
-    retry: 3,  // Add retry logic to handle occasional 429 errors
-    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),  // Exponential backoff for retries
+    retry: 3,
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 
-  // update the transcript when the underlying data changes
   React.useEffect(() => {
-    if (!data) {
-      return;
-    }
-    const transcript = {
+    if (!data) return;
+
+    const transcriptData = {
       title: data.videoTitle,
       transcript: data.transcript,
       thumbnailUrl: data.thumbnailUrl,
     };
-    setTranscript(transcript);
-    onNewTranscript(transcript);
+    setTranscript(transcriptData);
+    onNewTranscript(transcriptData);
   }, [data, onNewTranscript]);
 
   return {

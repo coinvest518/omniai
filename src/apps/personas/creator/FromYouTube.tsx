@@ -108,8 +108,10 @@ export function FromYouTube(props: {
     e.preventDefault(); // stop the form submit
 
     const videoId = extractVideoID(videoURL) || null;
-    if (!videoId)
+    if (!videoId) {
       setVideoURL('Invalid');
+    return;
+}
 
     // kick-start the transcript fetch
     setVideoID(videoId);

@@ -55,12 +55,12 @@ export function BeamScatterPane(props: {
   }));
 
   const handleStart = async () => {
-    if (!user || user.credits < 1) {
+    if (!user || user.credits < 50) {
       alert('Not enough credits to start.');
       return;
     }
 
-    const newCredits = user.credits - 1; // Deduct 1 credit
+    const newCredits = user.credits - 50; // Deduct 1 credit
     try {
       // Update user data on the server
       await fetch('/api/updateUserdata', {
@@ -84,7 +84,7 @@ export function BeamScatterPane(props: {
       return;
     }
 
-    const newTokens = user.tokens - 1; // Deduct 1 token
+    const newTokens = user.tokens - 10000; // Deduct 1 token
     try {
       // Update user data on the server
       await fetch('/api/updateUserdata', {
