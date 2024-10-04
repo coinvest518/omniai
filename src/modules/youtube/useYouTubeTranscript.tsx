@@ -1,18 +1,11 @@
-// Copyright (c) 2023-2024 Enrico Ros
-// This subsystem is responsible for fetching the transcript of a YouTube video.
-// It is used by the Big-AGI Persona Creator to create a character sheet.
-
 import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
-
 import { frontendSideFetch } from '~/common/util/clientFetchers';
-
 import { fetchYouTubeTranscript } from './youtube.fetcher';
 import { apiAsync } from '~/common/util/trpc.client';
 
 // configuration
 const USE_FRONTEND_FETCH = false;
-
 
 export interface YTVideoTranscript {
   title: string;
@@ -33,12 +26,13 @@ export function useYouTubeTranscript(videoID: string | null, onNewTranscript: (t
       ? fetchYouTubeTranscript(videoID!, url => frontendSideFetch(url).then(res => res.text()))
       : apiAsync.youtube.getTranscript.query({ videoId: videoID! }),
     staleTime: Infinity,
+    retry: 3,  // Add retry logic to handle occasional 429 errors
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),  // Exponential backoff for retries
   });
 
   // update the transcript when the underlying data changes
   React.useEffect(() => {
     if (!data) {
-      // setTranscript(null);
       return;
     }
     const transcript = {
@@ -50,10 +44,10 @@ export function useYouTubeTranscript(videoID: string | null, onNewTranscript: (t
     onNewTranscript(transcript);
   }, [data, onNewTranscript]);
 
-
   return {
     transcript,
     isFetching,
-    isError, error,
+    isError, 
+    error,
   };
 }
