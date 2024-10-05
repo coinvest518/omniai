@@ -1,24 +1,20 @@
-import { createTRPCRouter, publicProcedure } from '~/server/api/trpc.server';
-import { z } from 'zod';
-import { fetchYouTubeTranscript } from './youtube.fetcher';
-import { TRPCError } from '@trpc/server';
-
-const inputSchema = z.object({
-  videoId: z.string(),
-});
+import { z } from 'zod'; // Zod for input validation
+import { createTRPCRouter, publicProcedure } from '../../../src/server/api/trpc.server';
 
 export const youtubeRouter = createTRPCRouter({
+  // Define a new query 'getTranscript' to fetch the YouTube transcript
   getTranscript: publicProcedure
-    .input(inputSchema)
+    .input(z.string()) // Ensure input is a string (videoId)
     .query(async ({ input }) => {
-      try {
-        return await fetchYouTubeTranscript(input.videoId);
-      } catch (error) {
-        console.error('Error in YouTube router:', error);
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'Failed to fetch YouTube transcript',
-        });
+      const videoId = input;
+
+      // Fetch transcript data from our Next.js API route
+      const response = await fetch(`/api/youtubeTranscript?videoId=${videoId}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch transcript');
       }
+
+      const data = await response.json();
+      return data; // Return the transcript data
     }),
 });

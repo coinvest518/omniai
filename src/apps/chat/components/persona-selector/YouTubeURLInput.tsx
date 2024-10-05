@@ -1,46 +1,66 @@
 import * as React from 'react';
-
 import { Box, Button, Input } from '@mui/joy';
 import YouTubeIcon from '@mui/icons-material/YouTube';
+import { InlineError } from '~/common/components/InlineError';
 
-import type { SxProps } from '@mui/joy/styles/types';
-import { useYouTubeTranscript, YTVideoTranscript } from '~/modules/youtube/useYouTubeTranscript';
-
+interface YTVideoTranscript {
+  title: string;
+  transcript: string;
+  thumbnailUrl: string;
+}
 
 interface YouTubeURLInputProps {
   onSubmit: (transcript: string) => void;
   isFetching: boolean;
-  sx?: SxProps;
+  sx?: any; // Adjusted type to `any` for flexibility, change if needed
 }
 
 export const YouTubeURLInput: React.FC<YouTubeURLInputProps> = ({ onSubmit, isFetching, sx }) => {
   const [url, setUrl] = React.useState('');
-  const [submitFlag, setSubmitFlag] = React.useState(false);
+  const [isFetchingTranscript, setIsFetchingTranscript] = React.useState(false);
+  const [isError, setIsError] = React.useState(false);
+  const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
 
   // Function to extract video ID from URL
   function extractVideoID(videoURL: string): string | null {
     const regExp = /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([^#&?]*).*/;
     const match = videoURL.match(regExp);
-    return (match && match[1]?.length == 11) ? match[1] : null;
+    return (match && match[1]?.length === 11) ? match[1] : null;
   }
 
-  const videoID = extractVideoID(url);
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault(); // Prevent form from causing a page reload
+    const videoID = extractVideoID(url);
+    
+    if (!videoID) {
+      setErrorMessage('Invalid YouTube URL');
+      return;
+    }
 
-  // Callback function to handle new transcript
-  const handleNewTranscript = (newTranscript: YTVideoTranscript) => {
-    onSubmit(newTranscript.transcript); // Pass the transcript text to the onSubmit handler
-    setSubmitFlag(false); // Reset submit flag after handling
+    try {
+      setIsFetchingTranscript(true);
+      setIsError(false);
+      setErrorMessage(null);
+
+      // Fetch transcript from the API
+      const response = await fetch(`/api/youtubeTranscript?videoId=${videoID}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch transcript');
+      }
+
+      const transcriptData: YTVideoTranscript = await response.json();
+      onSubmit(transcriptData.transcript); // Call the onSubmit handler with the transcript
+    } catch (error) {
+      const errorMsg = (error as Error).message || 'An unknown error occurred';
+      setIsError(true);
+      setErrorMessage(errorMsg);
+    } finally {
+      setIsFetchingTranscript(false);
+    }
   };
-
-  const { transcript, isFetching: isTranscriptFetching, isError, error } = useYouTubeTranscript(videoID && submitFlag ? videoID : null, handleNewTranscript);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setUrl(event.target.value);
-  };
-
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault(); // Prevent form from causing a page reload
-    setSubmitFlag(true); // Set flag to indicate a submit action
   };
 
   return (
@@ -50,7 +70,7 @@ export const YouTubeURLInput: React.FC<YouTubeURLInputProps> = ({ onSubmit, isFe
           required
           type='url'
           fullWidth
-          disabled={isFetching || isTranscriptFetching}
+          disabled={isFetching || isFetchingTranscript}
           variant='outlined'
           placeholder='Enter YouTube Video URL'
           value={url}
@@ -61,13 +81,13 @@ export const YouTubeURLInput: React.FC<YouTubeURLInputProps> = ({ onSubmit, isFe
         <Button
           type='submit'
           variant='solid'
-          disabled={isFetching || isTranscriptFetching || !url}
-          loading={isFetching || isTranscriptFetching}
+          disabled={isFetching || isFetchingTranscript || !url}
+          loading={isFetching || isFetchingTranscript}
           sx={{ minWidth: 140 }}
         >
           Get Transcript
         </Button>
-        {isError && <div>Error fetching transcript. Please try again.</div>}
+        {isError && <InlineError error={errorMessage} sx={{ mt: 1 }} />}
       </form>
     </Box>
   );

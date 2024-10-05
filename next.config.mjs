@@ -1,4 +1,5 @@
 
+import { env } from '../../src/server/env.mjs'; 
 
 
 const buildType =
@@ -32,7 +33,7 @@ let nextConfig = {
 
   // Experimental features
   experimental: {
-    serverComponentsExternalPackages: ['puppeteer-core'],
+    serverComponentsExternalPackages: ['puppeteer-core', 'googleapis'],
     
   },
 
@@ -57,7 +58,7 @@ let nextConfig = {
         },
       },
     });
-
+  
     return config;
   },
 
