@@ -61,6 +61,7 @@
     "firebase": "^10.13.1",
     "font-awesome": "^4.7.0",
     "framer-motion": "^11.9.0",
+    "googleapis": "^144.0.0",
     "idb-keyval": "^6.2.1",
     "lucide-react": "^0.438.0",
     "micro": "^10.0.1",

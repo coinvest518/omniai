@@ -1,29 +1,4 @@
-import { z } from 'zod';
-
-const youtubeTranscriptionSchema = z.object({
-  wireMagic: z.literal('pb3'),
-  events: z.array(
-    z.object({
-      tStartMs: z.number(),
-      dDurationMs: z.number().optional(),
-      aAppend: z.number().optional(),
-      segs: z.array(
-        z.object({
-          utf8: z.string(),
-          tOffsetMs: z.number().optional(),
-        }),
-      ).optional(),
-    }),
-  ),
-});
-
-function extractFromTo(html: string, from: string, to: string, label: string): string {
-  const indexStart = html.indexOf(from);
-  const indexEnd = html.indexOf(to, indexStart);
-  if (indexStart < 0 || indexEnd <= indexStart)
-    throw new Error(`[YouTube API Issue] Could not find '${label}'`);
-  return html.substring(indexStart, indexEnd);
-}
+import { google } from 'googleapis';
 
 
 interface YouTubeTranscriptData {
@@ -33,44 +8,63 @@ interface YouTubeTranscriptData {
   transcript: string;
 }
 
+const youtube = google.youtube({
+  version: 'v3',
+  auth: process.env.YOUTUBE_API_KEY // Make sure to set this in your environment variables
+});
 
-export async function fetchYouTubeTranscript(videoId: string, fetchTextFn: (url: string) => Promise<string>): Promise<YouTubeTranscriptData> {
-
-  // 1. find the captions URL within the video HTML page
-  const html = await fetchTextFn(`https://www.youtube.com/watch?v=${videoId}`);
-
-  const captionsUrlEnc = extractFromTo(html, 'https://www.youtube.com/api/timedtext', '"', 'Captions URL');
-  const captionsUrl = decodeURIComponent(captionsUrlEnc.replaceAll('\\u0026', '&'));
-  const thumbnailUrl = extractFromTo(html, 'https://i.ytimg.com/vi/', '"', 'Thumbnail URL').replaceAll('maxres', 'hq');
-  const videoTitle = extractFromTo(html, '<title>', '</title>', 'Video Title').slice(7).replaceAll(' - YouTube', '').trim();
-
-  // 2. fetch the captions
-  // note: the desktop player appends this much: &fmt=json3&xorb=2&xobt=3&xovt=3&cbr=Chrome&cbrver=114.0.0.0&c=WEB&cver=2.20230628.07.00&cplayer=UNIPLAYER&cos=Windows&cosver=10.0&cplatform=DESKTOP
-  const captions = await fetchTextFn(captionsUrl + `&fmt=json3`);
-
-  let captionsJson: any;
+export async function fetchYouTubeTranscript(videoId: string): Promise<YouTubeTranscriptData> {
   try {
-    captionsJson = JSON.parse(captions);
-  } catch (e) {
-    console.error(e);
-    throw new Error('[YouTube API Issue] Could not parse the captions');
-  }
-  const safeData = youtubeTranscriptionSchema.safeParse(captionsJson);
-  if (!safeData.success) {
-    console.error(safeData.error);
-    throw new Error('[YouTube API Issue] Could not verify the captions');
-  }
+    // Fetch video details
+    const videoResponse = await youtube.videos.list({
+      part: ['snippet'],
+      id: [videoId]
+    });
 
-  // 3. flatten to text
-  const transcript = safeData.data.events
-    .flatMap(event => event.segs ?? [])
-    .map(seg => seg.utf8)
-    .join('');
+    const videoDetails = videoResponse.data.items?.[0]?.snippet;
+    if (!videoDetails) {
+      throw new Error('Video details not found');
+    }
 
-  return {
-    videoId,
-    videoTitle,
-    thumbnailUrl,
-    transcript,
-  };
+    // Fetch captions
+    const captionsResponse = await youtube.captions.list({
+      part: ['snippet'],
+      videoId: videoId
+    });
+
+    const captionTrack = captionsResponse.data.items?.find(item => item.snippet?.language === 'en');
+    if (!captionTrack) {
+      throw new Error('English captions not found');
+    }
+
+    // Download the actual transcript
+    const transcriptResponse = await youtube.captions.download({
+      id: captionTrack.id!,
+      tfmt: 'srt' // SubRip format
+    });
+
+    const transcript = transcriptResponse.data as string;
+
+    return {
+      videoId,
+      videoTitle: videoDetails.title || '',
+      thumbnailUrl: videoDetails.thumbnails?.high?.url || '',
+      transcript: parseSrtToPlainText(transcript), // You'll need to implement this function
+    };
+  } catch (error) {
+    console.error('Error fetching YouTube data:', error);
+    throw error;
+  }
+}
+
+function parseSrtToPlainText(srtTranscript: string): string {
+  // Implement SRT parsing logic here
+  // Remove timecodes and convert to plain text
+  // This is a simple example and might need to be more robust
+  return srtTranscript
+    .split('\n')
+    .filter(line => !line.match(/^\d+$/) && !line.match(/^\d{2}:\d{2}:\d{2},\d{3}/))
+    .join(' ')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
