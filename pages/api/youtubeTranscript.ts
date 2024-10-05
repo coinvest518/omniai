@@ -11,12 +11,13 @@ interface YouTubeTranscriptData {
 // Initialize the YouTube API client
 const youtube = google.youtube({
   version: 'v3',
-  auth: process.env.YOUTUBE_API_KEY, // Make sure to set this in your environment variables
+  auth: process.env.YOUTUBE_API_KEY, // Ensure this is set in your .env file
 });
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { videoId } = req.query;
 
+  // Validate videoId parameter
   if (!videoId || typeof videoId !== 'string') {
     return res.status(400).json({ error: 'Missing or invalid videoId parameter' });
   }
@@ -24,9 +25,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     const transcriptData = await fetchYouTubeTranscript(videoId);
     res.status(200).json(transcriptData);
-  } catch (error) {
-    console.error('Error fetching YouTube data:', error);
-    res.status(500).json({ error: 'Failed to fetch YouTube transcript' });
+  } catch (error: any) { // Specify error as type 'any'
+    console.error('Error fetching YouTube data:', error.message || error);
+    res.status(500).json({ error: 'Failed to fetch YouTube transcript', details: error.message || error });
   }
 }
 
@@ -53,10 +54,16 @@ async function fetchYouTubeTranscript(videoId: string): Promise<YouTubeTranscrip
       throw new Error('English captions not found');
     }
 
+    // Here, make sure to handle authorization for downloading captions
     const transcriptResponse = await youtube.captions.download({
       id: captionTrack.id!,
       tfmt: 'srt' // SubRip format
     });
+
+    // Check if transcriptResponse has data
+    if (!transcriptResponse.data) {
+      throw new Error('Transcript download failed or empty response');
+    }
 
     const transcript = transcriptResponse.data as string;
 
@@ -67,10 +74,11 @@ async function fetchYouTubeTranscript(videoId: string): Promise<YouTubeTranscrip
       transcript: parseSrtToPlainText(transcript),
     };
   } catch (error) {
-    throw error;
+    throw error; // Re-throw error for the handler to catch
   }
 }
 
+// Function to parse SRT to plain text
 function parseSrtToPlainText(srtTranscript: string): string {
   return srtTranscript
     .split('\n')
