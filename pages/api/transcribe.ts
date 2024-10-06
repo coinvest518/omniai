@@ -44,7 +44,7 @@ export default async function handler(
       form.append('language', 'en'); // Replace 'en' with the appropriate language code if needed
 
       // Optional: Specify the response format if needed
-      // form.append('response_format', 'text'); // Uncomment to get plain text response
+      form.append('response_format', 'text'); // Uncomment to get plain text response
 
       // Send audio to OpenAI Whisper API
       const response = await axios.post('https://api.openai.com/v1/audio/transcriptions', form, {
