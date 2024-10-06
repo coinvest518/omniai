@@ -123,7 +123,7 @@ export const navItems: {
       icon: TextsmsOutlinedIcon,
       iconActive: TextsmsIcon,
       type: 'app',
-      route: '/',
+      route: '/chat',
     },
     {
       name: 'Call',

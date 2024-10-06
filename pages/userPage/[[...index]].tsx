@@ -311,6 +311,8 @@ useEffect(() => {
           <div className="header-navigation">
             <nav className="header-navigation-as">
               <Link href="/" style={{ textDecoration: 'none' }}> Home </Link>
+              <Link href="/chat" style={{ textDecoration: 'none' }}> Launch App </Link>
+
               <Link href="https://accounts.omniai.icu/sign-in" style={{ textDecoration: 'none' }}> Sign Up </Link>
               <Link href="/price/PricingPage" style={{ textDecoration: 'none' }}> Plans </Link>
               <div className="dropdown">
@@ -343,8 +345,8 @@ useEffect(() => {
             <i className="ph-list-bold"></i>
             <span>Menu</span>
             <ul className="dropdown-menu">
-              <li><Link href="./">Home</Link></li>
-              <li><Link href="/">Omni.AI</Link></li>
+              <li><Link href="/">Home</Link></li>
+              <li><Link href="/chat">Omni.AI</Link></li>
               <li>
                 <Link href="https://accounts.omniai.icu/sign-in">Sign Up</Link>
               </li>
@@ -377,16 +379,16 @@ useEffect(() => {
               <Link href="#" onClick={handleFreeCredits} style={{ textDecoration: 'none' }}>100 Free Credits</Link>
             </div>
             <div className="horizontal-tab-item">
-              <Link href="/" style={{ textDecoration: 'none' }}>Omni Chat</Link>
+              <Link href="/chat" style={{ textDecoration: 'none' }}>Omni Chat</Link>
             </div>
             <div className="horizontal-tab-item">
               <Link href="/personas" style={{ textDecoration: 'none' }}>Omni YouTube</Link>
             </div>
             <div className="horizontal-tab-item">
-              <Link href="/" style={{ textDecoration: 'none' }}>Omni Art</Link>
+              <Link href="/chat" style={{ textDecoration: 'none' }}>Omni Art</Link>
             </div>
             <div className="horizontal-tab-item">
-              <Link href="/" style={{ textDecoration: 'none' }}>Omni Beam</Link>
+              <Link href="/chat" style={{ textDecoration: 'none' }}>Omni Beam</Link>
             </div>
             <div className="horizontal-tab-item">
               <Link href="https://streets2entretrepreneurs.myshopify.com/" style={{ textDecoration: 'none' }}>Omni Alien Merch</Link>
