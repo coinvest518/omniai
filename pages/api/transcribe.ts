@@ -1,7 +1,12 @@
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextApiRequest, NextApiResponse } from 'next';
 import ytdl from 'ytdl-core';
 import axios from 'axios';
 import FormData from 'form-data';
+
+interface TranscribeResponse {
+  transcription?: string;
+  error?: string;
+}
 
 export const config = {
   api: {
@@ -11,14 +16,21 @@ export const config = {
   },
 };
 
-export async function POST(req: NextRequest) {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse<TranscribeResponse>
+) {
+  if (req.method !== 'POST') {
+    res.setHeader('Allow', ['POST']);
+    return res.status(405).end(`Method ${req.method} Not Allowed`);
+  }
+
   try {
-    const body = await req.json();
-    const { videoUrl } = body;
+    const { videoUrl } = req.body;
 
     // Validate videoUrl
     if (!videoUrl) {
-      return NextResponse.json({ error: 'Video URL is required' }, { status: 400 });
+      return res.status(400).json({ error: 'Video URL is required' });
     }
 
     // Extract video ID using ytdl-core
@@ -26,7 +38,7 @@ export async function POST(req: NextRequest) {
     try {
       videoId = ytdl.getURLVideoID(videoUrl);
     } catch (error) {
-      return NextResponse.json({ error: 'Invalid YouTube URL' }, { status: 400 });
+      return res.status(400).json({ error: 'Invalid YouTube URL' });
     }
 
     // Fetch the audio stream
@@ -55,15 +67,15 @@ export async function POST(req: NextRequest) {
     });
 
     // Send back the transcribed text
-    return NextResponse.json({ transcription: response.data.text });
+    return res.status(200).json({ transcription: response.data.text });
   } catch (error) {
     console.error('Transcription error:', error);
     if (axios.isAxiosError(error) && error.response) {
-      return NextResponse.json({ error: `OpenAI API error: ${error.response.data.error.message}` }, { status: error.response.status });
+      return res.status(error.response.status).json({ error: `OpenAI API error: ${error.response.data.error.message}` });
     } else if (error instanceof Error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return res.status(500).json({ error: error.message });
     } else {
-      return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
+      return res.status(500).json({ error: 'An unexpected error occurred' });
     }
   }
 }
