@@ -1,90 +1,46 @@
 import * as React from 'react';
+
 import { Box, Button, Input } from '@mui/joy';
 import YouTubeIcon from '@mui/icons-material/YouTube';
-import { InlineError } from '~/common/components/InlineError';
 
-interface YTVideoTranscript {
-  title: string;
-  transcript: string;
-  thumbnailUrl: string;
-}
+import type { SxProps } from '@mui/joy/styles/types';
+import { useYouTubeTranscript, YTVideoTranscript } from '~/modules/youtube/useYouTubeTranscript';
+
 
 interface YouTubeURLInputProps {
   onSubmit: (transcript: string) => void;
   isFetching: boolean;
-  sx?: any; // Adjusted type to `any` for flexibility, change if needed
+  sx?: SxProps;
 }
 
 export const YouTubeURLInput: React.FC<YouTubeURLInputProps> = ({ onSubmit, isFetching, sx }) => {
   const [url, setUrl] = React.useState('');
-  const [isFetchingTranscript, setIsFetchingTranscript] = React.useState(false);
-  const [isError, setIsError] = React.useState(false);
-  const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
+  const [submitFlag, setSubmitFlag] = React.useState(false);
 
   // Function to extract video ID from URL
   function extractVideoID(videoURL: string): string | null {
     const regExp = /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([^#&?]*).*/;
     const match = videoURL.match(regExp);
-    return (match && match[1]?.length === 11) ? match[1] : null;
+    return (match && match[1]?.length == 11) ? match[1] : null;
   }
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault(); // Prevent form from causing a page reload
-    const videoID = extractVideoID(url);
-    
-    if (!videoID) {
-      setErrorMessage('Invalid YouTube URL');
-      return;
-    }
+  const videoID = extractVideoID(url);
 
-    try {
-      setIsFetchingTranscript(true);
-      setIsError(false);
-      setErrorMessage(null);
-
-      // Make a call to your Flask backend to download and transcribe the video
-      const downloadResponse = await fetch('/api/youtube', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ url }),
-      });
-
-      if (!downloadResponse.ok) {
-        throw new Error('Failed to download video');
-      }
-
-      // Assuming the file path is returned in the response for transcription
-      const downloadData = await downloadResponse.json();
-      const filePath = downloadData.filePath; // Adjust this according to your response
-
-      // Now call the transcription endpoint
-      const transcriptionResponse = await fetch('/api/youtube', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ file_path: filePath }),
-      });
-
-      if (!transcriptionResponse.ok) {
-        throw new Error('Failed to transcribe video');
-      }
-
-      const transcriptData: YTVideoTranscript = await transcriptionResponse.json();
-      onSubmit(transcriptData.transcript); // Call the onSubmit handler with the transcript
-    } catch (error) {
-      const errorMsg = (error as Error).message || 'An unknown error occurred';
-      setIsError(true);
-      setErrorMessage(errorMsg);
-    } finally {
-      setIsFetchingTranscript(false);
-    }
+  // Callback function to handle new transcript
+  const handleNewTranscript = (newTranscript: YTVideoTranscript) => {
+    onSubmit(newTranscript.transcript); // Pass the transcript text to the onSubmit handler
+    setSubmitFlag(false); // Reset submit flag after handling
   };
+
+  const { transcript, isFetching: isTranscriptFetching, isError, error } = useYouTubeTranscript(videoID && submitFlag ? videoID : null, handleNewTranscript);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setUrl(event.target.value);
+  };
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault(); // Prevent form from causing a page reload
+    setSubmitFlag(true); // Set flag to indicate a submit action
   };
 
   return (
@@ -94,7 +50,7 @@ export const YouTubeURLInput: React.FC<YouTubeURLInputProps> = ({ onSubmit, isFe
           required
           type='url'
           fullWidth
-          disabled={isFetching || isFetchingTranscript}
+          disabled={isFetching || isTranscriptFetching}
           variant='outlined'
           placeholder='Enter YouTube Video URL'
           value={url}
@@ -105,13 +61,13 @@ export const YouTubeURLInput: React.FC<YouTubeURLInputProps> = ({ onSubmit, isFe
         <Button
           type='submit'
           variant='solid'
-          disabled={isFetching || isFetchingTranscript || !url}
-          loading={isFetching || isFetchingTranscript}
+          disabled={isFetching || isTranscriptFetching || !url}
+          loading={isFetching || isTranscriptFetching}
           sx={{ minWidth: 140 }}
         >
           Get Transcript
         </Button>
-        {isError && <InlineError error={errorMessage} sx={{ mt: 1 }} />}
+        {isError && <div>Error fetching transcript. Please try again.</div>}
       </form>
     </Box>
   );

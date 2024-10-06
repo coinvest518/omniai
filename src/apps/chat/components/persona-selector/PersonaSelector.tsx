@@ -337,9 +337,8 @@ export function PersonaSelector(props: { conversationId: DConversationId, runExa
         {/* Persona Creator Tile */}
         {(editMode || !hidePersonaCreator) && (
           <Tile
-            text='YouTube Creator'
+            text='Persona Creator'
             symbol='🎭'
-            imageUrl= '/images/personas/youtube.png'
             isActive={false}
             isEditMode={editMode}
             isHidden={hidePersonaCreator}

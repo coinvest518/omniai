@@ -18,12 +18,11 @@ import { useToggleableBoolean } from '~/common/util/useToggleableBoolean';
 import { FromText } from './FromText';
 import { FromYouTube } from './FromYouTube';
 import { prependSimplePersona, SimplePersonaProvenance } from '../store-app-personas';
-import { useUserStore } from '../../../../src/common/state/userStore';
 
 
 // delay to start a new chain after the previous one finishes
 const CONTINUE_DELAY: number | false = false;
-const creditCostPerPersona = 10;
+
 
 const Prompts: string[] = [
   'You are skilled in analyzing and embodying diverse characters. You meticulously study transcripts to capture key attributes, draft comprehensive character sheets, and refine them for authenticity. Feel free to make assumptions without hedging, be concise and be creative.',
@@ -32,12 +31,15 @@ const Prompts: string[] = [
   'Compare the draft character sheet with the original transcript, validating its content and ensuring it captures both the speaker’s overt characteristics and the subtler undertones. Omit unknown information, fine-tune any areas that require clarity, have been overlooked, or require more authenticity. Use clear and illustrative examples from the transcript to refine your sheet and offer meaningful, tangible reference points. Your output is a coherent, comprehensive, and nuanced instruction that begins with \'You are a...\' and  serves as a go-to guide for an actor recreating the persona.',
 ];
 
-const PromptTitles: string[] = [
-  'Common: Creator System Prompt',
-  'Analyze the transcript',
-  'Define the character',
-  'Cross the t\'s',
-];
+const getTitlesForTab = (selectedTab: number): string[] => {
+  const analyzeSubject: string = selectedTab ? 'text' : 'transcript';
+  return [
+    'Common: Creator System Prompt',
+    `Analyze the ${analyzeSubject}`,
+    'Define the character',
+    'Cross the t\'s',
+  ];
+};
 
 // chain to convert a text input string (e.g. youtube transcript) into a persona prompt
 function createChain(instructions: string[], titles: string[]): LLMChainStep[] {
@@ -93,31 +95,25 @@ export function Creator(props: { display: boolean }) {
   const [chainInputText, setChainInputText] = React.useState<string | null>(null);
   const [inputProvenance, setInputProvenance] = React.useState<SimplePersonaProvenance | null>(null);
   const [showIntermediates, setShowIntermediates] = React.useState(false);
-  const [showInsufficientCreditsError, setShowInsufficientCreditsError] = React.useState(false);
-
-
-  const { user, updateCredits } = useUserStore((state) => ({
-    user: state.user,
-    updateCredits: state.updateCredits,
-  }));
 
   // external state
   const [personaLlmId, setPersonaLlmId] = useLLMSelectLocalState(true);
   const [personaLlm, llmComponent] = useLLMSelect(personaLlmId, setPersonaLlmId, 'Persona Creation Model');
 
-    
 
   // editable prompts
+  const promptTitles = React.useMemo(() => getTitlesForTab(selectedTab), [selectedTab]);
+
   const {
     strings: editedInstructions, stringEditors: instructionEditors,
-  } = useFormEditTextArray(Prompts, PromptTitles);
+  } = useFormEditTextArray(Prompts, promptTitles);
 
   const { steps: creationChainSteps, id: chainId } = React.useMemo(() => {
     return {
-      steps: createChain(editedInstructions, PromptTitles),
+      steps: createChain(editedInstructions, promptTitles),
       id: uuidv4(),
     };
-  }, [editedInstructions]);
+  }, [editedInstructions, promptTitles]);
 
   const llmLabel = personaLlm?.label || undefined;
   const savePersona = React.useCallback((personaPrompt: string, inputText: string) => {
@@ -154,39 +150,10 @@ export function Creator(props: { display: boolean }) {
   }, [debugRestart, restartChain]);
 
 
-
-  const handleCreate = React.useCallback(async (text: string, provenance: SimplePersonaProvenance) => {
-    if (user && user.credits >= creditCostPerPersona) {
-      try {
-        // Deduct credits on the server-side
-        const response = await fetch('/api/updateUserdata', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            credits: user.credits - creditCostPerPersona,
-          }),
-        });
-
-        if (!response.ok) {
-          const errorMessage = await response.text();
-          console.error('Error updating user credits:', errorMessage);
-          alert('Failed to update credits. Please try again.');
-          return;
-        }
-    updateCredits(user.credits - creditCostPerPersona);
-    setShowInsufficientCreditsError(false);
+  const handleCreate = React.useCallback((text: string, provenance: SimplePersonaProvenance) => {
     setChainInputText(text);
     setInputProvenance(provenance);
-  } catch (error) {
-    console.error('Network error:', error);
-        alert('Failed to update credits. Please check your network connection.');
-      }
-    } else {
-      setShowInsufficientCreditsError(true);
-    }
-  }, [user, updateCredits]);
+  }, []);
 
   const handleCancel = React.useCallback(() => {
     setChainInputText(null);
@@ -241,8 +208,6 @@ export function Creator(props: { display: boolean }) {
       <TabPanel keepMounted value={1} sx={{ p: 3 }}>
         <FromText isCreating={isTransforming} onCreate={handleCreate} />
       </TabPanel>
-
-      
 
       <Divider orientation='horizontal' />
 
@@ -303,12 +268,6 @@ export function Creator(props: { display: boolean }) {
         <Typography component='div'>{chainError}</Typography>
       </Alert>
     )}
-     {/* Error Handling */}
-     {!!showInsufficientCreditsError && (
-        <Alert color="warning">
-          You do not have enough credits to create a persona.
-        </Alert>
-      )}
 
     {/* The Persona (Output) */}
     {chainOutput && <>
