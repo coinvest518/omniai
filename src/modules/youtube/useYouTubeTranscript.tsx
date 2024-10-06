@@ -11,32 +11,11 @@ export interface YTVideoTranscript {
 
 // Exporting the useYouTubeTranscript function
 export function useYouTubeTranscript(videoID: string | null, onNewTranscript: (transcript: YTVideoTranscript) => void) {
-  const [transcript, setTranscript] = React.useState<YTVideoTranscript | null>(null);
-
-  const { data, isFetching, isError, error } = useQuery({
-    enabled: !!videoID,
-    queryKey: ['transcript', videoID],
-    queryFn: async () => apiAsync.youtube.getTranscript.query({ videoId: videoID! }),
-    staleTime: Infinity,
-  });
-
-  React.useEffect(() => {
-    if (!data) {
-      return;
-    }
-    const transcript = {
-      title: data.videoTitle,
-      transcript: data.transcript,
-      thumbnailUrl: data.thumbnailUrl,
-    };
-    setTranscript(transcript);
-    onNewTranscript(transcript);
-  }, [data, onNewTranscript]);
-
+  // Existing logic can be commented out or deleted
   return {
-    transcript,
-    isFetching,
-    isError,
-    error,
+    transcript: null,
+    isFetching: false,
+    isError: false,
+    error: null,
   };
 }
