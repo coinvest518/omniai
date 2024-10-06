@@ -42,13 +42,37 @@ export const YouTubeURLInput: React.FC<YouTubeURLInputProps> = ({ onSubmit, isFe
       setIsError(false);
       setErrorMessage(null);
 
-      // Fetch transcript from the API
-      const response = await fetch(`/api/youtubeTranscript?videoId=${videoID}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch transcript');
+      // Make a call to your Flask backend to download and transcribe the video
+      const downloadResponse = await fetch('/api/youtube', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ url }),
+      });
+
+      if (!downloadResponse.ok) {
+        throw new Error('Failed to download video');
       }
 
-      const transcriptData: YTVideoTranscript = await response.json();
+      // Assuming the file path is returned in the response for transcription
+      const downloadData = await downloadResponse.json();
+      const filePath = downloadData.filePath; // Adjust this according to your response
+
+      // Now call the transcription endpoint
+      const transcriptionResponse = await fetch('/api/youtube', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ file_path: filePath }),
+      });
+
+      if (!transcriptionResponse.ok) {
+        throw new Error('Failed to transcribe video');
+      }
+
+      const transcriptData: YTVideoTranscript = await transcriptionResponse.json();
       onSubmit(transcriptData.transcript); // Call the onSubmit handler with the transcript
     } catch (error) {
       const errorMsg = (error as Error).message || 'An unknown error occurred';

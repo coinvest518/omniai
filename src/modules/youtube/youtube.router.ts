@@ -1,20 +1,36 @@
-import { z } from 'zod'; // Zod for input validation
-import { createTRPCRouter, publicProcedure } from '../../../src/server/api/trpc.server';
+import { Router, Request, Response } from 'express';
+import axios from 'axios';
 
-export const youtubeRouter = createTRPCRouter({
-  // Define a new query 'getTranscript' to fetch the YouTube transcript
-  getTranscript: publicProcedure
-    .input(z.string()) // Ensure input is a string (videoId)
-    .query(async ({ input }) => {
-      const videoId = input;
+const router = Router();
 
-      // Fetch transcript data from our Next.js API route
-      const response = await fetch(`/api/youtubeTranscript?videoId=${videoId}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch transcript');
-      }
+router.post('/download', async (req: Request, res: Response) => {
+  const videoUrl: string = req.body.url;
 
-      const data = await response.json();
-      return data; // Return the transcript data
-    }),
+  try {
+    const response = await axios.post('http://127.0.0.1:5000/download', { url: videoUrl });
+    res.status(response.status).json(response.data);
+  } catch (error: any) {  // Use 'any' type here for error
+    if (error.response) {
+      res.status(error.response.status).json(error.response.data);
+    } else {
+      res.status(500).json({ message: 'Internal Server Error' });
+    }
+  }
 });
+
+router.post('/transcribe', async (req: Request, res: Response) => {
+  const filePath: string = req.body.filePath;
+
+  try {
+    const response = await axios.post('http://127.0.0.1:5000/transcribe', { file_path: filePath });
+    res.status(response.status).json(response.data);
+  } catch (error: any) {  // Use 'any' type here for error
+    if (error.response) {
+      res.status(error.response.status).json(error.response.data);
+    } else {
+      res.status(500).json({ message: 'Internal Server Error' });
+    }
+  }
+});
+
+export default router;

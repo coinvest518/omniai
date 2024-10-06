@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 import type { SxProps } from '@mui/joy/styles/types';
 import { Box, Button, Card, IconButton, Input, Typography } from '@mui/joy';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
@@ -40,24 +39,47 @@ export function FromYouTube(props: {
       setIsError(false);
       setError(null);
 
-      const response = await fetch(`/api/youtubeTranscript?videoId=${videoId}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch transcript');
+      // Make a call to your Flask backend to download and transcribe the video
+      const downloadResponse = await fetch('/api/youtube', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ url: videoURL }),
+      });
+
+      if (!downloadResponse.ok) {
+        throw new Error('Failed to download video');
       }
 
-      const data = await response.json();
-      setTranscript(data);
-      onCreate(
-        data.transcript,
-        {
-          type: 'youtube',
-          url: videoURL,
-          title: data.title,
-          thumbnailUrl: data.thumbnailUrl,
-        }
-      );
+      // Assuming the file path is returned in the response for transcription
+      const downloadData = await downloadResponse.json();
+      const filePath = downloadData.filePath; // Adjust this according to your response
+
+      // Now call the transcription endpoint
+      const transcriptionResponse = await fetch('/api/youtube', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ file_path: filePath }),
+      });
+
+      if (!transcriptionResponse.ok) {
+        throw new Error('Failed to transcribe video');
+      }
+
+      const transcriptionData = await transcriptionResponse.json();
+      setTranscript({ title: downloadData.title, transcript: transcriptionData.transcription, thumbnailUrl: downloadData.thumbnailUrl });
+
+      // Call the onCreate function with the transcript
+      onCreate(transcriptionData.transcription, {
+        type: 'youtube',
+        url: videoURL,
+        title: downloadData.title,
+        thumbnailUrl: downloadData.thumbnailUrl,
+      });
     } catch (err) {
-      // Cast err to Error to access message property
       const errorMessage = (err as Error).message || 'An unknown error occurred';
       setIsError(true);
       setError(errorMessage);
