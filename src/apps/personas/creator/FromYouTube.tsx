@@ -33,7 +33,6 @@ function YouTubeVideoTranscriptCard(props: { transcript: string; onClose: () => 
     </Card>
   );
 }
-
 export function FromYouTube(props: { isTransforming: boolean; onCreate: (text: string, provenance: SimplePersonaProvenance) => void; }) {
   const [videoURL, setVideoURL] = React.useState('');
   const [transcription, setTranscription] = React.useState<string | null>(null);
@@ -48,7 +47,7 @@ export function FromYouTube(props: { isTransforming: boolean; onCreate: (text: s
 
   const handleCreateFromTranscript = async (e: React.FormEvent) => {
     e.preventDefault();
-    const videoId = extractVideoID(videoURL) || null;
+    const videoId = extractVideoID(videoURL);
     if (!videoId) {
       setError('Invalid YouTube URL');
       return;
@@ -76,8 +75,8 @@ export function FromYouTube(props: { isTransforming: boolean; onCreate: (text: s
         onCreate(data.transcription, {
           type: 'youtube',
           url: videoURL,
-          title: 'YouTube Video', // You can customize this if needed
-          thumbnailUrl: '', // Add thumbnail URL if available
+          title: data.title || 'YouTube Video', // Ensure title is correctly fetched
+          thumbnailUrl: data.thumbnailUrl || '', // Ensure thumbnail is correctly fetched
         });
       }
     } catch (err) {

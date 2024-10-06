@@ -39,6 +39,12 @@ export default async function handler(
       const form = new FormData();
       form.append('file', audioStream, { filename: `${videoId}.mp3` }); // Specify the filename
       form.append('model', 'whisper-1'); // The model you want to use
+      
+      // Optional: Specify the language of the audio (ISO-639-1 format)
+      form.append('language', 'en'); // Replace 'en' with the appropriate language code if needed
+
+      // Optional: Specify the response format if needed
+      // form.append('response_format', 'text'); // Uncomment to get plain text response
 
       // Send audio to OpenAI Whisper API
       const response = await axios.post('https://api.openai.com/v1/audio/transcriptions', form, {
@@ -51,7 +57,9 @@ export default async function handler(
       // Send back the transcribed text
       res.status(200).json({ transcription: response.data.text });
     } catch (error) {
-      console.error(error);
+      // Enhanced error handling
+      const errorMsg = (error as any).response ? (error as any).response.data : (error as any).message;
+      console.error('Transcription error:', errorMsg);
       res.status(500).json({ error: 'Error fetching or transcribing audio' });
     }
   } else {
