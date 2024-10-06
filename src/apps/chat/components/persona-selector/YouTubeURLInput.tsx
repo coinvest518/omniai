@@ -4,7 +4,7 @@ import YouTubeIcon from '@mui/icons-material/YouTube';
 import type { SxProps } from '@mui/joy/styles/types';
 
 interface YouTubeURLInputProps {
-  onSubmit: (transcript: string) => void; // Passes the transcript text to parent component
+  onSubmit: (transcript: string) => void; // Passes the transcript text to the parent component
   isFetching: boolean;
   sx?: SxProps;
 }
@@ -16,7 +16,7 @@ export const YouTubeURLInput: React.FC<YouTubeURLInputProps> = ({ onSubmit, isFe
 
   // Function to extract video ID from URL
   function extractVideoID(videoURL: string): string | null {
-    const regExp = /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([^#&?]*).*/;
+    const regExp = /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|v\/)|youtu\.be\/)([^#&?]*).*/;
     const match = videoURL.match(regExp);
     return (match && match[1]?.length === 11) ? match[1] : null;
   }
@@ -24,7 +24,7 @@ export const YouTubeURLInput: React.FC<YouTubeURLInputProps> = ({ onSubmit, isFe
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault(); // Prevent form from causing a page reload
     setSubmitFlag(true); // Set flag to indicate a submit action
-    const videoId = extractVideoID(url);
+    const videoId = extractVideoID(url); // Change here to use 'url'
     
     if (!videoId) {
       setError('Invalid YouTube URL');
@@ -39,7 +39,7 @@ export const YouTubeURLInput: React.FC<YouTubeURLInputProps> = ({ onSubmit, isFe
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ videoUrl: url }),
+        body: JSON.stringify({ videoUrl: url }), // Use 'url' here
       });
 
       if (!response.ok) {
@@ -51,6 +51,8 @@ export const YouTubeURLInput: React.FC<YouTubeURLInputProps> = ({ onSubmit, isFe
         setError(data.error);
       } else {
         onSubmit(data.transcription);
+        setUrl(''); // Clear input on successful submission
+        setError(null); // Reset error
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unknown error occurred');
@@ -70,7 +72,10 @@ export const YouTubeURLInput: React.FC<YouTubeURLInputProps> = ({ onSubmit, isFe
           variant='outlined'
           placeholder='Enter YouTube Video URL'
           value={url}
-          onChange={(e) => setUrl(e.target.value)}
+          onChange={(e) => {
+            setUrl(e.target.value);
+            setError(null); // Clear error on input change
+          }}
           startDecorator={<YouTubeIcon sx={{ color: '#f00' }} />}
           sx={{ mb: 1.5, backgroundColor: 'background.popup' }}
         />
@@ -83,7 +88,7 @@ export const YouTubeURLInput: React.FC<YouTubeURLInputProps> = ({ onSubmit, isFe
         >
           Get Transcript
         </Button>
-        {error && <div>Error: {error}</div>} {/* Show error message */}
+        {error && <div style={{ color: 'red' }}>Error: {error}</div>} {/* Styled error message */}
       </form>
     </Box>
   );
