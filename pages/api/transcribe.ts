@@ -1,70 +1,69 @@
-// pages/api/transcribe.ts
-
-import type { NextApiRequest, NextApiResponse } from 'next';
+import { NextRequest, NextResponse } from 'next/server';
 import ytdl from 'ytdl-core';
 import axios from 'axios';
 import FormData from 'form-data';
 
-interface TranscribeRequestBody {
-  videoUrl: string;
-}
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '10mb', // Adjust this value based on your needs
+    },
+  },
+};
 
-interface TranscribeResponse {
-  transcription?: string;
-  error?: string;
-}
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const { videoUrl } = body;
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse<TranscribeResponse>
-) {
-  if (req.method === 'POST') {
-    const { videoUrl }: TranscribeRequestBody = req.body;
-
+    // Validate videoUrl
     if (!videoUrl) {
-      return res.status(400).json({ error: 'Video URL is required' });
+      return NextResponse.json({ error: 'Video URL is required' }, { status: 400 });
     }
 
     // Extract video ID using ytdl-core
-    const videoId = ytdl.getURLVideoID(videoUrl);
-    if (!videoId) {
-      return res.status(400).json({ error: 'Invalid YouTube URL' });
-    }
-
+    let videoId: string;
     try {
-      // Fetch the audio stream
-      const audioStream = ytdl(videoUrl, { filter: (format) => format.itag === 140 }); // itag 140 for audio only (128kbps)
-
-      // Create a FormData instance to send to OpenAI
-      const form = new FormData();
-      form.append('file', audioStream, { filename: `${videoId}.mp3` }); // Specify the filename
-      form.append('model', 'whisper-1'); // The model you want to use
-      
-      // Optional: Specify the language of the audio (ISO-639-1 format)
-      form.append('language', 'en'); // Replace 'en' with the appropriate language code if needed
-
-      // Optional: Specify the response format if needed
-      form.append('response_format', 'text'); // Uncomment to get plain text response
-
-      // Send audio to OpenAI Whisper API
-      const response = await axios.post('https://api.openai.com/v1/audio/transcriptions', form, {
-        headers: {
-          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-          ...form.getHeaders(),
-        },
-      });
-
-      // Send back the transcribed text
-      res.status(200).json({ transcription: response.data.text });
+      videoId = ytdl.getURLVideoID(videoUrl);
     } catch (error) {
-      // Enhanced error handling
-      const errorMsg = (error as any).response ? (error as any).response.data : (error as any).message;
-      console.error('Transcription error:', errorMsg);
-      res.status(500).json({ error: 'Error fetching or transcribing audio' });
+      return NextResponse.json({ error: 'Invalid YouTube URL' }, { status: 400 });
     }
-  } else {
-    // Handle any other HTTP method
-    res.setHeader('Allow', ['POST']);
-    res.status(405).end(`Method ${req.method} Not Allowed`);
+
+    // Fetch the audio stream
+    const audioStream = ytdl(videoUrl, { filter: 'audioonly', quality: 'lowestaudio' });
+
+    // Convert stream to buffer
+    const chunks: Uint8Array[] = [];
+    for await (const chunk of audioStream) {
+      chunks.push(chunk);
+    }
+    const buffer = Buffer.concat(chunks);
+
+    // Create a FormData instance to send to OpenAI
+    const form = new FormData();
+    form.append('file', buffer, { filename: `${videoId}.mp3` });
+    form.append('model', 'whisper-1');
+    form.append('language', 'en');
+
+    // Send audio to OpenAI Whisper API
+    const response = await axios.post('https://api.openai.com/v1/audio/transcriptions', form, {
+      headers: {
+        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+        ...form.getHeaders(),
+      },
+      maxBodyLength: Infinity,
+    });
+
+    // Send back the transcribed text
+    return NextResponse.json({ transcription: response.data.text });
+  } catch (error) {
+    console.error('Transcription error:', error);
+    if (axios.isAxiosError(error) && error.response) {
+      return NextResponse.json({ error: `OpenAI API error: ${error.response.data.error.message}` }, { status: error.response.status });
+    } else if (error instanceof Error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    } else {
+      return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
+    }
   }
 }
