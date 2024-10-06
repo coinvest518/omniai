@@ -3,52 +3,40 @@
 // It is used by the Big-AGI Persona Creator to create a character sheet.
 import { z } from 'zod';
 import { createTRPCRouter, publicProcedure } from '~/server/api/trpc.server';
-import { fetchTextOrTRPCError } from '~/server/api/trpc.router.fetchers';
-import { fetchYouTubeTranscript } from './youtube.fetcher';
-import { TRPCError } from '@trpc/server';
+import { YoutubeTranscript } from 'youtube-transcript';
 
+interface YouTubeTranscriptData {
+  videoId: string;
+  videoTitle: string;
+  thumbnailUrl: string;
+  transcript: string;
+}
 
 const inputSchema = z.object({
   videoId: z.string().min(1),
 });
 
-const MAX_RETRIES = 3;
-const RETRY_DELAY_MS = 1000; // 1 second
-
-
 export const youtubeRouter = createTRPCRouter({
-
-  /**
-   * Get the transcript for a YouTube video ID
-   */
   getTranscript: publicProcedure
-  .input(inputSchema)
-  .query(async ({ input }) => {
-    const { videoId } = input;
-    let retryCount = 0;
-
-    while (retryCount < MAX_RETRIES) {
-      try {
-        return await fetchYouTubeTranscript(videoId, url => fetchTextOrTRPCError(url, 'GET', {}, undefined, 'YouTube Transcript'));
-      } catch (err) {
-        if (err instanceof TRPCError && err.code === 'BAD_REQUEST' && err.message.includes('Too Many Requests')) {
-          retryCount++;
-          console.log(`Retrying YouTube transcript fetch for videoId ${videoId} (attempt ${retryCount}/${MAX_RETRIES})`);
-          await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS * Math.pow(2, retryCount - 1))); // Exponential backoff
-        } else {
-          throw err;
-        }
-      }
-    }
-
-    
-    throw new TRPCError({
-      code: 'INTERNAL_SERVER_ERROR',
-      message: `Failed to fetch YouTube transcript for videoId ${videoId} after ${MAX_RETRIES} retries.`,
-    });
-  }),
+    .input(inputSchema)
+    .query(async ({ input }) => {
+      const { videoId } = input;
+      const transcript = await fetchYouTubeTranscript(videoId);
+      return transcript;
+    }),
 });
 
+async function fetchYouTubeTranscript(videoId: string): Promise<YouTubeTranscriptData> {
+  const transcriptData = await YoutubeTranscript.fetchTranscript(videoId);
+  const transcript = transcriptData.map(item => item.text).join(' ');
+
+  return {
+    videoId,
+    videoTitle: '', // You'll need to fetch the video title separately
+    thumbnailUrl: '', // You'll need to fetch the thumbnail URL separately
+    transcript,
+  };
+}
 
 /*
 
