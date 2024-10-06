@@ -8,7 +8,6 @@ import { llmGeminiRouter } from '~/modules/llms/server/gemini/gemini.router';
 import { llmOllamaRouter } from '~/modules/llms/server/ollama/ollama.router';
 import { llmOpenAIRouter } from '~/modules/llms/server/openai/openai.router';
 import { prodiaRouter } from '~/modules/t2i/prodia/prodia.router';
-import { youtubeRouter } from '~/modules/youtube/youtube.router';
 
 /**
  * Primary rooter, and will be sitting on an Edge Runtime.
@@ -22,7 +21,6 @@ export const appRouterEdge = createTRPCRouter({
   llmOllama: llmOllamaRouter,
   llmOpenAI: llmOpenAIRouter,
   prodia: prodiaRouter,
-  youtube: youtubeRouter,
 });
 
 // export type definition of API

@@ -1,36 +1,34 @@
-import { Router, Request, Response } from 'express';
 import axios from 'axios';
+import type { NextApiRequest, NextApiResponse } from 'next';
 
-const router = Router();
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
+  if (req.method === 'POST') {
+    const { url, filePath } = req.body;
 
-router.post('/download', async (req: Request, res: Response) => {
-  const videoUrl: string = req.body.url;
-
-  try {
-    const response = await axios.post('http://127.0.0.1:5000/download', { url: videoUrl });
-    res.status(response.status).json(response.data);
-  } catch (error: any) {  // Use 'any' type here for error
-    if (error.response) {
-      res.status(error.response.status).json(error.response.data);
-    } else {
-      res.status(500).json({ message: 'Internal Server Error' });
+    if (url) {
+      try {
+        const response = await axios.post('https://omniai.icu/download', { url });
+        return res.status(response.status).json(response.data);
+      } catch (error) {
+        return res.status(500).json({ error: 'Failed to download video' });
+      }
     }
-  }
-});
 
-router.post('/transcribe', async (req: Request, res: Response) => {
-  const filePath: string = req.body.filePath;
-
-  try {
-    const response = await axios.post('http://127.0.0.1:5000/transcribe', { file_path: filePath });
-    res.status(response.status).json(response.data);
-  } catch (error: any) {  // Use 'any' type here for error
-    if (error.response) {
-      res.status(error.response.status).json(error.response.data);
-    } else {
-      res.status(500).json({ message: 'Internal Server Error' });
+    if (filePath) {
+      try {
+        const response = await axios.post('https://omniai.icu/transcribe', { file_path: filePath });
+        return res.status(response.status).json(response.data);
+      } catch (error) {
+        return res.status(500).json({ error: 'Failed to transcribe video' });
+      }
     }
-  }
-});
 
-export default router;
+    return res.status(400).json({ error: 'URL or file path is required' });
+  }
+
+  res.setHeader('Allow', ['POST']);
+  res.status(405).end(`Method ${req.method} Not Allowed`);
+}

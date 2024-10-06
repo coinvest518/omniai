@@ -101,6 +101,7 @@
     "update": "^0.7.4",
     "uuid": "^9.0.1",
     "youtube-transcript": "^1.2.1",
+    "zlib": "^1.0.5",
     "zod": "^3.23.8",
     "zustand": "^4.5.5"
   },
