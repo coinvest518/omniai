@@ -1,35 +1,30 @@
-// pages/api/transcribe.ts
-import { NextApiRequest, NextApiResponse } from 'next'; // Import types for request and response
-import { spawn } from 'child_process';
+import ytdl from 'ytdl-core';
 import fs from 'fs';
 import path from 'path';
+import { NextApiRequest, NextApiResponse } from 'next';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { videoUrl }: { videoUrl: string } = req.body; // Explicitly type the request body
+  const { videoUrl }: { videoUrl: string } = req.body;
 
   if (!videoUrl) {
     return res.status(400).json({ error: 'No video URL provided' });
   }
 
   try {
-    // Step 1: Download the audio using yt-dlp
     const audioFilePath = path.join(process.cwd(), 'temp_audio.mp3');
-    const ytDlp = spawn('yt-dlp', ['-x', '--audio-format', 'mp3', '-o', audioFilePath, videoUrl]);
+    const writeStream = fs.createWriteStream(audioFilePath);
 
-    ytDlp.stderr.on('data', (data: Buffer) => {
-      console.error(`yt-dlp error: ${data.toString()}`);
-    });
+    // Step 1: Download the audio from YouTube using ytdl-core
+    const stream = ytdl(videoUrl, { filter: 'audioonly' });
 
-    ytDlp.on('close', async (code: number) => {
-      if (code !== 0) {
-        return res.status(500).json({ error: 'Error downloading audio' });
-      }
+    stream.pipe(writeStream);
 
-      // Step 2: Transcribe the audio using Whisper or any other service
+    writeStream.on('finish', async () => {
+      // Step 2: Transcribe the audio using Whisper or another service
       try {
         const transcribedText = await transcribeAudio(audioFilePath);
 
@@ -42,16 +37,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(500).json({ error: 'Error transcribing audio' });
       }
     });
+
+    writeStream.on('error', (error) => {
+      console.error('Error writing audio file:', error);
+      return res.status(500).json({ error: 'Error saving audio file' });
+    });
   } catch (error) {
     console.error('Error processing request:', error);
     return res.status(500).json({ error: 'Internal server error' });
   }
 }
 
-// Function to transcribe audio using Whisper (or any other library)
 async function transcribeAudio(filePath: string): Promise<string> {
-  // Assuming you have a function to call Whisper API or any other transcription API
-  // This is a placeholder; implement your actual transcription logic here
+  // Use Whisper or another transcription service here
+  // This is just a placeholder implementation
   const { spawn } = require('child_process');
   const whisper = spawn('whisper', [filePath]);
 
