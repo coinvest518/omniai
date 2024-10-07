@@ -37,7 +37,7 @@ interface UserData {
 
 
 
-const AppUsers: React.FC = (props) => {
+const AppUsers: React.FC = () => {
   const { user } = useUser();
   const { isSignedIn, userId } = useAuth();
   const setUser = useUserStore(state => state.setUser);

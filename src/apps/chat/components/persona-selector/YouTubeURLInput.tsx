@@ -34,7 +34,7 @@ export const YouTubeURLInput: React.FC<YouTubeURLInputProps> = ({ onSubmit, isFe
 
     try {
       // Call your backend API to get the transcription
-      const response = await fetch('/api/transcribe', {
+      const response = await fetch('api/transcribe', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
