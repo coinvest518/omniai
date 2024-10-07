@@ -1,21 +1,32 @@
-import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
+import React from 'react';
 import { apiAsync } from '~/common/util/trpc.client';
 
-// Exporting the YTVideoTranscript interface
-export interface YTVideoTranscript {
+interface YTVideoTranscript {
   title: string;
   transcript: string;
   thumbnailUrl: string;
 }
 
-// Exporting the useYouTubeTranscript function
 export function useYouTubeTranscript(videoID: string | null, onNewTranscript: (transcript: YTVideoTranscript) => void) {
-  // Existing logic can be commented out or deleted
-  return {
-    transcript: null,
-    isFetching: false,
-    isError: false,
-    error: null,
-  };
+  const [transcript, setTranscript] = React.useState<YTVideoTranscript | null>(null);
+  const { data, isFetching, isError, error } = useQuery({
+    enabled: !!videoID,
+    queryKey: ['transcript', videoID],
+    queryFn: () => apiAsync.youtube.getTranscript.query({ videoId: videoID! }),
+    staleTime: Infinity,
+  });
+
+  React.useEffect(() => {
+    if (data) {
+      const transcript = {
+        title: data.videoTitle,
+        transcript: data.transcript,
+        thumbnailUrl: data.thumbnailUrl,
+      };
+      onNewTranscript(transcript);
+    }
+  }, [data, onNewTranscript]);
+
+  return { transcript, isFetching, isError, error };
 }
