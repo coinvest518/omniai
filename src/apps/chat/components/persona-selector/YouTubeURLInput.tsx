@@ -22,42 +22,48 @@ export const YouTubeURLInput: React.FC<YouTubeURLInputProps> = ({ onSubmit, isFe
   }
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault(); // Prevent form from causing a page reload
-    setSubmitFlag(true); // Set flag to indicate a submit action
-    const videoId = extractVideoID(url); // Change here to use 'url'
-    
+    event.preventDefault(); 
+    setSubmitFlag(true); 
+    const videoId = extractVideoID(url);
+  
     if (!videoId) {
       setError('Invalid YouTube URL');
       setSubmitFlag(false);
       return;
     }
-
+  
     try {
+      // Use the video ID to create a URL for the audio
+      const audioUrl = `https://www.youtube.com/watch?v=${videoId}`;
+  
       // Call your backend API to get the transcription
-      const response = await fetch('api/transcribe', {
+      const response = await fetch('/api/transcribe', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ videoUrl: url }), // Use 'url' here
+        body: JSON.stringify({
+          videoUrl: url,
+          audioUrl: audioUrl, 
+        }),
       });
-
+  
       if (!response.ok) {
         throw new Error('Failed to fetch transcription');
       }
-
+  
       const data = await response.json();
       if (data.error) {
         setError(data.error);
       } else {
-        onSubmit(data.transcription);
-        setUrl(''); // Clear input on successful submission
-        setError(null); // Reset error
+        onSubmit(data.transcription); // Pass transcription to the parent component
+        setUrl('');
+        setError(null);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unknown error occurred');
     } finally {
-      setSubmitFlag(false); // Reset submit flag after handling
+      setSubmitFlag(false);
     }
   };
 
