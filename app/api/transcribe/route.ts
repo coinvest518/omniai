@@ -8,15 +8,16 @@ interface TranscribeRequestBody {
   videoUrl: string;
 }
 
-
-
 // Helper function to convert stream to buffer
 function streamToBuffer(stream: Readable): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     const chunks: Buffer[] = [];
     stream.on('data', (chunk) => chunks.push(chunk));
     stream.on('end', () => resolve(Buffer.concat(chunks)));
-    stream.on('error', reject);
+    stream.on('error', (err) => {
+      console.error('Stream error:', err);
+      reject(err);
+    });
   });
 }
 
@@ -35,11 +36,18 @@ export async function POST(req: Request) {
     try {
       videoId = ytdl.getURLVideoID(videoUrl);
     } catch (error) {
+      console.error('Invalid YouTube URL:', error);
       return NextResponse.json({ error: 'Invalid YouTube URL' }, { status: 400 });
     }
 
     // Fetch the audio stream from YouTube
-    const audioStream = ytdl(videoUrl, { filter: 'audioonly', quality: 'lowestaudio' });
+    let audioStream;
+    try {
+      audioStream = ytdl(videoUrl, { filter: 'audioonly', quality: 'lowestaudio' });
+    } catch (error) {
+      console.error('Error fetching audio stream from YouTube:', error);
+      return NextResponse.json({ error: 'Failed to fetch audio from YouTube' }, { status: 500 });
+    }
 
     // Convert audio stream to buffer
     const audioBuffer = await streamToBuffer(audioStream);
@@ -67,6 +75,7 @@ export async function POST(req: Request) {
 
     // Handle Axios-specific errors
     if (axios.isAxiosError(error) && error.response) {
+      console.error('OpenAI API Error:', error.response.data);
       return NextResponse.json({ error: `OpenAI API error: ${error.response.data.error.message}` }, { status: error.response.status });
     }
 
