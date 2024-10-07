@@ -1,8 +1,18 @@
+// app/api/transcribe/route.ts
 import { NextResponse } from 'next/server';
 import ytdl from 'ytdl-core';
 import axios from 'axios';
 import { Readable } from 'stream';
 import FormData from 'form-data';
+import ffmpeg from 'fluent-ffmpeg';
+import ffmpegStatic from 'ffmpeg-static';
+
+
+if (ffmpegStatic === null) {
+  throw new Error('FFmpeg binary not found. Make sure ffmpeg-static is correctly installed.');
+}
+
+ffmpeg.setFfmpegPath(ffmpegStatic);
 
 interface TranscribeRequestBody {
   videoUrl: string;
@@ -52,19 +62,23 @@ export async function POST(req: Request) {
     // Convert audio stream to buffer
     const audioBuffer = await streamToBuffer(audioStream);
 
+    // Create a readable stream from the audio buffer
+    const audioReadableStream = new Readable();
+    audioReadableStream.push(audioBuffer);
+    audioReadableStream.push(null); // End of stream
+
     // Prepare the form data for Whisper API
     const form = new FormData();
-    form.append('file', audioBuffer, `${videoId}.mp3`); // Attach audio buffer as file
+    form.append('file', audioReadableStream, { filename: `${videoId}.mp3` });
     form.append('model', 'whisper-1');
     form.append('language', 'en');
 
     // Send the request to OpenAI Whisper API
     const response = await axios.post('https://api.openai.com/v1/audio/transcriptions', form, {
       headers: {
-        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`, // Use your OpenAI API key
+        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
         ...form.getHeaders(),
       },
-      maxBodyLength: Infinity, // Handle large audio files
     });
 
     // Return the transcription response
@@ -72,14 +86,6 @@ export async function POST(req: Request) {
 
   } catch (error) {
     console.error('Transcription error:', error);
-
-    // Handle Axios-specific errors
-    if (axios.isAxiosError(error) && error.response) {
-      console.error('OpenAI API Error:', error.response.data);
-      return NextResponse.json({ error: `OpenAI API error: ${error.response.data.error.message}` }, { status: error.response.status });
-    }
-
-    // Handle unexpected errors
     return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }
