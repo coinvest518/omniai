@@ -1,7 +1,8 @@
-import ytdl from 'ytdl-core';
 import fs from 'fs';
 import path from 'path';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { spawn } from 'child_process'; // Import the spawn function from child_process
+
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -13,18 +14,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (!videoUrl) {
     return res.status(400).json({ error: 'No video URL provided' });
   }
-
   try {
-    const audioFilePath = path.join(process.cwd(), 'temp_audio.mp3');
-    const writeStream = fs.createWriteStream(audioFilePath);
+    // Step 1: Download the audio using yt-dlp
+    const audioFilePath = path.join('/tmp', 'temp_audio.mp3');  // Use /tmp for temporary storage
+    const ytDlp = spawn('yt-dlp', ['-x', '--audio-format', 'mp3', '-o', audioFilePath, videoUrl]);
 
-    // Step 1: Download the audio from YouTube using ytdl-core
-    const stream = ytdl(videoUrl, { filter: 'audioonly' });
+    ytDlp.stderr.on('data', (data: Buffer) => {
+      console.error(`yt-dlp error: ${data.toString()}`);
+    });
 
-    stream.pipe(writeStream);
+    ytDlp.on('close', async (code: number) => {
+      if (code !== 0) {
+        return res.status(500).json({ error: 'Error downloading audio' });
+      }
 
-    writeStream.on('finish', async () => {
-      // Step 2: Transcribe the audio using Whisper or another service
+      // Step 2: Transcribe the audio using Whisper or any other service
       try {
         const transcribedText = await transcribeAudio(audioFilePath);
 
@@ -36,11 +40,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         console.error('Error transcribing audio:', error);
         return res.status(500).json({ error: 'Error transcribing audio' });
       }
-    });
-
-    writeStream.on('error', (error) => {
-      console.error('Error writing audio file:', error);
-      return res.status(500).json({ error: 'Error saving audio file' });
     });
   } catch (error) {
     console.error('Error processing request:', error);
