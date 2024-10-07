@@ -1,75 +1,49 @@
-import { NextApiRequest, NextApiResponse } from 'next'; // Import types for request and response
+import { NextApiRequest, NextApiResponse } from 'next';
 import { spawn } from 'child_process';
-import fs from 'fs';
 import path from 'path';
+import os from 'os'; // Import os to get tmpdir
+import fs from 'fs';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { videoUrl }: { videoUrl: string } = req.body; // Explicitly type the request body
+  const { url } = req.body;
 
-  if (!videoUrl) {
-    return res.status(400).json({ error: 'No video URL provided' });
+  if (!url) {
+    return res.status(400).json({ error: 'No URL provided' });
   }
 
-  try {
-    // Step 1: Download the audio using yt-dlp
-    const audioFilePath = path.join(process.cwd(), 'temp_audio.mp3');
-    const ytDlp = spawn('yt-dlp', ['-x', '--audio-format', 'mp3', '-o', audioFilePath, videoUrl]);
+  const audioFilePath = path.join(os.tmpdir(), 'temp_audio.mp3'); // Use temporary directory
 
-    ytDlp.stderr.on('data', (data: Buffer) => {
-      console.error(`yt-dlp error: ${data.toString()}`);
-    });
+  const ytdlp = spawn('yt-dlp', ['-x', '--audio-format', 'mp3', '-o', audioFilePath, url]);
 
-    ytDlp.on('close', async (code: number) => {
-      if (code !== 0) {
-        return res.status(500).json({ error: 'Error downloading audio' });
-      }
+  ytdlp.stdout.on('data', (data) => {
+    console.log(`stdout: ${data}`);
+  });
 
-      // Step 2: Transcribe the audio using Whisper or any other service
-      try {
-        const transcribedText = await transcribeAudio(audioFilePath);
+  ytdlp.stderr.on('data', (data) => {
+    console.error(`stderr: ${data}`);
+  });
 
-        // Clean up the audio file
-        fs.unlinkSync(audioFilePath);
+  ytdlp.on('close', (code) => {
+    if (code === 0) {
+      // Read the audio file and send it back
+      fs.readFile(audioFilePath, (err, audioData) => {
+        if (err) {
+          return res.status(500).json({ error: 'Failed to read audio file' });
+        }
+        res.setHeader('Content-Type', 'audio/mp3');
+        res.send(audioData);
+      });
+    } else {
+      return res.status(500).json({ error: `yt-dlp process exited with code ${code}` });
+    }
+  });
 
-        return res.status(200).json({ transcription: transcribedText });
-      } catch (error) {
-        console.error('Error transcribing audio:', error);
-        return res.status(500).json({ error: 'Error transcribing audio' });
-      }
-    });
-  } catch (error) {
-    console.error('Error processing request:', error);
-    return res.status(500).json({ error: 'Internal server error' });
-  }
-}
-
-// Function to transcribe audio using Whisper (or any other library)
-async function transcribeAudio(filePath: string): Promise<string> {
-  // Assuming you have a function to call Whisper API or any other transcription API
-  // This is a placeholder; implement your actual transcription logic here
-  const { spawn } = require('child_process');
-  const whisper = spawn('whisper', [filePath]);
-
-  return new Promise((resolve, reject) => {
-    let transcription = '';
-
-    whisper.stdout.on('data', (data: Buffer) => {
-      transcription += data.toString();
-    });
-
-    whisper.stderr.on('data', (data: Buffer) => {
-      console.error(`Whisper error: ${data.toString()}`);
-    });
-
-    whisper.on('close', (code: number) => {
-      if (code !== 0) {
-        return reject(new Error('Error transcribing audio'));
-      }
-      resolve(transcription);
-    });
+  ytdlp.on('error', (error) => {
+    console.error(`Failed to start subprocess: ${error}`);
+    res.status(500).json({ error: 'Failed to start yt-dlp' });
   });
 }
