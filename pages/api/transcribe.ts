@@ -9,15 +9,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { url } = req.body;
+  const { videoUrl } = req.body;
 
-  if (!url) {
+  if (!videoUrl) {
     return res.status(400).json({ error: 'No URL provided' });
   }
 
   const audioFilePath = path.join(os.tmpdir(), 'temp_audio.mp3'); // Use temporary directory
 
-  const ytdlp = spawn('yt-dlp', ['-x', '--audio-format', 'mp3', '-o', audioFilePath, url]);
+  const ytdlp = spawn('yt-dlp', ['-x', '--audio-format', 'mp3', '-o', audioFilePath, videoUrl]);
 
   ytdlp.stdout.on('data', (data) => {
     console.log(`stdout: ${data}`);

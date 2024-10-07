@@ -20,7 +20,6 @@ export const YouTubeURLInput: React.FC<YouTubeURLInputProps> = ({ onSubmit, isFe
     const match = videoURL.match(regExp);
     return (match && match[1]?.length === 11) ? match[1] : null;
   }
-
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault(); 
     setSubmitFlag(true); 
@@ -33,9 +32,6 @@ export const YouTubeURLInput: React.FC<YouTubeURLInputProps> = ({ onSubmit, isFe
     }
   
     try {
-      // Use the video ID to create a URL for the audio
-      const audioUrl = `https://www.youtube.com/watch?v=${videoId}`;
-  
       // Call your backend API to get the transcription
       const response = await fetch('/api/transcribe', {
         method: 'POST',
@@ -43,8 +39,7 @@ export const YouTubeURLInput: React.FC<YouTubeURLInputProps> = ({ onSubmit, isFe
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          videoUrl: url,
-          audioUrl: audioUrl, 
+          url: url,  // Send url instead of videoUrl
         }),
       });
   
@@ -66,6 +61,7 @@ export const YouTubeURLInput: React.FC<YouTubeURLInputProps> = ({ onSubmit, isFe
       setSubmitFlag(false);
     }
   };
+
 
   return (
     <Box sx={{ mb: 1, ...sx }}>
