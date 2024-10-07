@@ -8,9 +8,9 @@ interface YouTubeTranscriptData {
   transcript: string;
 }
 
-// Define the input schema for the video ID
+// Define the input schema for the video URL
 const inputSchema = z.object({
-  videoId: z.string().min(1),
+  videoUrl: z.string().url().min(1), // Ensure video URL is validated as a URL
 });
 
 // Create the YouTube router
@@ -18,23 +18,23 @@ export const youtubeRouter = createTRPCRouter({
   getTranscript: publicProcedure
     .input(inputSchema)
     .query(async ({ input }) => {
-      const { videoId } = input;
+      const { videoUrl } = input;
 
-      // Fetch the transcript using your backend API instead
-      const transcript = await fetchTranscriptFromBackend(videoId); // This function will call your new backend API
+      // Fetch the transcript using your backend API
+      const transcript = await fetchTranscriptFromBackend(videoUrl); // Call your backend API
 
       return transcript;
     }),
 });
 
 // Function to fetch transcript from your new backend API
-async function fetchTranscriptFromBackend(videoId: string): Promise<YouTubeTranscriptData> {
+async function fetchTranscriptFromBackend(videoUrl: string): Promise<YouTubeTranscriptData> {
   const response = await fetch('/api/transcribe', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ videoUrl: `https://www.youtube.com/watch?v=${videoId}` }),
+    body: JSON.stringify({ videoUrl }), // Send the video URL directly
   });
 
   if (!response.ok) {
@@ -42,12 +42,24 @@ async function fetchTranscriptFromBackend(videoId: string): Promise<YouTubeTrans
   }
 
   const data = await response.json();
-  
-  // You may need to shape the response here to match YouTubeTranscriptData
+
+  const videoId = extractVideoID(videoUrl); // Extract video ID
+  if (!videoId) {
+    throw new Error('Invalid video URL: Unable to extract video ID');
+  }
+
   return {
-    videoId,
-    videoTitle: data.title,         // Assuming the backend returns these fields
-    thumbnailUrl: data.thumbnailUrl, // Ensure these keys match your backend response
-    transcript: data.transcription,   // Assuming your backend response has this
+    videoId, // This is guaranteed to be a string now
+    videoTitle: data.title,               
+    thumbnailUrl: data.thumbnailUrl,
+    transcript: data.transcription,       
   };
+}
+
+
+// Helper function to extract Video ID
+function extractVideoID(videoURL: string): string | null {
+  const regExp = /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|v\/)|youtu\.be\/)([^#&?]*).*/;
+  const match = videoURL.match(regExp);
+  return (match && match[1]?.length === 11) ? match[1] : null;
 }

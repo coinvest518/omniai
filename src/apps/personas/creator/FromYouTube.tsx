@@ -1,3 +1,4 @@
+// FromYouTube.tsx
 import * as React from 'react';
 import { YouTubeURLInput } from '../../../../src/apps/chat/components/persona-selector/YouTubeURLInput'; // Adjust the path accordingly
 import type { SimplePersonaProvenance } from '../store-app-personas';
@@ -11,10 +12,7 @@ export const FromYouTube: React.FC<FromYouTubeProps> = ({ isTransforming, onCrea
   const [isFetching, setIsFetching] = React.useState(false);
 
   const handleTranscriptSubmit = (transcript: string) => {
-    // Call the onCreate function passed from the parent component
-    onCreate(transcript, {
-      type: 'text'
-    });
+    onCreate(transcript, { type: 'text' });
   };
 
   return (

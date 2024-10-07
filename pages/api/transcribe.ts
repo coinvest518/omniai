@@ -1,7 +1,8 @@
+// pages/api/transcribe.ts
 import { NextApiRequest, NextApiResponse } from 'next';
 import { spawn } from 'child_process';
 import path from 'path';
-import os from 'os'; // Import os to get tmpdir
+import os from 'os';
 import fs from 'fs';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -9,41 +10,43 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { videoUrl } = req.body;
+  const { videoUrl } = req.body;  // Make sure you are getting videoUrl from the body
+  console.log('Received video URL:', videoUrl);  // Debug log
 
+  // Check if videoUrl is provided
   if (!videoUrl) {
     return res.status(400).json({ error: 'No URL provided' });
   }
 
-  const audioFilePath = path.join(os.tmpdir(), 'temp_audio.mp3'); // Use temporary directory
+  const audioFilePath = path.join(os.tmpdir(), 'temp_audio.mp3');  // Use tmpdir for temporary file
 
-  const ytdlp = spawn('yt-dlp', ['-x', '--audio-format', 'mp3', '-o', audioFilePath, videoUrl]);
+  try {
+    const ytdlp = spawn('yt-dlp', ['-x', '--audio-format', 'mp3', '-o', audioFilePath, videoUrl]);
 
-  ytdlp.stdout.on('data', (data) => {
-    console.log(`stdout: ${data}`);
-  });
+    ytdlp.on('close', (code) => {
+      if (code !== 0) {
+        return res.status(500).json({ error: 'Failed to transcribe video' });
+      }
 
-  ytdlp.stderr.on('data', (data) => {
-    console.error(`stderr: ${data}`);
-  });
+      // Here you would process the audio file and send back the transcription
+      // For demonstration, let's assume we just send back a success message
+      res.status(200).json({ transcription: 'Transcription result goes here...' });
 
-  ytdlp.on('close', (code) => {
-    if (code === 0) {
-      // Read the audio file and send it back
-      fs.readFile(audioFilePath, (err, audioData) => {
+      // Clean up temporary file if needed
+      fs.unlink(audioFilePath, (err) => {
         if (err) {
-          return res.status(500).json({ error: 'Failed to read audio file' });
+          console.error('Error deleting temporary file:', err);
         }
-        res.setHeader('Content-Type', 'audio/mp3');
-        res.send(audioData);
       });
-    } else {
-      return res.status(500).json({ error: `yt-dlp process exited with code ${code}` });
-    }
-  });
+    });
+    
+    ytdlp.on('error', (err) => {
+      console.error('Error spawning yt-dlp:', err);
+      res.status(500).json({ error: 'Internal Server Error' });
+    });
 
-  ytdlp.on('error', (error) => {
-    console.error(`Failed to start subprocess: ${error}`);
-    res.status(500).json({ error: 'Failed to start yt-dlp' });
-  });
+  } catch (error) {
+    console.error('Error processing request:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
 }

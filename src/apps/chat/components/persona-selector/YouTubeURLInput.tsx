@@ -1,3 +1,4 @@
+// YouTubeURLInput.tsx
 import * as React from 'react';
 import { Box, Button, Input } from '@mui/joy';
 import YouTubeIcon from '@mui/icons-material/YouTube';
@@ -20,6 +21,7 @@ export const YouTubeURLInput: React.FC<YouTubeURLInputProps> = ({ onSubmit, isFe
     const match = videoURL.match(regExp);
     return (match && match[1]?.length === 11) ? match[1] : null;
   }
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault(); 
     setSubmitFlag(true); 
@@ -39,7 +41,7 @@ export const YouTubeURLInput: React.FC<YouTubeURLInputProps> = ({ onSubmit, isFe
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          url: url,  // Send url instead of videoUrl
+          videoUrl: url,  // Ensure this matches what your API expects
         }),
       });
   
@@ -61,7 +63,6 @@ export const YouTubeURLInput: React.FC<YouTubeURLInputProps> = ({ onSubmit, isFe
       setSubmitFlag(false);
     }
   };
-
 
   return (
     <Box sx={{ mb: 1, ...sx }}>

@@ -8,18 +8,17 @@ interface YTVideoTranscript {
   thumbnailUrl: string;
 }
 
-export function useYouTubeTranscript(videoID: string | null, onNewTranscript: (transcript: YTVideoTranscript) => void) {
-  const [transcript, setTranscript] = React.useState<YTVideoTranscript | null>(null);
+export function useYouTubeTranscript(videoURL: string | null, onNewTranscript: (transcript: YTVideoTranscript) => void) {
   const { data, isFetching, isError, error } = useQuery({
-    enabled: !!videoID,
-    queryKey: ['transcript', videoID],
-    queryFn: () => apiAsync.youtube.getTranscript.query({ videoId: videoID! }),
+    enabled: !!videoURL,
+    queryKey: ['transcript', videoURL],
+    queryFn: () => apiAsync.youtube.getTranscript.query({ videoUrl: videoURL! }), // Pass videoURL
     staleTime: Infinity,
   });
 
   React.useEffect(() => {
     if (data) {
-      const transcript = {
+      const transcript: YTVideoTranscript = {
         title: data.videoTitle,
         transcript: data.transcript,
         thumbnailUrl: data.thumbnailUrl,
@@ -28,5 +27,5 @@ export function useYouTubeTranscript(videoID: string | null, onNewTranscript: (t
     }
   }, [data, onNewTranscript]);
 
-  return { transcript, isFetching, isError, error };
+  return { transcript: data, isFetching, isError, error };
 }
