@@ -1,22 +1,22 @@
+import { NextApiRequest, NextApiResponse } from 'next'; // Import types for request and response
+import { spawn } from 'child_process';
 import fs from 'fs';
 import path from 'path';
-import { NextApiRequest, NextApiResponse } from 'next';
-import { spawn } from 'child_process'; // Import the spawn function from child_process
-
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { videoUrl }: { videoUrl: string } = req.body;
+  const { videoUrl }: { videoUrl: string } = req.body; // Explicitly type the request body
 
   if (!videoUrl) {
     return res.status(400).json({ error: 'No video URL provided' });
   }
+
   try {
     // Step 1: Download the audio using yt-dlp
-    const audioFilePath = path.join('/tmp', 'temp_audio.mp3');  // Use /tmp for temporary storage
+    const audioFilePath = path.join(process.cwd(), 'temp_audio.mp3');
     const ytDlp = spawn('yt-dlp', ['-x', '--audio-format', 'mp3', '-o', audioFilePath, videoUrl]);
 
     ytDlp.stderr.on('data', (data: Buffer) => {
@@ -47,9 +47,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 }
 
+// Function to transcribe audio using Whisper (or any other library)
 async function transcribeAudio(filePath: string): Promise<string> {
-  // Use Whisper or another transcription service here
-  // This is just a placeholder implementation
+  // Assuming you have a function to call Whisper API or any other transcription API
+  // This is a placeholder; implement your actual transcription logic here
   const { spawn } = require('child_process');
   const whisper = spawn('whisper', [filePath]);
 
