@@ -1,31 +1,59 @@
+// Copyright (c) 2023-2024 Enrico Ros
+// This subsystem is responsible for fetching the transcript of a YouTube video.
+// It is used by the Big-AGI Persona Creator to create a character sheet.
+
+import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import React from 'react';
+
+import { frontendSideFetch } from '~/common/util/clientFetchers';
+
+import { fetchYouTubeTranscript } from './youtube.fetcher';
 import { apiAsync } from '~/common/util/trpc.client';
 
-interface YTVideoTranscript {
+// configuration
+const USE_FRONTEND_FETCH = false;
+
+
+export interface YTVideoTranscript {
   title: string;
   transcript: string;
   thumbnailUrl: string;
 }
 
-export function useYouTubeTranscript(videoURL: string | null, onNewTranscript: (transcript: YTVideoTranscript) => void) {
+export function useYouTubeTranscript(videoID: string | null, onNewTranscript: (transcript: YTVideoTranscript) => void) {
+
+  // state
+  const [transcript, setTranscript] = React.useState<YTVideoTranscript | null>(null);
+
+  // data
   const { data, isFetching, isError, error } = useQuery({
-    enabled: !!videoURL,
-    queryKey: ['transcript', videoURL],
-    queryFn: () => apiAsync.youtube.getTranscript.query({ videoUrl: videoURL! }), // Pass videoURL
+    enabled: !!videoID,
+    queryKey: ['transcript', videoID],
+    queryFn: async () => USE_FRONTEND_FETCH
+      ? fetchYouTubeTranscript(videoID!, url => frontendSideFetch(url).then(res => res.text()))
+      : apiAsync.youtube.getTranscript.query({ videoId: videoID! }),
     staleTime: Infinity,
   });
 
+  // update the transcript when the underlying data changes
   React.useEffect(() => {
-    if (data) {
-      const transcript: YTVideoTranscript = {
-        title: data.videoTitle,
-        transcript: data.transcript,
-        thumbnailUrl: data.thumbnailUrl,
-      };
-      onNewTranscript(transcript);
+    if (!data) {
+      // setTranscript(null);
+      return;
     }
+    const transcript = {
+      title: data.videoTitle,
+      transcript: data.transcript,
+      thumbnailUrl: data.thumbnailUrl,
+    };
+    setTranscript(transcript);
+    onNewTranscript(transcript);
   }, [data, onNewTranscript]);
 
-  return { transcript: data, isFetching, isError, error };
+
+  return {
+    transcript,
+    isFetching,
+    isError, error,
+  };
 }
