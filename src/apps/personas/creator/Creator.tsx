@@ -16,7 +16,6 @@ import { useLLMSelect, useLLMSelectLocalState } from '~/common/components/forms/
 import { useToggleableBoolean } from '~/common/util/useToggleableBoolean';
 
 import { FromText } from './FromText';
-import { FromYouTube } from './FromYouTube';
 import { prependSimplePersona, SimplePersonaProvenance } from '../store-app-personas';
 
 
@@ -199,11 +198,10 @@ export function Creator(props: { display: boolean }) {
           '& > *:first-of-type': { borderTopLeftRadius: '0.5rem' },
         }}
       >
-        <Tab>From YouTube</Tab>
+       
         <Tab>From Text</Tab>
       </TabList>
       <TabPanel keepMounted value={0} sx={{ p: 3 }}>
-        <FromYouTube isTransforming={isTransforming} onCreate={handleCreate} />
       </TabPanel>
       <TabPanel keepMounted value={1} sx={{ p: 3 }}>
         <FromText isCreating={isTransforming} onCreate={handleCreate} />
