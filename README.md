@@ -1,6 +1,6 @@
 
 
-## 🌐 **Welcome to the Omni AI Discord Server!**
+## 🌐 **Welcome to the Omni AI Discord Server!**         ** Notion Guide -- https://coinvestinc.notion.site/Omni-Ai-Guide-112b40c6a5cc806398e7fec2b4c831a2?pvs=4 **
 
 ### 🚀 **What is Omni AI?**
 **Omni AI** is a cutting-edge Generative AI suite that revolutionizes your chat experience by integrating multiple Large Language Models (LLMs). Imagine harnessing the power of not just one AI but a whole ensemble, each bringing unique insights and capabilities to the conversation. With Omni AI, you're not just chatting—you're exploring a new frontier of AI interaction.
