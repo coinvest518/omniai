@@ -382,7 +382,7 @@ useEffect(() => {
               <Link href="/chat" style={{ textDecoration: 'none' }}>Omni Chat</Link>
             </div>
             <div className="horizontal-tab-item">
-              <Link href="/personas" style={{ textDecoration: 'none' }}>Omni YouTube</Link>
+              <Link href="/personas" style={{ textDecoration: 'none' }}>Omni Transcriber</Link>
             </div>
             <div className="horizontal-tab-item">
               <Link href="/chat" style={{ textDecoration: 'none' }}>Omni Art</Link>
