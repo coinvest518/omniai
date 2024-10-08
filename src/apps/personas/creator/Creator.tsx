@@ -199,7 +199,7 @@ export function Creator(props: { display: boolean }) {
           '& > *:first-of-type': { borderTopLeftRadius: '0.5rem' },
         }}
       >
-        
+        <Tab>From YouTube</Tab>
         <Tab>From Text</Tab>
       </TabList>
       <TabPanel keepMounted value={0} sx={{ p: 3 }}>
